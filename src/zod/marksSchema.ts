@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { teamDBSchema } from './teamSchema';
+import { userDBSchema } from './userSchema';
 
 export const marksDBSchema = z.object({
   id: z.number().int().positive(),
@@ -14,3 +16,10 @@ export const marksDBSchema = z.object({
 });
 
 export type MarksDBType = z.infer<typeof marksDBSchema>;
+
+export const marksDataSchema = marksDBSchema.extend({
+  teamId: teamDBSchema,
+  juryId: userDBSchema
+})
+
+export type MarksDataType = z.infer<typeof marksDataSchema>

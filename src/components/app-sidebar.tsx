@@ -2,24 +2,20 @@
 
 import * as React from "react"
 import {
-  IconCamera,
-  IconChartBar,
-  IconDashboard,
+  IconScale,
+  IconUser,
   IconDatabase,
-  IconFileAi,
-  IconFileDescription,
   IconFileWord,
-  IconFolder,
+  IconUsersGroup,
   IconHelp,
-  IconInnerShadowTop,
-  IconListDetails,
+  IconChartBar,
   IconReport,
   IconSearch,
   IconSettings,
-  IconUsers,
+  IconHome2,
+  IconNumber123,
 } from "@tabler/icons-react"
 
-import { NavDocuments } from "@/components/nav-documents"
 import { NavMain } from "@/components/nav-main"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
@@ -43,75 +39,27 @@ const data = {
     {
       title: "Dashboard",
       url: "#",
-      icon: IconDashboard,
+      icon: IconHome2,
     },
     {
-      title: "Lifecycle",
+      title: "Marks",
       url: "#",
-      icon: IconListDetails,
+      icon: IconNumber123,
     },
     {
-      title: "Analytics",
+      title: "Jury",
       url: "#",
-      icon: IconChartBar,
+      icon: IconScale,
     },
     {
-      title: "Projects",
+      title: "Teams",
       url: "#",
-      icon: IconFolder,
+      icon: IconUsersGroup,
     },
     {
-      title: "Team",
+      title: "Participants",
       url: "#",
-      icon: IconUsers,
-    },
-  ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: IconCamera,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
-      icon: IconFileDescription,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: IconFileAi,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
+      icon: IconUser,
     },
   ],
   navSecondary: [
@@ -161,16 +109,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
               <a href="#">
-                <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">Acme Inc.</span>
+                <IconChartBar className="!size-8" />
+                <span className="font-semibold text-3xl">EvalEase</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="mt-5">
         <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>

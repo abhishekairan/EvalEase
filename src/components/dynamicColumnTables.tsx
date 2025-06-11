@@ -5,11 +5,11 @@ import { useState, useMemo, useEffect } from "react";
 import { useReactTable, getCoreRowModel, ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/data-table";
 import { DataTableToolbar } from "@/components/data-table-toolbar";
-import { MarksDataType, TeamDBType, TeamMemberDBType, UserDBType } from "@/zod";
+import { MarksDataType, TeamDataType, TeamMemberDataType, UserDBType } from "@/zod";
 import { jurryColumns, marksColumns, participantsColumns, teamColumns } from "./TableColumns";
 
 
-type TableDataType = MarksDataType | UserDBType | TeamDBType | TeamMemberDBType
+type TableDataType = MarksDataType | UserDBType | TeamDataType | TeamMemberDataType
 
 export default function DynamicColumnTable() {
   const [activeView, setActiveView] = useState("participants");
@@ -30,7 +30,7 @@ export default function DynamicColumnTable() {
       case "marks":
         return marksColumns as ColumnDef<TableDataType>[]
       default:
-        return teamColumns as ColumnDef<TableDataType>[]
+        return participantsColumns as ColumnDef<TableDataType>[]
     }
   }, [activeView]);
 
@@ -53,7 +53,7 @@ export default function DynamicColumnTable() {
           activeView={activeView}
           onViewChange={handleViewChange}
         />
-{/*         
+        {/*
         <div className="text-sm text-muted-foreground mb-2">
           Current view: <strong>{activeView}</strong> - 
           Columns: <strong>{currentColumns.length}</strong> - 

@@ -38,27 +38,27 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/dashboard",
       icon: IconHome2,
     },
     {
       title: "Marks",
-      url: "#",
+      url: "/dashboard/marks",
       icon: IconNumber123,
     },
     {
       title: "Jury",
-      url: "#",
+      url: "/dashboard/jury",
       icon: IconScale,
     },
     {
       title: "Teams",
-      url: "#",
+      url: "/dashboard/teams",
       icon: IconUsersGroup,
     },
     {
       title: "Participants",
-      url: "#",
+      url: "/dashboard/participants",
       icon: IconUser,
     },
   ],

@@ -8,18 +8,22 @@ import { MarksDataType, TeamDataType, TeamMemberDataType, UserDBType } from "@/z
 // Column definitions for Marks 
 export const marksColumns: ColumnDef<MarksDataType>[] = [
   {
+    id:"marksColumnID",
     accessorKey: "id",
     header: "ID",
   },
   {
+    id:"marksColumnTeamName",
     accessorKey: "teamId.teamName",
     header: "Team Name",
   },
   {
+    id:"marksColumnJurryName",
     accessorKey: "jurryId.name",
     header: "Jurry",
   },
   {
+    id:"marksColumnDay",
     accessorKey: "createdAt",
     header: "Day",
     cell: ({ row }) => {
@@ -64,18 +68,22 @@ export const marksColumns: ColumnDef<MarksDataType>[] = [
 // Column definitions for jurry 
 export const jurryColumns: ColumnDef<UserDBType>[] = [
   {
+    id:"jurryColumnsID",
     accessorKey: "id",
     header: "ID",
   },
   {
+    id:"jurryColumnsName",
     accessorKey: "name",
     header: "Name",
   },
   {
+    id:"jurryColumnsPhoneNumber",
     accessorKey: "phoneNumber",
     header: "Phone Number",
   },
   {
+    id:"jurryColumnsEmail",
     accessorKey: "email",
     header: "Email",
   },
@@ -85,18 +93,22 @@ export const jurryColumns: ColumnDef<UserDBType>[] = [
 // Column definitions for Team 
 export const teamColumns: ColumnDef<TeamDataType>[] = [
   {
+    id:"teamColumnsID",
     accessorKey: "id",
     header: "ID",
   },
   {
+    id:"teamColumnsTeamName",
     accessorKey: "teamName",
     header: "Team Name",
   },
   {
+    id:"teamColumnsLeaderName",
     accessorKey: "leaderId.name",
     header: "Leader",
   },
   {
+    id:"teamColumnsMember1",
     accessorKey: "members",
     header: "Member 1",
     cell: ({row}) => {
@@ -105,6 +117,7 @@ export const teamColumns: ColumnDef<TeamDataType>[] = [
     }
   },
   {
+    id:"teamColumnsMember2",
     accessorKey: "members",
     header: "Member 2",
     cell: ({row}) => {
@@ -113,6 +126,7 @@ export const teamColumns: ColumnDef<TeamDataType>[] = [
     }
   },
   {
+    id:"teamColumnsMember3",
     accessorKey: "members",
     header: "Member 3",
     cell: ({row}) => {
@@ -126,22 +140,27 @@ export const teamColumns: ColumnDef<TeamDataType>[] = [
 // Column definitions for participants 
 export const participantsColumns: ColumnDef<TeamMemberDataType>[] = [
   {
+    id:"participantsColumnsID",
     accessorKey: "memberId.id",
     header: "ID",
   },
   {
+    id:"participantsColumnsMemberName",
     accessorKey: "memberId.name",
     header: "Name",
   },
   {
+    id:"participantsColumnsTeamName",
     accessorKey: "teamId.teamName",
     header: "Team",
   },
   {
+    id:"participantsColumnsPhoneNumber",
     accessorKey: "phoneNumber",
     header: "Phone Number",
   },
   {
+    id:"participantsColumnsEmail",
     accessorKey: "email",
     header: "Email",
   },

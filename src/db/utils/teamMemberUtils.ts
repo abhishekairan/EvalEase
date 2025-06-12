@@ -120,6 +120,7 @@ export async function deleteTeamMember(id: number) {
  * @returns Promise<TeamMemberDBType[]> - Array containing the updated team member
  */
 export async function updateTeamMember(teamMember: TeamMemberDBType) {
+  if(!teamMember.id) return []
   await db.update(teamMembers).set({ ...teamMember }).where(eq(teamMembers.id, teamMember.id));
   return await getTeamMembers(teamMember.id);
 }

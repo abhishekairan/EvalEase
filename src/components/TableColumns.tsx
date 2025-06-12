@@ -3,7 +3,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
-import { MarksDataType, TeamDataType, TeamMemberDataType, UserDBType } from "@/zod";
+import { MarksDataType, TeamDataType, TeamMemberDataType, UserDBType, userWithTeamType } from "@/zod";
 
 // Column definitions for Marks 
 export const marksColumns: ColumnDef<MarksDataType>[] = [
@@ -116,8 +116,7 @@ export const teamColumns: ColumnDef<TeamDataType>[] = [
       return row.members[0].name
     },
     cell: ({getValue}) => {
-      const name = getValue()
-      return name
+      return getValue()
     }
   },
   {
@@ -129,8 +128,7 @@ export const teamColumns: ColumnDef<TeamDataType>[] = [
       return member? member.name : '-'
     },
     cell: ({getValue}) => {
-      const name = getValue()
-      return name
+      return getValue()
     }
   },
   {
@@ -142,38 +140,42 @@ export const teamColumns: ColumnDef<TeamDataType>[] = [
       return member? member.name : '-'
     },
     cell: ({getValue}) => {
-      const name = getValue()
-      return name
+      return getValue()
     }
   }
 ];
 
 
 // Column definitions for participants 
-export const participantsColumns: ColumnDef<TeamMemberDataType>[] = [
+export const participantsColumns: ColumnDef<userWithTeamType>[] = [
   {
     id:"participantsColumnsID",
-    accessorKey: "memberId.id",
+    accessorKey: "id",
     header: "ID",
   },
   {
     id:"participantsColumnsMemberName",
-    accessorKey: "memberId.name",
+    accessorKey: "name",
     header: "Name",
   },
   {
     id:"participantsColumnsTeamName",
-    accessorKey: "teamId.teamName",
     header: "Team",
+    accessorFn: (key)=>{
+      return key.teamName? key.teamName : "-"
+    },
+    cell: ({getValue}) => {
+      return getValue()
+    }
   },
   {
     id:"participantsColumnsPhoneNumber",
-    accessorKey: "memberId.phoneNumber",
+    accessorKey: "phoneNumber",
     header: "Phone Number",
   },
   {
     id:"participantsColumnsEmail",
-    accessorKey: "memberId.email",
+    accessorKey: "email",
     header: "Email",
   },
 ];

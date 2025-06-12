@@ -240,3 +240,17 @@ export async function getAllTeamsDetails(): Promise<TeamDataType[]> {
     throw new Error('Failed to fetch teams details');
   }
 }
+
+
+/**
+ * Retrieves all teams for dropdown selection
+ * @returns Promise - Array of teams with id and teamName
+ */
+export async function getTeamsForDropdown() {
+  const response = await db.select({
+    id: teams.id,
+    teamName: teams.teamName,
+  }).from(teams);
+  
+  return response;
+}

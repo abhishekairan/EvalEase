@@ -3,11 +3,11 @@ import { teamDBSchema } from './teamSchema';
 import { userDBSchema } from './userSchema';
 
 export const teamMemberDBSchema = z.object({
-  id: z.number().int().positive(),
-  teamId: z.number().int().positive(),
-  memberId: z.number().int().positive(),
-  createdAt: z.date().default(() => new Date()).nullable(),
-  updatedAt: z.date().default(() => new Date()).nullable(),
+  id: z.coerce.number().int().positive().optional(),
+  teamId: z.coerce.number().int().positive(),
+  memberId: z.coerce.number().int().positive(),
+  createdAt: z.coerce.date().default(() => new Date()).nullable(),
+  updatedAt: z.coerce.date().default(() => new Date()).nullable(),
 });
 
 export type TeamMemberDBType = z.infer<typeof teamMemberDBSchema>;

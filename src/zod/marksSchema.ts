@@ -11,8 +11,8 @@ export const marksDBSchema = z.object({
   technicalScore: z.number().int().min(-1).max(10).default(-1),
   impactScore: z.number().int().min(-1).max(10).default(-1),
   submitted: z.boolean().default(false),
-  createdAt: z.date().default(() => new Date()),
-  updatedAt: z.date().default(() => new Date()),
+  createdAt: z.date().default(() => new Date()).nullable(),
+  updatedAt: z.date().default(() => new Date()).nullable(),
 });
 
 export type MarksDBType = z.infer<typeof marksDBSchema>;

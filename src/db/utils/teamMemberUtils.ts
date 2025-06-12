@@ -46,6 +46,7 @@ export async function getTeamMemberData(id?: number, teamId?: number) {
         name: users.name,
         email: users.email,
         role: users.role,
+        phoneNumber: users.phoneNumber,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
       },

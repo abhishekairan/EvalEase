@@ -13,10 +13,10 @@ import { eq } from "drizzle-orm";
  * @param email - Email address to find a specific user
  * @returns Promise<UserDBType[]> - Array of users matching the criteria
  */
-export async function getUsers(
+export async function getUsers({id,type,email}:{
   id?: number,
   type?: "admin" | "jury" | "student",
-  email?: string
+  email?: string}
 ) {
   if (id) {
     const response = await db.select().from(users).where(eq(users.id, id));
@@ -41,7 +41,7 @@ export async function getUsers(
  */
 export async function insertUser(user: UserDBType) {
   const { id } = (await db.insert(users).values(user).$returningId())[0];
-  const userObj = await getUsers(id);
+  const userObj = await getUsers({id});
   return userObj;
 }
 
@@ -53,7 +53,7 @@ export async function insertUser(user: UserDBType) {
  */
 export async function deleteUser(id: number) {
   await db.delete(users).where(eq(users.id, id));
-  const user = await getUsers(id);
+  const user = await getUsers({id});
   return user;
 }
 
@@ -65,5 +65,5 @@ export async function deleteUser(id: number) {
  */
 export async function updateUser(user: UserDBType) {
   await db.update(users).set({ ...user }).where(eq(users.id, user.id));
-  return await getUsers(user.id);
+  return await getUsers({id:user.id});
 }

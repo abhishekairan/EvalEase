@@ -19,22 +19,24 @@ export const marksColumns: ColumnDef<MarksDataType>[] = [
   },
   {
     id:"marksColumnJurryName",
-    accessorKey: "jurryId.name",
+    accessorKey: "juryId.name",
     header: "Jurry",
+  },{
+  id: "marksColumnDay",
+  header: "Day",
+  accessorFn: (row) => {
+    const date = row.createdAt as Date;
+    return date.getDate(); // Return raw day value, not JSX
   },
-  {
-    id:"marksColumnDay",
-    accessorKey: "createdAt",
-    header: "Day",
-    cell: ({ row }) => {
-      const status = row.getValue("createdAt") as Date;
-      return (
-        <Badge variant={"secondary"}>
-          {status.getDay() > 28 ? "Day 1" : "Day 2"}
-        </Badge>
-      );
-    },
+  cell: ({ getValue }) => {
+    const day = getValue() as number;
+    return (
+      <Badge variant="outline">
+        {day < 15 ? "Day 1" : "Day 2"}
+      </Badge>
+    );
   },
+},
   {
     accessorKey: "innovationScore",
     header: "Innovation Score",
@@ -109,29 +111,39 @@ export const teamColumns: ColumnDef<TeamDataType>[] = [
   },
   {
     id:"teamColumnsMember1",
-    accessorKey: "members",
     header: "Member 1",
-    cell: ({row}) => {
-      const member = row.getValue("members") as UserDBType[]
-      return member[0].name
+    accessorFn: (row) =>{
+      return row.members[0].name
+    },
+    cell: ({getValue}) => {
+      const name = getValue()
+      return name
     }
   },
   {
     id:"teamColumnsMember2",
     accessorKey: "members",
     header: "Member 2",
-    cell: ({row}) => {
-      const member = row.getValue("members") as UserDBType[]
-      return member[1].name
+    accessorFn: (row) =>{
+      const member = row.members[1]
+      return member? member.name : '-'
+    },
+    cell: ({getValue}) => {
+      const name = getValue()
+      return name
     }
   },
   {
     id:"teamColumnsMember3",
     accessorKey: "members",
     header: "Member 3",
-    cell: ({row}) => {
-      const member = row.getValue("members") as UserDBType[]
-      return member[2].name
+    accessorFn: (row) =>{
+      const member = row.members[2]
+      return member? member.name : '-'
+    },
+    cell: ({getValue}) => {
+      const name = getValue()
+      return name
     }
   }
 ];
@@ -156,12 +168,12 @@ export const participantsColumns: ColumnDef<TeamMemberDataType>[] = [
   },
   {
     id:"participantsColumnsPhoneNumber",
-    accessorKey: "phoneNumber",
+    accessorKey: "memberId.phoneNumber",
     header: "Phone Number",
   },
   {
     id:"participantsColumnsEmail",
-    accessorKey: "email",
+    accessorKey: "memberId.email",
     header: "Email",
   },
 ];

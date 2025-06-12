@@ -44,14 +44,14 @@ export async function getMarksData(id?: number, teamId?: number, juryId?: number
         leaderId: teams.leaderId,
         createdAt: teams.createdAt,
         updatedAt: teams.updatedAt,
-      },
-      juryId: {
+      },      juryId: {
         id: users.id,
         name: users.name,
         email: users.email,
+        phoneNumber: users.phoneNumber,
         role: users.role,
         createdAt: users.createdAt,
-        updatedAt: users.updatedAt,
+        updatedAt: users.updatedAt
       },
       innovationScore: marks.innovationScore,
       presentationScore: marks.presentationScore,

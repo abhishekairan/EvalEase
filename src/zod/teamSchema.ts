@@ -7,8 +7,8 @@ export const teamDBSchema = z.object({
     .min(3, "Team name must be at least 3 characters long")
     .max(100, "Team name cannot exceed 100 characters"),
   leaderId: z.number().int().positive(),
-  createdAt: z.date().default(() => new Date()),
-  updatedAt: z.date().default(() => new Date()),
+  createdAt: z.date().default(() => new Date()).nullable(),
+  updatedAt: z.date().default(() => new Date()).nullable(),
 });
 
 export type TeamDBType = z.infer<typeof teamDBSchema>;

@@ -1,5 +1,5 @@
 import { db } from "../index";
-import { teamDataSchema, TeamDBType } from "@/zod";
+import { teamDataSchema, TeamDataType, TeamDBType } from "@/zod";
 import { teamMembers, teams, users } from "../schema";
 import { eq, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/mysql-core";
@@ -36,6 +36,7 @@ export async function getTeamData(id?: number) {
           name: users.name,
           email: users.email,
           role: users.role,
+          phoneNumber: users.phoneNumber,
           createdAt: users.createdAt,
           updatedAt: users.updatedAt,
         },
@@ -109,95 +110,133 @@ export async function updateTeam(team: TeamDBType) {
  * @param teamId - Team ID to fetch complete information for
  * @returns Promise<TeamWithMembersType | null> - Complete team data with members or null if not found
  */
-export async function getTeamWithMembers(teamId: number) {
-  const teamWithMembersQuery = await db
-    .select({
-      // Team information
-      teamId: teams.id,
-      teamName: teams.teamName,
-      teamCreatedAt: teams.createdAt,
-      teamUpdatedAt: teams.updatedAt,
-      
-      // Leader information
-      leaderId: users.id,
-      leaderName: users.name,
-      leaderEmail: users.email,
-      leaderRole: users.role,
-      leaderPhoneNumber: users.phoneNumber,
-      leaderCreatedAt: users.createdAt,
-      leaderUpdatedAt: users.updatedAt,
-      
-      // Member information (will be null for the leader row)
-      memberId: sql<number | null>`member_users.id`,
-      memberName: sql<string | null>`member_users.name`,
-      memberEmail: sql<string | null>`member_users.email`,
-      memberRole: sql<string | null>`member_users.role`,
-      memberJoinedAt: sql<Date | null>`team_members.created_at`,
-    })
-    .from(teams)
-    .innerJoin(users, eq(teams.leaderId, users.id))
-    .leftJoin(teamMembers, eq(teamMembers.teamId, teams.id))
-    .leftJoin(
-      alias(users, 'member_users'), 
-      eq(teamMembers.memberId, sql`member_users.id`)
-    )
-    .where(eq(teams.id, teamId));
 
-  if (teamWithMembersQuery.length === 0) {
-    return null;
+export async function getTeamDetails(teamId: number): Promise<TeamDataType | null> {
+  try {
+    // Get the team with leader information
+    const teamWithLeader = await db
+      .select({
+        id: teams.id,
+        teamName: teams.teamName,
+        leaderId: teams.leaderId,
+        createdAt: teams.createdAt,
+        updatedAt: teams.updatedAt,
+        leader: {
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          phoneNumber: users.phoneNumber,
+          role: users.role,
+          createdAt: users.createdAt,
+          updatedAt: users.updatedAt,
+        }
+      })
+      .from(teams)
+      .innerJoin(users, eq(teams.leaderId, users.id))
+      .where(eq(teams.id, teamId))
+      .limit(1);
+
+    if (teamWithLeader.length === 0) {
+      return null;
+    }
+
+    const team = teamWithLeader[0];
+
+    // Get all team members
+    const members = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        phoneNumber: users.phoneNumber,
+        role: users.role,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+      })
+      .from(teamMembers)
+      .innerJoin(users, eq(teamMembers.memberId, users.id))
+      .where(eq(teamMembers.teamId, teamId));
+
+    // Format the response according to TeamDataType
+    const teamData: TeamDataType = {
+      id: team.id,
+      teamName: team.teamName,
+      leaderId: team.leader,
+      members: members,
+      createdAt: team.createdAt,
+      updatedAt: team.updatedAt,
+    };
+
+    return teamData;
+  } catch (error) {
+    console.error('Error fetching team details:', error);
+    throw new Error('Failed to fetch team details');
   }
+}
 
-  // Transform the flat result into a structured object
-  const firstRow = teamWithMembersQuery[0];
-  
-  const teamData = {
-    id: firstRow.teamId,
-    teamName: firstRow.teamName,
-    createdAt: firstRow.teamCreatedAt,
-    updatedAt: firstRow.teamUpdatedAt,
-    leaderId: {
-      id: firstRow.leaderId,
-      name: firstRow.leaderName,
-      email: firstRow.leaderEmail,
-      role: firstRow.leaderRole,
-      phoneNumber: firstRow.leaderPhoneNumber,
-      createdAt: firstRow.leaderCreatedAt,
-      updatedAt: firstRow.leaderUpdatedAt,
-    },
-    members: [] as Array<{
-      id: number;
-      name: string;
-      email: string;
-      role: string;
-      joinedAt: Date;
-    }>
-  };
+// Alternative function to get all teams
+export async function getAllTeamsDetails(): Promise<TeamDataType[]> {
+  try {
+    // Get all teams with leader information
+    const teamsWithLeaders = await db
+      .select({
+        id: teams.id,
+        teamName: teams.teamName,
+        leaderId: teams.leaderId,
+        createdAt: teams.createdAt,
+        updatedAt: teams.updatedAt,
+        leader: {
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          phoneNumber: users.phoneNumber,
+          role: users.role,
+          createdAt: users.createdAt,
+          updatedAt: users.updatedAt,
+        }
+      })
+      .from(teams)
+      .innerJoin(users, eq(teams.leaderId, users.id));
 
-  // Extract unique members (excluding null entries)
-  const uniqueMembers = teamWithMembersQuery
-    .filter(row => row.memberId !== null)
-    .reduce((acc, row) => {
-      const existingMember = acc.find(member => member.id === row.memberId);
-      if (!existingMember && row.memberId) {
-        acc.push({
-          id: row.memberId,
-          name: row.memberName!,
-          email: row.memberEmail!,
-          role: row.memberRole!,
-          joinedAt: row.memberJoinedAt!,
-        });
+    // Get all team members for all teams
+    const allMembers = await db
+      .select({
+        teamId: teamMembers.teamId,
+        member: {
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          phoneNumber: users.phoneNumber,
+          role: users.role,
+          createdAt: users.createdAt,
+          updatedAt: users.updatedAt,
+        }
+      })
+      .from(teamMembers)
+      .innerJoin(users, eq(teamMembers.memberId, users.id));
+
+    // Group members by team ID
+    const membersByTeam = allMembers.reduce((acc, item) => {
+      if (!acc[item.teamId]) {
+        acc[item.teamId] = [];
       }
+      acc[item.teamId].push(item.member);
       return acc;
-    }, [] as Array<{
-      id: number;
-      name: string;
-      email: string;
-      role: string;
-      joinedAt: Date;
-    }>);
+    }, {} as Record<number, typeof allMembers[0]['member'][]>);
 
-  teamData.members = uniqueMembers;
-    const result = teamDataSchema.safeParse(teamData)
-    if(result.success) return result.data
-  return [];
+    // Format the response
+    const teamsData: TeamDataType[] = teamsWithLeaders.map(team => ({
+      id: team.id,
+      teamName: team.teamName,
+      leaderId: team.leader,
+      members: membersByTeam[team.id] || [],
+      createdAt: team.createdAt,
+      updatedAt: team.updatedAt,
+    }));
+
+    return teamsData;
+  } catch (error) {
+    console.error('Error fetching all teams details:', error);
+    throw new Error('Failed to fetch teams details');
+  }
 }

@@ -14,10 +14,10 @@ export function SectionCards() {
       >
         <CardHeader className="space-y-3">
           <CardDescription className="text-sm font-medium text-muted-foreground">
-            Total Jury
+            Total Teams
           </CardDescription>
           <CardTitle className="text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
-            $1,250.00
+            150
           </CardTitle>
         </CardHeader>
       </Card>
@@ -31,7 +31,7 @@ export function SectionCards() {
             Total Jurys
           </CardDescription>
           <CardTitle className="text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
-            1,234
+            8
           </CardTitle>
         </CardHeader>
       </Card>
@@ -45,7 +45,7 @@ export function SectionCards() {
             Total Participants
           </CardDescription>
           <CardTitle className="text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
-            45,678
+            600
           </CardTitle>
         </CardHeader>
       </Card>

@@ -9,8 +9,8 @@ export const userDBSchema = z.object({
   phoneNumber: z.string()
     .regex(/^\+?[1-9]\d{1,14}$/, "Invalid phone number format. Use international format."),
   role: userRole,
-  createdAt: z.date().default(() => new Date()),
-  updatedAt: z.date().default(() => new Date()),
+  createdAt: z.date().default(() => new Date()).nullable(),
+  updatedAt: z.date().default(() => new Date()).nullable(),
 });
 
 export type UserDBType = z.infer<typeof userDBSchema>;

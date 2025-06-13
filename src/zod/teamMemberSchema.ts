@@ -6,8 +6,8 @@ export const teamMemberDBSchema = z.object({
   id: z.coerce.number().int().positive().optional(),
   teamId: z.coerce.number().int().positive(),
   memberId: z.coerce.number().int().positive(),
-  createdAt: z.coerce.date().default(() => new Date()).nullable(),
-  updatedAt: z.coerce.date().default(() => new Date()).nullable(),
+  createdAt: z.coerce.date().default(() => new Date()).nullable().optional(),
+  updatedAt: z.coerce.date().default(() => new Date()).nullable().optional(),
 });
 
 export type TeamMemberDBType = z.infer<typeof teamMemberDBSchema>;

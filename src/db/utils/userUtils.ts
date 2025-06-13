@@ -169,3 +169,18 @@ export async function getUsersWithCompleteTeamInfo() {
 
   return Array.from(userMap.values());
 }
+
+
+/**
+ * Retrieves all Users for dropdown selection
+ * @returns Promise - Array of teams with id and teamName
+ */
+export async function getUsersForDropdown({type}: {type?: "admin" | "jury" | "student"}) {
+  const baseQuery = db.select({
+    id: users.id,
+    name: users.name,
+  }).from(users);
+  if(type) baseQuery.where(eq(users.role,type))
+  const response = await baseQuery
+  return response;
+}

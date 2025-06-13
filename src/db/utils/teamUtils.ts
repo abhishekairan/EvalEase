@@ -100,6 +100,7 @@ export async function deleteTeam(id: number) {
  * @returns Promise<TeamDBType[]> - Array containing the updated team
  */
 export async function updateTeam(team: TeamDBType) {
+  if(!team.id) return []
   await db.update(teams).set({ ...team }).where(eq(teams.id, team.id));
   return await getTeams(team.id);
 }

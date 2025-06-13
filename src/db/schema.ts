@@ -18,6 +18,13 @@ export const users = mysqlTable('users', {
   updatedAt: timestamp('updated_at').default(sql`CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`),
 });
 
+// Credentials Table
+export const creds = mysqlTable('creds',{
+  id: int().autoincrement().primaryKey(),
+  user: int('user').notNull().references(()=> users.id),
+  password: varchar('password',{length:512}).notNull(),
+})
+
 // Teams table
 export const teams = mysqlTable('teams', {
   id: int('id').autoincrement().primaryKey(),

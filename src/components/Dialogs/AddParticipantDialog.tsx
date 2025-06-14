@@ -1,7 +1,7 @@
 // components/add-participant-dialog.tsx
 "use client";
 
-import { useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -29,15 +29,14 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { userDBSchema } from "@/zod/userSchema";
+import { participantsDBSchema } from "@/zod";
 import { addParticipantAction } from "@/actions/participantForm";
 
 // Extend the user schema for the form, omitting id and timestamps, setting role as student
-const addParticipantSchema = userDBSchema.omit({
+const addParticipantSchema = participantsDBSchema.omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-  role: true,
 }).extend({
   teamId: z.number().optional().nullable(),
 });
@@ -54,20 +53,22 @@ interface AddParticipantDialogProps {
   teams: Team[];
 }
 
-export function AddParticipantDialog({ children, teams }: AddParticipantDialogProps) {
+export const AddParticipantDialog = memo<AddParticipantDialogProps>(({ children, teams }: AddParticipantDialogProps) => {
   const [open, setOpen] = useState(false);
+
+  const memorizedTeams = useMemo(()=> teams, [teams])
 
   const form = useForm<AddParticipantFormData>({
     resolver: zodResolver(addParticipantSchema),
-    defaultValues: {
+    defaultValues: useMemo(() => ({
       name: "",
       email: "",
       phoneNumber: "",
       teamId: null,
-    },
+    }),[])
   });
 
-  const onSubmit = async (data: AddParticipantFormData) => {
+  const onSubmit = useCallback(async (data: AddParticipantFormData) => {
     try {
       await addParticipantAction(data);
       form.reset();
@@ -75,12 +76,12 @@ export function AddParticipantDialog({ children, teams }: AddParticipantDialogPr
     } catch (error) {
       console.error("Error adding participant:", error);
     }
-  };
+  },[form]);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     form.reset();
     setOpen(false);
-  };
+  },[form]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -161,7 +162,7 @@ export function AddParticipantDialog({ children, teams }: AddParticipantDialogPr
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="null">No Team</SelectItem>
-                      {teams.map((team) => (
+                      {memorizedTeams.map((team) => (
                         <SelectItem key={team.id} value={team.id.toString()}>
                           {team.teamName}
                         </SelectItem>
@@ -184,4 +185,4 @@ export function AddParticipantDialog({ children, teams }: AddParticipantDialogPr
       </DialogContent>
     </Dialog>
   );
-}
+})

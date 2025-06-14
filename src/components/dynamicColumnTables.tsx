@@ -5,11 +5,11 @@ import { useState, useMemo, useEffect } from "react";
 import { useReactTable, getCoreRowModel, ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/data-table";
 import { DataTableToolbar } from "@/components/data-table-toolbar";
-import { MarksDataType, TeamDataType, TeamMemberDataType, UserDBType, userWithTeamType } from "@/zod";
+import { MarksDataType, TeamDataType, TeamMemberDataType, adminDBType, juryDBType, participantsDBType, participantsWithTeamType } from "@/zod";
 import { jurryColumns, marksColumns, participantsColumns, teamColumns } from "./TableColumns";
 
 
-type TableDataType = MarksDataType | UserDBType | TeamDataType | TeamMemberDataType | userWithTeamType
+type TableDataType = MarksDataType | participantsDBType | TeamDataType | TeamMemberDataType | participantsWithTeamType | juryDBType | adminDBType
 
 export default function DynamicColumnTable() {
   const [activeView, setActiveView] = useState("participants");

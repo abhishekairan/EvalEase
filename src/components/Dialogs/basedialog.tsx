@@ -29,11 +29,11 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { userDBSchema } from "@/zod/userSchema";
+import { participantsDBSchema } from "@/zod/ParticipantsSchema";
 import { addParticipantAction } from "@/actions/participantForm";
 
 // Extend the user schema for the form, omitting id and timestamps, setting role as student
-const addParticipantSchema = userDBSchema.omit({
+const addParticipantSchema = participantsDBSchema.omit({
   id: true,
   createdAt: true,
   updatedAt: true,

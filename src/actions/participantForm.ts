@@ -2,8 +2,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { insertUser, insertTeamMember } from "@/db/utils";
-import { userDBSchema } from "@/zod/userSchema";
+import { addTeamMember, createParticipant } from "@/db/utils";
+import { participantsDBSchema } from "@/zod/";
 import { teamMemberDBSchema } from "@/zod/teamMemberSchema";
 
 interface AddParticipantData {
@@ -11,34 +11,31 @@ interface AddParticipantData {
   email: string;
   phoneNumber: string;
   teamId?: number | null;
+  institude?: string
 }
 
 export async function addParticipantAction(data: AddParticipantData) {
   try {
     // Create user data with student role
-    const userData = userDBSchema.parse({
+    const userData = participantsDBSchema.parse({
       name: data.name,
       email: data.email,
+      institude: data.institude,
       phoneNumber: data.phoneNumber,
-      role: "student" as const,
-      createdAt: new Date(),
-      updatedAt: new Date(),
     });
 
     // Insert user into database
     // console.log(userData)
-    const [newUser] = await insertUser(userData);
+    const [newUser] = await createParticipant({participant: userData});
 
     // If team is selected, add user to team members
     if (data.teamId && newUser) {
       const teamMemberData = teamMemberDBSchema.safeParse({
         teamId: data.teamId,
         memberId: newUser.id,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       });
       // console.log(teamMemberData.data)
-      if(teamMemberData.success) await insertTeamMember(teamMemberData.data);
+      if(teamMemberData.success) await addTeamMember({teamMember: teamMemberData.data});
     }
 
     // Revalidate the page to show updated data

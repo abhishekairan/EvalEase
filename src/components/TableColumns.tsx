@@ -3,7 +3,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
-import { MarksDataType, TeamDataType, TeamMemberDataType, UserDBType, userWithTeamType } from "@/zod";
+import { MarksDataType, TeamDataType, juryDBType, participantsWithTeamType } from "@/zod";
 
 // Column definitions for Marks 
 export const marksColumns: ColumnDef<MarksDataType>[] = [
@@ -22,36 +22,86 @@ export const marksColumns: ColumnDef<MarksDataType>[] = [
     accessorKey: "juryId.name",
     header: "Jurry",
   },{
-  id: "marksColumnDay",
-  header: "Day",
-  accessorFn: (row) => {
-    const date = row.createdAt as Date;
-    return date.getDate(); // Return raw day value, not JSX
-  },
-  cell: ({ getValue }) => {
-    const day = getValue() as number;
-    return (
-      <Badge variant="outline">
-        {day < 15 ? "Day 1" : "Day 2"}
-      </Badge>
-    );
-  },
+    id: "marksColumnDay",
+    accessorKey: "session.name",
+    header: "Session",
+  // accessorFn: (row) => {
+  //   return row.session.name
+  //   const date = row.createdAt as Date;
+  //   return date.getDate(); // Return raw day value, not JSX
+  // },
+  // cell: ({ getValue }) => {
+  //   const day = getValue() as number;
+  //   return (
+  //     <Badge variant="outline">
+  //       {day < 15 ? "Day 1" : "Day 2"}
+  //     </Badge>
+  //   );
+  // },
 },
   {
     accessorKey: "innovationScore",
     header: "Innovation Score",
+    cell: (value)=>{
+      const score = value.getValue() as number
+      let varient: "red" | "orange" | "green" = "red"
+      if(score<4) varient="red"
+      if(score>3 && score<8) varient="orange"
+      if(score>7) varient="green"
+      return (
+        <Badge variant={varient}>
+          {score}
+        </Badge>
+      )
+    }
   },
   {
     accessorKey: "presentationScore",
     header: "Presentation Score",
+    cell: (value)=>{
+      const score = value.getValue() as number
+      let varient: "red" | "orange" | "green" = "red"
+      if(score<4) varient="red"
+      if(score>3 && score<8) varient="orange"
+      if(score>7) varient="green"
+      return (
+        <Badge variant={varient}>
+          {score}
+        </Badge>
+      )
+    }
   },
   {
     accessorKey: "technicalScore",
     header: "Technical Score",
+    cell: (value)=>{
+      const score = value.getValue() as number
+      let varient: "red" | "orange" | "green" = "red"
+      if(score<4) varient="red"
+      if(score>3 && score<8) varient="orange"
+      if(score>7) varient="green"
+      return (
+        <Badge variant={varient}>
+          {score}
+        </Badge>
+      )
+    }
   },
   {
     accessorKey: "impactScore",
     header: "Impact Score",
+    cell: (value)=>{
+      const score = value.getValue() as number
+      let varient: "red" | "orange" | "green" = "red"
+      if(score<4) varient="red"
+      if(score>3 && score<8) varient="orange"
+      if(score>7) varient="green"
+      return (
+        <Badge variant={varient}>
+          {score}
+        </Badge>
+      )
+    }
   },
   {
     header: "Total Score",
@@ -68,7 +118,7 @@ export const marksColumns: ColumnDef<MarksDataType>[] = [
 
 
 // Column definitions for jurry 
-export const jurryColumns: ColumnDef<UserDBType>[] = [
+export const jurryColumns: ColumnDef<juryDBType>[] = [
   {
     id:"jurryColumnsID",
     accessorKey: "id",
@@ -147,7 +197,7 @@ export const teamColumns: ColumnDef<TeamDataType>[] = [
 
 
 // Column definitions for participants 
-export const participantsColumns: ColumnDef<userWithTeamType>[] = [
+export const participantsColumns: ColumnDef<participantsWithTeamType>[] = [
   {
     id:"participantsColumnsID",
     accessorKey: "id",

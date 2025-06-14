@@ -4,7 +4,7 @@ import {
   insertTeamMember, 
   insertMark 
 } from "@/db/utils";
-import { UserDBType, TeamDBType, TeamMemberDBType, MarksDBType } from "@/zod";
+import { participantsDBType, TeamDBType, TeamMemberDBType, MarksDBType } from "@/zod";
 import { testConnection } from ".";
 
 async function populateDatabase() {
@@ -22,14 +22,14 @@ async function populateDatabase() {
       email: "admin@paruluniversity.ac.in",
       phoneNumber: "+91-9876543210",
       role: "admin"
-    } as UserDBType);
+    } as participantsDBType);
 
     const admin2 = await insertUser({
       name: "Prof. Rajesh Kumar",
       email: "rajesh.admin@paruluniversity.ac.in",
       phoneNumber: "+91-9876543211",
       role: "admin"
-    } as UserDBType);
+    } as participantsDBType);
 
     // Step 2: Create Jury Members
     console.log("👨‍⚖️ Creating jury members...");
@@ -49,7 +49,7 @@ async function populateDatabase() {
         email: jury.email,
         phoneNumber: jury.phone,
         role: "jury"
-      } as UserDBType);
+      } as participantsDBType);
       juryMembers.push(juryMember[0]);
     }
 
@@ -92,7 +92,7 @@ async function populateDatabase() {
         email: student.email,
         phoneNumber: student.phone,
         role: "student"
-      } as UserDBType);
+      } as participantsDBType);
       students.push(studentUser[0]);
     }
 

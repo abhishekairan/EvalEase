@@ -4,9 +4,8 @@
 
 import { z } from "zod";
 import { teamDBSchema } from "@/zod/teamSchema";
-import { insertTeam } from "@/db/utils/teamUtils";
-import { insertTeamMember } from "@/db/utils/teamMemberUtils";
 import { revalidatePath } from "next/cache";
+import { addTeamMember, createTeam } from "@/db/utils";
 
 // Define the schema for the form data
 const addTeamSchema = teamDBSchema.omit({
@@ -33,7 +32,7 @@ export async function addTeamAction(data: AddTeamFormData) {
     };
 
     // Insert the team into the database
-    const createdTeam = await insertTeam(teamData);
+    const createdTeam = await createTeam({team: teamData});
     
     if (!createdTeam || createdTeam.length === 0) {
       throw new Error("Failed to create team");
@@ -50,10 +49,10 @@ export async function addTeamAction(data: AddTeamFormData) {
 
     // Insert each member into the teamMembers table
     for (const memberId of memberIds) {
-      await insertTeamMember({
+      await addTeamMember({teamMember: {
         teamId,
         memberId,
-      });
+      }});
     }
 
     // Revalidate the path to refresh the data

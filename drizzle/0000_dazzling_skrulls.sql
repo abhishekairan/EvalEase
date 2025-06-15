@@ -82,7 +82,7 @@ CREATE TABLE `teams` (
 	CONSTRAINT `teams_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
-ALTER TABLE `creds` ADD CONSTRAINT `creds_user_users_id_fk` FOREIGN KEY (`user`) REFERENCES `users`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `creds` ADD CONSTRAINT `creds_user_admin_id_fk` FOREIGN KEY (`user`) REFERENCES `admin`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `jurry` ADD CONSTRAINT `jurry_session_sessions_id_fk` FOREIGN KEY (`session`) REFERENCES `sessions`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `marks` ADD CONSTRAINT `marks_team_id_teams_id_fk` FOREIGN KEY (`team_id`) REFERENCES `teams`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `marks` ADD CONSTRAINT `marks_jury_id_users_id_fk` FOREIGN KEY (`jury_id`) REFERENCES `users`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint

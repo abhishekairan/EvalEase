@@ -14,6 +14,8 @@ import {
   IconSettings,
   IconHome2,
   IconNumber123,
+  IconNotebook,
+  IconChecklist,
 } from "@tabler/icons-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -60,6 +62,11 @@ const data = {
       title: "Participants",
       url: "/dashboard/participants",
       icon: IconUser,
+    },
+    {
+      title: "Sessions",
+      url: "/dashboard/session",
+      icon: IconChecklist,
     },
   ],
   navSecondary: [

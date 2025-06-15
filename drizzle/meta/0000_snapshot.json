@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "d9f5e85a-ea73-498d-869a-86b289658432",
+  "id": "8a474402-271d-4264-a117-a4584e4d16f3",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "admin": {
@@ -93,10 +93,10 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "creds_user_users_id_fk": {
-          "name": "creds_user_users_id_fk",
+        "creds_user_admin_id_fk": {
+          "name": "creds_user_admin_id_fk",
           "tableFrom": "creds",
-          "tableTo": "users",
+          "tableTo": "admin",
           "columnsFrom": [
             "user"
           ],

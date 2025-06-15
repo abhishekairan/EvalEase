@@ -102,3 +102,10 @@ export async function updateSession({ session }: { session: sessionDBType }) {
   
   return await getSessions({ id: session.id });
 }
+
+export async function getSessionsForDropdown() {
+  return await db.select({
+    id: sessions.id,
+    name: sessions.name
+  }).from(sessions).orderBy(sessions.name);
+}

@@ -1,8 +1,9 @@
 import { DataTable } from "@/components/data-table";
+import { AddJuryDialog } from "@/components/Dialogs/AddJuryDialog";
 import { SiteHeader } from "@/components/site-header";
 import { jurryColumns } from "@/components/TableColumns";
 import { Button } from "@/components/ui/button";
-import { getJury } from "@/db/utils";
+import { getJury, getSessionsForDropdown } from "@/db/utils";
 import React, { Suspense } from "react";
 
 function JurryTableSkeleton(){
@@ -15,9 +16,13 @@ function JurryTableSkeleton(){
 async function JuryContent(){
   try{
     const data = await getJury()
+    const sessions = await getSessionsForDropdown()
     return(
       <>
-          <DataTable columns={jurryColumns} data={data} />
+        <AddJuryDialog sessions={sessions}>
+          <Button variant={"secondary"}>Add Jury</Button>
+        </AddJuryDialog>
+        <DataTable columns={jurryColumns} data={data} />
       </>
     )
   }catch(error){
@@ -42,7 +47,6 @@ const page = async () => {
       <SiteHeader title="Jury" />
       <div className="container mx-auto py-10">
         <div className="space-y-4 space-x-4">
-          <Button variant="secondary">Add Jury</Button>
           <Suspense fallback={
             <JurryTableSkeleton/>
           }>

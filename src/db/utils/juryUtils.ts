@@ -44,9 +44,21 @@ export async function getJury({
 /**
  * Creates a new jury member in the database with credentials
  * @param params - Parameters object
- * @param params.jury - Jury data conforming to juryDBType schema
- * @param params.password - Plain text password to be hashed
- * @returns Promise - Array containing the newly created jury member
+ * @param params.jury - Jury data conforming to juryDBType schema (without password)
+ * @param params.password - Plain text password to be hashed and stored in credentials table
+ * @returns Promise<juryDBType[]> - Array containing the newly created jury member, or empty array if creation failed
+ * 
+ * @example
+ * const newJury = {
+ *   name: "Dr. Smith",
+ *   email: "dr.smith@example.com",
+ *   session: 1,
+ *   phoneNumber: "+1234567890"
+ * };
+ * const result = await createJury({ 
+ *   jury: newJury, 
+ *   password: "securePassword123" 
+ * });
  */
 export async function createJury({ 
   jury: juryData, 
@@ -56,10 +68,17 @@ export async function createJury({
   password: string 
 }) {
   try {
+    // Validate password strength
+    if (!password || password.length < 8) {
+      throw new Error("Password must be at least 8 characters long");
+    }
+
     // Create jury record
     const juryResponse = await db.insert(jury).values(juryData).$returningId();
     
-    if (juryResponse.length <= 0) return [];
+    if (juryResponse.length <= 0) {
+      throw new Error("Failed to create jury member");
+    }
     
     const juryId = juryResponse[0].id;
     
@@ -70,9 +89,22 @@ export async function createJury({
       password: hashedPassword
     });
     
+    // Return the newly created jury member
     return await getJury({ id: juryId });
   } catch (error) {
     console.error('Error creating jury:', error);
+    // Clean up jury record if credentials creation failed
+    if (error instanceof Error && error.message !== "Failed to create jury member") {
+      try {
+        // If we have a juryId, it means jury was created but credentials failed
+        const juryResponse = await db.insert(jury).values(juryData).$returningId();
+        if (juryResponse.length > 0) {
+          await db.delete(jury).where(eq(jury.id, juryResponse[0].id));
+        }
+      } catch (cleanupError) {
+        console.error('Error during cleanup:', cleanupError);
+      }
+    }
     return [];
   }
 }

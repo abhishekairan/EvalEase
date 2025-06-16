@@ -1,12 +1,14 @@
 import {
   ArrowRight,
-  UsersRound
+  UsersRound,
+  LogOutIcon
 } from "lucide-react";
 import React from "react";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import MarksDialog from "./marks-dialog";
+import { logoutAction } from "@/actions/logout";
 
 interface ListItem {
   icon: React.ReactNode;
@@ -65,9 +67,14 @@ const List2 = ({
     <section className=" pb-6 md:flex md:justify-center md:align-middle">
       <div className="container px-0 md:px-8 md:max-w-1/3">
       <Separator />
-        <h1 className="my-5 px-4 text-3xl font-semibold md:text-4xl">
+      <div className="flex justify-between px-4 align-middle my-5">
+        <h1 className="px-4 text-3xl font-semibold md:text-4xl">
           {heading}
         </h1>
+        <div onClick={logoutAction}>
+        <LogOutIcon />
+        </div>
+      </div>
         <div className="flex flex-col">
           <Separator />
           {items.map((item, index) => (

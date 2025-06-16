@@ -1,4 +1,4 @@
-// lib/auth.ts
+// lib/auth.ts - FIXED VERSION
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { verifyPassword } from "./password";
@@ -23,7 +23,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       async authorize(credentials: any) {
         try {
           const { email, password, role } = credentials;
-          
+
           if (!email || !password || !role) {
             return null;
           }
@@ -40,10 +40,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
             return {
               id: String(data.id),
-              email: data.email,
-              name: data.name,
-              role: "admin", // Add role here
+              email: String(data.email),
+              name: String(data.name),
+              role: 'admin',
             };
+
           } else if (role === "jury") {
             const data = await getJuryForAuth({ email: email });
             if (!data) return null;
@@ -54,9 +55,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
             return {
               id: String(data.id),
-              email: data.email,
-              name: data.name,
-              role: "jury", // Add role here
+              email: String(data.email),
+              name: String(data.name),
+              role: "jury",
               session: String(data.session)
             };
           }
@@ -66,7 +67,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           console.error("Authentication error:", error);
           return null;
         }
-      },
+      }, // FIXED: Added missing closing brace
     }),
   ],
   callbacks: {
@@ -75,7 +76,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
-        token.role = user.role; // Store role in JWT
+        token.role = user.role;
+        if('session' in user) token.session = user.session;
       }
       return token;
     },
@@ -84,7 +86,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.id = token.id as string;
         session.user.email = token.email as string;
         session.user.name = token.name as string;
-        session.user.role = token.role as string; // Add role to session
+        session.user.role = token.role as string;
+        if (token.session) {
+          (session.user as any).session = token.session as string;
+        }
       }
       return session;
     },

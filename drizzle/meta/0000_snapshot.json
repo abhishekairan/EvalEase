@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "8a474402-271d-4264-a117-a4584e4d16f3",
+  "id": "5f3b4c78-b4f6-4ae1-8bca-d239085b1eea",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "admin": {
@@ -76,9 +76,16 @@
           "notNull": true,
           "autoincrement": true
         },
-        "user": {
-          "name": "user",
-          "type": "int",
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "role": {
+          "name": "role",
+          "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -92,21 +99,7 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {
-        "creds_user_admin_id_fk": {
-          "name": "creds_user_admin_id_fk",
-          "tableFrom": "creds",
-          "tableTo": "admin",
-          "columnsFrom": [
-            "user"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {
         "creds_id": {
           "name": "creds_id",
@@ -115,7 +108,14 @@
           ]
         }
       },
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "creds_email_unique": {
+          "name": "creds_email_unique",
+          "columns": [
+            "email"
+          ]
+        }
+      },
       "checkConstraint": {}
     },
     "jurry": {

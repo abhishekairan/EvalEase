@@ -80,17 +80,16 @@ export async function createJury({
       throw new Error("Failed to create jury member");
     }
     
-    const juryId = juryResponse[0].id;
-    
     // Hash password and create credentials
     const hashedPassword = await hashPassword(password);
     await db.insert(creds).values({
-      user: juryId,
-      password: hashedPassword
+      email: juryData.email,
+      password: hashedPassword,
+      role:'jury'
     });
     
     // Return the newly created jury member
-    return await getJury({ id: juryId });
+    return await getJury({ email:juryData.email });
   } catch (error) {
     console.error('Error creating jury:', error);
     // Clean up jury record if credentials creation failed
@@ -115,15 +114,15 @@ export async function createJury({
  * @param params.id - Required jury ID to delete
  * @returns Promise - Returns true if deletion was successful
  */
-export async function deleteJury({ id }: { id: number }) {
+export async function deleteJury({ email }: { email: string }) {
   try {
     // Delete credentials first (foreign key constraint)
-    await db.delete(creds).where(eq(creds.user, id));
+    await db.delete(creds).where(eq(creds.email, email));
     
     // Delete jury member
-    await db.delete(jury).where(eq(jury.id, id));
+    await db.delete(jury).where(eq(jury.email, email));
     
-    const data = await getJury({ id });
+    const data = await getJury({ email:email });
     return data.length === 0;
   } catch (error) {
     console.error('Error deleting jury:', error);
@@ -158,17 +157,17 @@ export async function updateJury({ jury: juryData }: { jury: juryDBType }) {
  * @returns Promise - Returns true if password was updated successfully
  */
 export async function updateJuryPassword({ 
-  id, 
+  email, 
   newPassword 
 }: { 
-  id: number; 
+  email: string; 
   newPassword: string 
 }) {
   try {
     const hashedPassword = await hashPassword(newPassword);
     await db.update(creds)
       .set({ password: hashedPassword })
-      .where(eq(creds.user, id));
+      .where(eq(creds.email, email));
     return true;
   } catch (error) {
     console.error('Error updating jury password:', error);
@@ -190,12 +189,12 @@ export async function juryExists({ email }: { email: string }) {
 /**
  * Gets jury credentials for authentication
  * @param params - Parameters object
- * @param params.userid - Jury user ID
+ * @param params.email - Jury user ID
  * @returns Promise - Jury credentials object or null
  */
-export async function getJuryPassword({ userid }: { userid: number }) {
+export async function getJuryPassword({ email }: { email: string }) {
   try {
-    const data = await db.select().from(creds).where(eq(creds.user, userid));
+    const data = await db.select().from(creds).where(eq(creds.email, email));
     return data[0] || null;
   } catch (error) {
     console.error('Error getting jury password:', error);
@@ -215,7 +214,7 @@ export async function getJuryForAuth({ email }: { email: string }) {
     if (juryData.length === 0) return null;
     
     const juryMember = juryData[0];
-    const credentials = await getJuryPassword({ userid: juryMember.id });
+    const credentials = await getJuryPassword({ email: juryMember.email });
     
     if (!credentials) return null;
     

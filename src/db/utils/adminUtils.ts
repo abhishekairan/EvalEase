@@ -2,7 +2,7 @@
 import { db } from "@/db";
 import { admin, creds } from "@/db/schema";
 import { adminDBType } from "@/zod/userSchema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { hashPassword } from "@/lib/password";
 
 /**
@@ -50,13 +50,15 @@ export async function createAdmin({
     
     if (adminResponse.length <= 0) return [];
     
-    const adminId = adminResponse[0].id;
+    const {email} = adminData;
+    const adminId = adminResponse[0].id
     
     // Hash password and create credentials
     const hashedPassword = await hashPassword(password);
     await db.insert(creds).values({
-      user: adminId,
-      password: hashedPassword
+      email: email,
+      password: hashedPassword,
+      role: 'admin'
     });
     
     return await getAdmins({ id: adminId });
@@ -72,15 +74,15 @@ export async function createAdmin({
  * @param params.id - Required admin ID to delete
  * @returns Promise - Returns true if deletion was successful
  */
-export async function deleteAdmin({ id }: { id: number }) {
+export async function deleteAdmin({ email }: { email: string }) {
   try {
     // Delete credentials first (foreign key constraint)
-    await db.delete(creds).where(eq(creds.user, id));
+    await db.delete(creds).where(and(eq(creds.email, email),eq(creds.role,'admin')));
     
     // Delete admin
-    await db.delete(admin).where(eq(admin.id, id));
+    await db.delete(admin).where(eq(admin.email, email));
     
-    const data = await getAdmins({ id });
+    const data = await getAdmins({email:email});
     return data.length === 0;
   } catch (error) {
     console.error('Error deleting admin:', error);
@@ -115,17 +117,17 @@ export async function updateAdmin({ admin: adminData }: { admin: adminDBType }) 
  * @returns Promise - Returns true if password was updated successfully
  */
 export async function updateAdminPassword({ 
-  id, 
+  email, 
   newPassword 
 }: { 
-  id: number; 
+  email: string; 
   newPassword: string 
 }) {
   try {
     const hashedPassword = await hashPassword(newPassword);
     await db.update(creds)
       .set({ password: hashedPassword })
-      .where(eq(creds.user, id));
+      .where(and(eq(creds.email, email),eq(creds.role,'admin')));
     return true;
   } catch (error) {
     console.error('Error updating admin password:', error);
@@ -147,12 +149,12 @@ export async function adminExists({ email }: { email: string }) {
 /**
  * Gets admin credentials for authentication
  * @param params - Parameters object
- * @param params.userid - Admin user ID
+ * @param params.email - Email of admin user 
  * @returns Promise - Admin credentials object or null
  */
-export async function getAdminPassword({ userid }: { userid: number }) {
+export async function getAdminPassword({ email }: { email: string }) {
   try {
-    const data = await db.select().from(creds).where(eq(creds.user, userid));
+    const data = await db.select().from(creds).where(and(eq(creds.email,email),eq(creds.role,'admin')));
     return data[0] || null;
   } catch (error) {
     console.error('Error getting admin password:', error);
@@ -168,18 +170,11 @@ export async function getAdminPassword({ userid }: { userid: number }) {
  */
 export async function getAdminForAuth({ email }: { email: string }) {
   try {
-    const adminData = await getAdmins({ email });
-    if (adminData.length === 0) return null;
-    
-    const admin = adminData[0];
-    const credentials = await getAdminPassword({ userid: admin.id });
-    
+    const credentials = await getAdminPassword({ email: email });
+    const user = await getAdmins({email:email})
     if (!credentials) return null;
     
-    return {
-      ...admin,
-      password: credentials.password
-    };
+    return {...user[0],...credentials}
   } catch (error) {
     console.error('Error getting admin for auth:', error);
     return null;

@@ -52,7 +52,8 @@ export const participants = mysqlTable('users', {
 // Credentials Table
 export const creds = mysqlTable('creds',{
   id: int().autoincrement().primaryKey(),
-  user: int('user').notNull().references(()=> admin.id),
+  email: varchar('email', { length: 255 }).notNull().unique(),
+  role: varchar('role', { length: 255 }).notNull().notNull(),
   password: varchar('password',{length:512}).notNull(),
 })
 

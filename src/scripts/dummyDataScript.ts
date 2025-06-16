@@ -110,7 +110,7 @@ async function createDummyAdmins(count: number) {
     };
 
     try {
-      const result = await createAdmin({ admin: adminData });
+      const result = await createAdmin({ admin: adminData, password: 'test@1234' });
       if (result.length > 0) {
         admins.push(result[0]);
         console.log(`  📝 Created admin: ${adminData.name} (${adminData.email})`);
@@ -214,7 +214,7 @@ async function createDummyJury(sessions: any[], juryPerSession: number) {
       };
 
       try {
-        const result = await createJury({ jury: juryData });
+        const result = await createJury({ jury: juryData, password: 'test@1234' });
         if (result.length > 0) {
           juryMembers.push(result[0]);
           console.log(`  ⚖️ Created jury member: ${juryData.name} for session ${session.name}`);
@@ -380,7 +380,8 @@ export async function generateTestScenarios() {
         email: 'test.judge@example.com',
         session: testSession[0].id,
         phoneNumber: '+1234567890'
-      }
+      },
+      password: 'test@1234'
     });
 
     // Create participants

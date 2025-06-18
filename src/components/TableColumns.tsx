@@ -139,6 +139,15 @@ export const jurryColumns: ColumnDef<juryDBType>[] = [
     accessorKey: "email",
     header: "Email",
   },
+  {
+    id:"jurryColumnsSession",
+    accessorKey: 'session',
+    header: "Session",
+    cell:(value) => {
+      const session = value.getValue() as number | null | undefined
+      return session? <Badge variant={'green'}>In Session</Badge> : <Badge variant={"destructive"}>No Session</Badge>
+    }
+  }
 ];
 
 
@@ -207,6 +216,11 @@ export const participantsColumns: ColumnDef<participantsWithTeamType>[] = [
     id:"participantsColumnsMemberName",
     accessorKey: "name",
     header: "Name",
+  },
+  {
+    id:"participantsColumnsInstitudeName",
+    accessorKey: "institude",
+    header: "Institude",
   },
   {
     id:"participantsColumnsTeamName",

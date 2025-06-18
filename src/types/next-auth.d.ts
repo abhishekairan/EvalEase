@@ -16,6 +16,7 @@ declare module "next-auth" {
       email: string
       name: string
       role: string
+      session?: string
     }
   }
 }
@@ -26,5 +27,6 @@ declare module "next-auth/jwt" {
     email: string
     name: string
     role: string
+    session?: string
   }
 }

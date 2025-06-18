@@ -42,14 +42,13 @@ const addJurySchema = juryDBSchema.omit({
 
 type AddJuryFormData = z.infer<typeof addJurySchema>;
 
-interface Session {
-  id: number;
-  name: string;
-}
 
 interface AddJuryDialogProps {
   children: React.ReactNode;
-  sessions: Session[];
+  sessions: {
+    id: number,
+    name: string
+  }[];
 }
 
 export const AddJuryDialog = memo<AddJuryDialogProps>(({ children, sessions }) => {

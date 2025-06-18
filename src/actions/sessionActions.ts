@@ -2,7 +2,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { createSession, updateJurySession, updateSession, deleteSession } from "@/db/utils"
+import { createSession, updateJurySession, updateSession, deleteSession, getJuryBySession, getJuryIdsBySession, deleteJurysSession } from "@/db/utils"
 import { shuffleTeamsInSession } from "@/db/utils"
 
 interface AddSessionData {
@@ -48,7 +48,6 @@ export async function startSessionAction(sessionId: number) {
         startedAt: new Date()
       }
     })
-    
     revalidatePath("/dashboard/sessions")
     revalidatePath("/home")
     return { success: true, session: result }
@@ -66,6 +65,9 @@ export async function endSessionAction(sessionId: number) {
         endedAt: new Date()
       }
     })
+    const juries = await getJuryIdsBySession({sessionId: sessionId})
+    const response = await deleteJurysSession({juries})
+    if(!response) throw new Error("Failed to stop session")
     
     revalidatePath("/dashboard/sessions")
     revalidatePath("/home")

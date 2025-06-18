@@ -239,6 +239,19 @@ export async function getJuryBySession({ sessionId }: { sessionId: number }) {
 }
 
 /**
+ * Gets all jury members IDs for a specific session
+ * @param params - Parameters object
+ * @param params.sessionId - Session ID to filter by
+ * @returns Promise - Array of jury members in the session
+ */
+export async function getJuryIdsBySession({ sessionId }: { sessionId: number }) {
+  const juryIds = await db.select({
+    id: jury.id
+  }).from(jury).where(eq(jury.session,sessionId));
+  return juryIds.map((j)=> j.id)
+}
+
+/**
  * Assigns jury member to a session
  * @param params - Parameters object
  * @param params.juryId - Jury member ID
@@ -250,7 +263,7 @@ export async function assignJuryToSession({
   sessionId 
 }: { 
   juryId: number; 
-  sessionId: number 
+  sessionId: number | null
 }) {
   try {
     await db.update(jury)

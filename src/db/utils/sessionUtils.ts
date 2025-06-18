@@ -1,7 +1,9 @@
 // db/sessionUtils.ts
 import { db } from "@/db"
 import { sessions, jury, teams, marks } from "@/db/schema"
-import { eq, count, avg, sql, and } from "drizzle-orm"
+import { eq, count, avg, sql, and, inArray } from "drizzle-orm"
+import { getJuryIdsBySession } from "./juryUtils"
+import { getTeamIds } from "./teamUtils"
 
 export async function getSessions() {
   try {
@@ -142,6 +144,17 @@ export async function deleteSession(sessionId: number) {
   }
 }
 
+
+// Delete jury session
+export async function deleteJurysSession({juries}:{juries: number[]}){
+  try{
+    const response = await db.update(jury).set({session: null}).where(inArray(jury.session,juries))
+    return true
+  }catch(err){
+    return false
+  }
+}
+
 export async function updateJurySession({ juryId, sessionId }: { juryId: number; sessionId: number }) {
   try {
     return await db
@@ -171,47 +184,31 @@ export async function getSessionsForDropdown() {
 export async function shuffleTeamsInSession(sessionId: number): Promise<boolean> {
   try {
     // Get all jury members in this session
-    const juryMembers = await db
-      .select({ id: jury.id })
-      .from(jury)
-      .where(eq(jury.session, sessionId))
+    const juryMembers = await getJuryIdsBySession({sessionId})
 
     if (juryMembers.length === 0) {
       throw new Error("No jury members found in this session")
     }
 
     // Get all teams (assuming all teams participate in all sessions)
-    const allTeams = await db
-      .select({ id: teams.id })
-      .from(teams)
+    const allTeams = await getTeamIds()
 
     if (allTeams.length === 0) {
       throw new Error("No teams found to shuffle")
     }
     // Create shuffled assignments
     const shuffledAssignments = createShuffledAssignments(
-      allTeams.map(t => t.id),
-      juryMembers.map(j => j.id)
+      allTeams,
+      juryMembers
     )
-
-    const newMarkEntries = []
-
-    for (const [teamId, juryId] of shuffledAssignments) {
-        newMarkEntries.push({
-          teamId,
-          juryId,
-          session: sessionId,
-          innovationScore: 0,
-          presentationScore: 0,
-          technicalScore: 0,
-          impactScore: 0,
-          submitted: false
-        })
+    // console.log(shuffledAssignments) // => { '1': [ 8, 5, 2, 4 ], '2': [ 1, 6, 10 ], '7': [ 3, 7, 9 ] }
+    const queries = []
+    for(const [value, ids] of Object.entries(shuffledAssignments)){
+      queries.push(db.update(teams)
+        .set({ juryId: Number(value) })
+        .where(inArray(teams.id, ids)))
     }
-
-    if (newMarkEntries.length > 0) {
-      await db.insert(marks).values(newMarkEntries)
-    }
+    await Promise.all(queries);
 
     return true
   } catch (error) {
@@ -224,10 +221,15 @@ export async function shuffleTeamsInSession(sessionId: number): Promise<boolean>
  * Creates shuffled team-jury assignments with balanced distribution
  * @param teamIds - Array of team IDs
  * @param juryIds - Array of jury IDs
- * @returns Map<teamId, juryId> - Mapping of teams to jury members
+ * @returns Record<number, number[]> - Key-value pairs mapping jury IDs to arrays of team IDs
  */
-function createShuffledAssignments(teamIds: number[], juryIds: number[]): Map<number, number> {
-  const assignments = new Map<number, number>()
+function createShuffledAssignments(teamIds: number[], juryIds: number[]): Record<number, number[]> {
+  const assignments: Record<number, number[]> = {}
+  
+  // Initialize empty arrays for each jury member
+  juryIds.forEach(juryId => {
+    assignments[juryId] = []
+  })
   
   // Shuffle teams randomly
   const shuffledTeams = [...teamIds].sort(() => Math.random() - 0.5)
@@ -247,13 +249,15 @@ function createShuffledAssignments(teamIds: number[], juryIds: number[]): Map<nu
     
     // Assign teams to this jury member
     for (let i = 0; i < teamsForThisJury && teamIndex < shuffledTeams.length; i++) {
-      assignments.set(shuffledTeams[teamIndex], juryId)
+      assignments[juryId].push(shuffledTeams[teamIndex])
       teamIndex++
     }
   }
   
   return assignments
 }
+
+
 
 /**
  * Gets current team distribution for a session

@@ -62,6 +62,7 @@ export const teams = mysqlTable('teams', {
   id: int('id').autoincrement().primaryKey(),
   teamName: varchar('team_name', { length: 255 }).notNull(),
   leaderId: int('leader_id').notNull().references(()=> participants.id),
+  juryId: int('juryid').references(()=>jury.id),
   ...timestamps,
 });
 

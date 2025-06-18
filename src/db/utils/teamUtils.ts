@@ -326,3 +326,8 @@ export async function getTeamsForDropdown() {
   
   return data;
 }
+
+export async function getTeamIds(){
+  const response =  await db.select({id: teams.id}).from(teams)
+  return response.map((t)=>t.id)
+}

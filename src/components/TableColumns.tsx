@@ -277,7 +277,7 @@ export const participantsColumns: ColumnDef<participantsWithTeamType>[] = [
     id:"participantsColumnsEmail",
     accessorKey: "email",
     header: "Email",
-  },,
+  },
   {
     id: "participantsColumnsActions",
     header: "Actions",

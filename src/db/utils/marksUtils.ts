@@ -232,7 +232,8 @@ export async function getMarksWithData({ id, teamId, juryId, session }: {
         teamName: teams.teamName,
         leaderId: teams.leaderId,
         createdAt: teams.createdAt,
-        updatedAt: teams.updatedAt
+        updatedAt: teams.updatedAt,
+        juryid: teams.juryId
       },
       // Jury data
       juryId: {

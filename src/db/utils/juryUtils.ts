@@ -2,7 +2,7 @@
 import { db } from "@/db";
 import { jury, creds } from "@/db/schema";
 import { juryDBType } from "@/zod/userSchema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { hashPassword } from "@/lib/password";
 
 /**
@@ -108,27 +108,59 @@ export async function createJury({
   }
 }
 
+
 /**
  * Deletes a jury member from the database along with credentials
  * @param params - Parameters object
- * @param params.id - Required jury ID to delete
+ * @param params.id - Optional jury ID to delete
+ * @param params.email - Optional jury email to delete
  * @returns Promise - Returns true if deletion was successful
  */
-export async function deleteJury({ email }: { email: string }) {
+export async function deleteJury({ id, email }: { id?: number; email?: string }) {
   try {
-    // Delete credentials first (foreign key constraint)
-    await db.delete(creds).where(eq(creds.email, email));
-    
-    // Delete jury member
-    await db.delete(jury).where(eq(jury.email, email));
-    
-    const data = await getJury({ email:email });
-    return data.length === 0;
+    // Validate that at least one parameter is provided
+    if (!id && !email) {
+      throw new Error('Either id or email must be provided');
+    }
+
+    if (id) {
+      // Delete by ID
+      // First get the jury member to find their email for credentials deletion
+      const juryMember = await db.select().from(jury).where(eq(jury.id, id)).limit(1);
+      
+      if (juryMember.length === 0) {
+        return false; // Jury member not found
+      }
+
+      const juryEmail = juryMember[0].email;
+
+      // Delete credentials first (foreign key constraint)
+      await db.delete(creds).where(eq(creds.email, juryEmail));
+      
+      // Delete jury member
+      await db.delete(jury).where(eq(jury.id, id));
+      
+      // Verify deletion
+      const data = await getJury({ id });
+      return data.length === 0;
+    } else {
+      // Delete by email (original logic)
+      // Delete credentials first (foreign key constraint)
+      await db.delete(creds).where(eq(creds.email, email!));
+      
+      // Delete jury member
+      await db.delete(jury).where(eq(jury.email, email!));
+      
+      // Verify deletion
+      const data = await getJury({ email });
+      return data.length === 0;
+    }
   } catch (error) {
     console.error('Error deleting jury:', error);
     return false;
   }
 }
+
 
 /**
  * Updates an existing jury member in the database

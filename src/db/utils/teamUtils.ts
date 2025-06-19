@@ -163,6 +163,7 @@ export async function getTeamsWithData({ id, leaderId }: { id?: number; leaderId
       teamName: teams.teamName,
       createdAt: teams.createdAt,
       updatedAt: teams.updatedAt,
+      juryid: teams.juryId,
       leaderId: {
         id: participants.id,
         name: participants.name,
@@ -330,4 +331,14 @@ export async function getTeamsForDropdown() {
 export async function getTeamIds(){
   const response =  await db.select({id: teams.id}).from(teams)
   return response.map((t)=>t.id)
+}
+
+export async function updateTeamjury({teamid,juryId}:{teamid: number, juryId: number|null}){
+  try{
+    const response = await db.update(teams).set({juryId: juryId}).where(eq(teams.id,teamid))
+    return true
+  }catch(err){
+    console.error(err)
+    return false
+  }
 }

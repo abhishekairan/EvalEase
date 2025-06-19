@@ -29,6 +29,7 @@ export async function addTeamAction(data: AddTeamFormData) {
     const teamData = {
       teamName: validatedData.teamName,
       leaderId: validatedData.leaderId,
+      juryid: null
     };
 
     // Insert the team into the database

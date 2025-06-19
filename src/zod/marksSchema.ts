@@ -26,3 +26,12 @@ export const marksDataSchema = marksDBSchema.extend({
 })
 
 export type MarksDataType = z.infer<typeof marksDataSchema>
+
+export const MarksFormSchema = z.object({
+  innovationScore: z.number().int().min(0).max(10),
+  presentationScore: z.number().int().min(0).max(10),
+  technicalScore: z.number().int().min(0).max(10),
+  impactScore: z.number().int().min(0).max(10),
+});
+
+export type MarksFormData = z.infer<typeof MarksFormSchema>;

@@ -288,7 +288,7 @@ export function SessionCard({
               variant="outline"
               size="sm"
               className="flex-1"
-              disabled={actionLoading === "shuffle" || isLoading || stats.totalJury === 0 || stats.totalTeams === 0}
+              disabled={actionLoading === "shuffle" || isLoading}
             >
               {actionLoading === "shuffle" ? (
                 <div className="flex items-center gap-2">

@@ -4,6 +4,9 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { MarksDataType, TeamDataType, juryDBType, participantsWithTeamType } from "@/zod";
+import { Trash2} from "lucide-react";
+import {ConfirmDeleteTeamAlert, ConfirmDeleteTJuryAlert, ConfirmDeleteTParticipantAlert} from "./alerts/ConfirmDeleteAlert";
+
 
 // Column definitions for Marks 
 export const marksColumns: ColumnDef<MarksDataType>[] = [
@@ -147,6 +150,22 @@ export const jurryColumns: ColumnDef<juryDBType>[] = [
       const session = value.getValue() as number | null | undefined
       return session? <Badge variant={'green'}>In Session</Badge> : <Badge variant={"destructive"}>No Session</Badge>
     }
+  },
+  {
+    id: "jurryColumnsActions",
+    header: "Actions",
+    cell: ({ row }) => {
+      return (
+        <span
+          // onClick={() => meta?.deleteTeam?.(team.id)}
+          className="text-red-600 focus:text-red-600 cursor-pointer hover:drop-shadow-2xl hover:drop-shadow-red-500"
+        >
+          <ConfirmDeleteTJuryAlert id={row.original.id? row.original.id : 0} description={`Are you sure you want to delete ${row.original.name}`}>
+            <Trash2 className="mr-2 h-5 w-5" />
+          </ConfirmDeleteTJuryAlert>
+        </span>
+      );
+    },
   }
 ];
 
@@ -172,7 +191,8 @@ export const teamColumns: ColumnDef<TeamDataType>[] = [
     id:"teamColumnsMember1",
     header: "Member 1",
     accessorFn: (row) =>{
-      return row.members[0].name
+      const member = row.members[0]
+      return member? member.name : '-'
     },
     cell: ({getValue}) => {
       return getValue()
@@ -201,6 +221,22 @@ export const teamColumns: ColumnDef<TeamDataType>[] = [
     cell: ({getValue}) => {
       return getValue()
     }
+  },
+  {
+    id: "teamColumnsActions",
+    header: "Actions",
+    cell: ({ row }) => {
+      return (
+        <span
+          // onClick={() => meta?.deleteTeam?.(team.id)}
+          className="text-red-600 focus:text-red-600 cursor-pointer hover:drop-shadow-2xl hover:drop-shadow-red-500"
+        >
+          <ConfirmDeleteTeamAlert id={row.original.id? row.original.id : 0} description={`Are you sure you want to delete ${row.original.teamName}`}>
+            <Trash2 className="mr-2 h-5 w-5" />
+          </ConfirmDeleteTeamAlert>
+        </span>
+      );
+    },
   }
 ];
 
@@ -241,5 +277,21 @@ export const participantsColumns: ColumnDef<participantsWithTeamType>[] = [
     id:"participantsColumnsEmail",
     accessorKey: "email",
     header: "Email",
-  },
+  },,
+  {
+    id: "participantsColumnsActions",
+    header: "Actions",
+    cell: ({ row }) => {
+      return (
+        <span
+          // onClick={() => meta?.deleteTeam?.(team.id)}
+          className="text-red-600 focus:text-red-600 cursor-pointer hover:drop-shadow-2xl hover:drop-shadow-red-500"
+        >
+          <ConfirmDeleteTParticipantAlert id={row.original.id? row.original.id : 0} description={`Are you sure you want to delete ${row.original.name}'s record?`}>
+            <Trash2 className="mr-2 h-5 w-5" />
+          </ConfirmDeleteTParticipantAlert>
+        </span>
+      );
+    },
+  }
 ];

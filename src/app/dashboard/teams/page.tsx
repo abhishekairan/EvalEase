@@ -40,7 +40,7 @@ async function TeamsContent() {
   try {
     const data = await getTeamsWithData();
     const teams = await getParticipantsForDropdown();
-    
+    // console.log(data)
     return (
       <>
         <div className="flex flex-wrap gap-4 mb-6">

@@ -69,29 +69,43 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
       }, // FIXED: Added missing closing brace
     }),
-  ],
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-        token.email = user.email;
-        token.name = user.name;
-        token.role = user.role;
-        if('session' in user) token.session = user.session;
+  ],// In your auth.ts file
+callbacks: {
+  async jwt({ token, user }) {
+    if (user) {
+      token.id = user.id;
+      token.email = user.email;
+      token.name = user.name;
+      token.role = user.role;
+      if('session' in user) token.session = user.session;
+    }
+    return token;
+  },
+  
+  async session({ session, token }) {
+    if (token) {
+      // Fetch fresh user data from database on every session access
+      let freshUserData = null;
+      
+      if (token.role === "admin") {
+        freshUserData = await getAdminForAuth({email: token.email as string});
+      } else if (token.role === "jury") {
+        freshUserData = await getJuryForAuth({ email: token.email as string});
       }
-      return token;
-    },
-    async session({ session, token }) {
-      if (token) {
-        session.user.id = token.id as string;
-        session.user.email = token.email as string;
-        session.user.name = token.name as string;
+      
+      if (freshUserData) {
+        session.user.id = String(freshUserData.id);
+        session.user.email = String(freshUserData.email);
+        session.user.name = String(freshUserData.name);
         session.user.role = token.role as string;
-        if (token.session) {
-          (session.user as any).session = token.session as string;
+        
+        if (token.role === "jury" && 'session' in freshUserData) {
+          (session.user as any).session = String(freshUserData.session);
         }
       }
-      return session;
-    },
+    }
+    return session;
   },
+}
+
 });

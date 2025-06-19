@@ -33,7 +33,7 @@ export const jury = mysqlTable('jurry',{
   id: int('id').autoincrement().primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
   email: varchar('email', { length: 255 }).notNull().unique(),
-  session: int('session').references(() => sessions.id),
+  session: int('session').references(() => sessions.id, {onDelete: 'set null'}),
   phoneNumber: varchar('phone_number', { length: 20 }).notNull(),
   ...timestamps,
 })
@@ -61,25 +61,25 @@ export const creds = mysqlTable('creds',{
 export const teams = mysqlTable('teams', {
   id: int('id').autoincrement().primaryKey(),
   teamName: varchar('team_name', { length: 255 }).notNull(),
-  leaderId: int('leader_id').notNull().references(()=> participants.id),
-  juryId: int('juryid').references(()=>jury.id),
+  leaderId: int('leader_id').notNull().references(()=> participants.id, {onDelete: 'cascade'}),
+  juryId: int('juryid').references(()=>jury.id, {onDelete: 'set null'}),
   ...timestamps,
 });
 
 // Team members table
 export const teamMembers = mysqlTable('team_members', {
   id: int('id').autoincrement().primaryKey(),
-  teamId: int('team_id').notNull().references(()=> teams.id),
-  memberId: int('member_id').notNull().references(()=> participants.id),
+  teamId: int('team_id').notNull().references(()=> teams.id, {onDelete: 'cascade'}),
+  memberId: int('member_id').notNull().references(()=> participants.id, {onDelete: 'cascade'}),
   ...timestamps,
 });
 
 // Marks table
 export const marks = mysqlTable('marks', {
   id: int('id').autoincrement().primaryKey(),
-  teamId: int('team_id').notNull().references(()=> teams.id),
-  juryId: int('jury_id').notNull().references(()=> participants.id),
-  session: int('session').references(() => sessions.id).notNull(),
+  teamId: int('team_id').notNull().references(()=> teams.id, {onDelete: 'cascade'}),
+  juryId: int('jury_id').notNull().references(()=> participants.id, {onDelete: 'cascade'}),
+  session: int('session').references(() => sessions.id, {onDelete: 'cascade'}).notNull(),
   innovationScore: int('innovation_score').notNull(),
   presentationScore: int('presentation_score').notNull(),
   technicalScore: int('technical_score').notNull(),

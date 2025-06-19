@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -14,30 +13,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Crown, Users, Mail, Phone, Newspaper } from "lucide-react";
+import { Crown, Users, Mail, Phone, Building } from "lucide-react";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { submitMarks } from "@/actions/marks";
 import { toast } from "sonner";
-
-interface TeamMember {
-  id: number;
-  name: string;
-  email: string;
-  institude: string;
-  phoneNumber: string;
-}
-
-interface TeamData {
-  id: number;
-  teamName: string;
-  leaderId: TeamMember;
-  members: TeamMember[];
-}
+import { MarksFormData, MarksFormSchema, TeamDataType } from "@/zod";
 
 interface MarksDialogProps {
   open: boolean;
   onClose: () => void;
-  team: TeamData;
+  team: TeamDataType;
   juryId?: number;
   sessionId?: number | null;
   onMarksSubmitted: (teamId: number) => void;
@@ -51,29 +38,27 @@ export default function MarksDialog({
   sessionId,
   onMarksSubmitted
 }: MarksDialogProps) {
-  const [marks, setMarks] = useState({
-    innovationScore: "",
-    presentationScore: "",
-    technicalScore: "",
-    impactScore: ""
-  });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleInputChange = (field: string, value: string) => {
-    const numValue = parseInt(value);
-    if (value === "" || (numValue >= 0 && numValue <= 10)) {
-      setMarks(prev => ({ ...prev, [field]: value }));
-    }
-  };
+  const form = useForm<MarksFormData>({
+    resolver: zodResolver(MarksFormSchema),
+    defaultValues: {
+      innovationScore: 0,
+      presentationScore: 0,
+      technicalScore: 0,
+      impactScore: 0,
+    },
+  });
 
-  const handleSubmit = async () => {
-    // Validate all fields are filled
-    const scores = Object.values(marks);
-    if (scores.some(score => score === "" || parseInt(score) < 0 || parseInt(score) > 10)) {
-      toast.error("Please enter valid scores (0-10) for all categories");
-      return;
-    }
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    watch
+  } = form;
 
+  const onSubmit = async (data: MarksFormData) => {
     if (!juryId || !sessionId) {
       toast.error("Missing jury or session information");
       return;
@@ -83,27 +68,23 @@ export default function MarksDialog({
 
     try {
       const markData = {
-        teamId: team.id,
+        teamId: team.id!,
         juryId: juryId,
         session: sessionId,
-        innovationScore: parseInt(marks.innovationScore),
-        presentationScore: parseInt(marks.presentationScore),
-        technicalScore: parseInt(marks.technicalScore),
-        impactScore: parseInt(marks.impactScore),
+        innovationScore: data.innovationScore,
+        presentationScore: data.presentationScore,
+        technicalScore: data.technicalScore,
+        impactScore: data.impactScore,
         submitted: true
       };
 
       await submitMarks(markData);
       toast.success("Marks submitted successfully!");
-      onMarksSubmitted(team.id);
+      onMarksSubmitted(team.id!);
       
       // Reset form
-      setMarks({
-        innovationScore: "",
-        presentationScore: "",
-        technicalScore: "",
-        impactScore: ""
-      });
+      reset();
+      onClose();
     } catch (error) {
       console.error("Error submitting marks:", error);
       toast.error("Failed to submit marks. Please try again.");
@@ -112,8 +93,13 @@ export default function MarksDialog({
     }
   };
 
+  const handleClose = () => {
+    reset();
+    onClose();
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">
@@ -164,7 +150,7 @@ export default function MarksDialog({
                     Team Members ({team.members.length})
                   </h4>
                   <div className="space-y-2">
-                    {team.members.map((member, index) => (
+                    {team.members.map((member) => (
                       <div key={member.id} className="p-3 bg-blue-50 rounded-lg border border-blue-200">
                         <div className="space-y-1">
                           <p className="font-medium text-gray-900">{member.name}</p>
@@ -190,84 +176,100 @@ export default function MarksDialog({
           {/* Marks Section */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Newspaper className="h-5 w-5" />
-                Evaluation Marks
-              </CardTitle>
-              <DialogDescription className="text-start">
+              <CardTitle className="text-lg">Evaluation Marks</CardTitle>
+              <DialogDescription>
                 Enter scores from 0 to 10 for each category
               </DialogDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="innovation">Innovation Score (0-10)</Label>
-                  <Input
-                    id="innovation"
-                    type="number"
-                    min="0"
-                    max="10"
-                    value={marks.innovationScore}
-                    onChange={(e) => handleInputChange("innovationScore", e.target.value)}
-                    placeholder="Enter score"
-                  />
+            <CardContent>
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="innovationScore">Innovation Score (0-10)</Label>
+                    <Input
+                      id="innovationScore"
+                      type="number"
+                      min="0"
+                      max="10"
+                      {...register("innovationScore", { valueAsNumber: true })}
+                      placeholder="Enter score"
+                      className={errors.innovationScore ? "border-red-500" : ""}
+                    />
+                    {errors.innovationScore && (
+                      <p className="text-red-500 text-sm">{errors.innovationScore.message}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="presentationScore">Presentation Score (0-10)</Label>
+                    <Input
+                      id="presentationScore"
+                      type="number"
+                      min="0"
+                      max="10"
+                      {...register("presentationScore", { valueAsNumber: true })}
+                      placeholder="Enter score"
+                      className={errors.presentationScore ? "border-red-500" : ""}
+                    />
+                    {errors.presentationScore && (
+                      <p className="text-red-500 text-sm">{errors.presentationScore.message}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="technicalScore">Technical Score (0-10)</Label>
+                    <Input
+                      id="technicalScore"
+                      type="number"
+                      min="0"
+                      max="10"
+                      {...register("technicalScore", { valueAsNumber: true })}
+                      placeholder="Enter score"
+                      className={errors.technicalScore ? "border-red-500" : ""}
+                    />
+                    {errors.technicalScore && (
+                      <p className="text-red-500 text-sm">{errors.technicalScore.message}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="impactScore">Impact Score (0-10)</Label>
+                    <Input
+                      id="impactScore"
+                      type="number"
+                      min="0"
+                      max="10"
+                      {...register("impactScore", { valueAsNumber: true })}
+                      placeholder="Enter score"
+                      className={errors.impactScore ? "border-red-500" : ""}
+                    />
+                    {errors.impactScore && (
+                      <p className="text-red-500 text-sm">{errors.impactScore.message}</p>
+                    )}
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="presentation">Presentation Score (0-10)</Label>
-                  <Input
-                    id="presentation"
-                    type="number"
-                    min="0"
-                    max="10"
-                    value={marks.presentationScore}
-                    onChange={(e) => handleInputChange("presentationScore", e.target.value)}
-                    placeholder="Enter score"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="technical">Technical Score (0-10)</Label>
-                  <Input
-                    id="technical"
-                    type="number"
-                    min="0"
-                    max="10"
-                    value={marks.technicalScore}
-                    onChange={(e) => handleInputChange("technicalScore", e.target.value)}
-                    placeholder="Enter score"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="impact">Impact Score (0-10)</Label>
-                  <Input
-                    id="impact"
-                    type="number"
-                    min="0"
-                    max="10"
-                    value={marks.impactScore}
-                    onChange={(e) => handleInputChange("impactScore", e.target.value)}
-                    placeholder="Enter score"
-                  />
-                </div>
-              </div>
+                <DialogFooter className="gap-2 mt-6">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={handleClose} 
+                    disabled={isSubmitting}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    disabled={isSubmitting}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    {isSubmitting ? "Submitting..." : "Submit Marks"}
+                  </Button>
+                </DialogFooter>
+              </form>
             </CardContent>
           </Card>
         </div>
-
-        <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleSubmit} 
-            disabled={isSubmitting}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            {isSubmitting ? "Submitting..." : "Submit Marks"}
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

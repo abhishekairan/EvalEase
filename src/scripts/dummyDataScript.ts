@@ -251,7 +251,8 @@ async function createDummyTeams(participants: any[], teamCount: number) {
   for (let i = 0; i < Math.min(teamCount, shuffledParticipants.length); i++) {
     const teamData = {
       teamName: `${faker.helpers.arrayElement(teamNamePrefixes)} ${faker.helpers.arrayElement(teamNameSuffixes)}`,
-      leaderId: shuffledParticipants[i].id
+      leaderId: shuffledParticipants[i].id,
+      juryid: null
     };
 
     try {
@@ -368,8 +369,6 @@ export async function generateTestScenarios() {
     const testSession = await createSession({
       session: {
         name: 'Test Scenario Session',
-        startedAt: new Date(),
-        endedAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
       }
     });
 
@@ -402,7 +401,8 @@ export async function generateTestScenarios() {
     const testTeam = await createTeam({
       team: {
         teamName: 'Test Team Alpha',
-        leaderId: testParticipants[0].id
+        leaderId: testParticipants[0].id,
+        juryid: null
       }
     });
 

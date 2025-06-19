@@ -1,6 +1,6 @@
 "use server";
 
-import { createMark } from "@/db/utils";
+import { createMark, updateTeamjury } from "@/db/utils";
 import { revalidatePath } from "next/cache";
 
 interface MarkData {
@@ -17,7 +17,10 @@ interface MarkData {
 export async function submitMarks(markData: MarkData) {
   try {
     await createMark({ mark: markData });
-    revalidatePath("/");
+    await updateTeamjury({teamid: markData.teamId, juryId: null})
+    revalidatePath("/home");
+    revalidatePath("/dashboard/marks");
+    revalidatePath("/dashboard/sessions");
     return { success: true };
   } catch (error) {
     console.error("Error submitting marks:", error);

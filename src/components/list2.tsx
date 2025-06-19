@@ -13,27 +13,12 @@ import { Separator } from "@/components/ui/separator";
 import MarksDialog from "./marks-dialog";
 import { logoutAction } from "@/actions/logout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { TeamDataType } from "@/zod";
 
-interface TeamMember {
-  id: number;
-  name: string;
-  email: string;
-  institude: string;
-  phoneNumber: string;
-}
-
-interface TeamData {
-  id: number;
-  teamName: string;
-  leaderId: TeamMember;
-  members: TeamMember[];
-  isMarked: boolean;
-}
 
 interface List2Props {
   heading?: string;
-  teams?: TeamData[];
+  teams?: TeamDataType[];
   juryId?: number;
   sessionId?: number | null;
 }
@@ -44,8 +29,8 @@ const List2 = ({
   juryId,
   sessionId
 }: List2Props) => {
-  const [teamList, setTeamList] = useState<TeamData[]>(teams);
-  const [selectedTeam, setSelectedTeam] = useState<TeamData | null>(null);
+  const [teamList, setTeamList] = useState<TeamDataType[]>(teams);
+  const [selectedTeam, setSelectedTeam] = useState<TeamDataType | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -64,7 +49,7 @@ const List2 = ({
     setSelectedTeam(null);
   };
 
-  const openMarksDialog = (team: TeamData) => {
+  const openMarksDialog = (team: TeamDataType) => {
     setSelectedTeam(team);
     setDialogOpen(true);
   };
@@ -130,22 +115,13 @@ const List2 = ({
           {teamList.map((team) => (
             <Card 
               key={team.id} 
-              className={`transition-all duration-200 hover:shadow-lg gap-4 ${
-                team.isMarked 
-                  ? 'bg-gray-100 border-gray-300 opacity-75' 
-                  : 'bg-white border-gray-200 hover:border-blue-300'
-              }`}
+              className={`transition-all duration-200 hover:shadow-lg gap-4 'bg-white border-gray-200 hover:border-blue-300'`}
             >
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-2xl font-bold text-gray-900 truncate">
                     {team.teamName}
                   </CardTitle>
-                  {team.isMarked && (
-                    <Badge variant="secondary" className="bg-green-100 text-green-800">
-                      Marked
-                    </Badge>
-                  )}
                 </div>
               </CardHeader>
               
@@ -174,15 +150,8 @@ const List2 = ({
 
                 <Button
                   onClick={() => openMarksDialog(team)}
-                  disabled={team.isMarked}
-                  className={`w-full ${
-                    team.isMarked 
-                      ? 'bg-gray-400 cursor-not-allowed' 
-                      : 'bg-blue-600 hover:bg-blue-700'
-                  }`}
-                >
-                  {team.isMarked ? 'Already Marked' : 'Enter Marks'}
-                  {!team.isMarked && <ArrowRight className="ml-2 h-4 w-4" />}
+                  className={`w-full bg-blue-600 hover:bg-blue-700`}>
+                  {'Enter Marks'}
                 </Button>
               </CardContent>
             </Card>

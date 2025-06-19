@@ -32,6 +32,7 @@ export async function addSessionAction(data: AddSessionData) {
 
     // Revalidate the sessions page
     revalidatePath("/dashboard/sessions")
+    revalidatePath("/home")
 
     return { success: true, session: newSession }
   } catch (error) {
@@ -81,7 +82,6 @@ export async function endSessionAction(sessionId: number) {
 export async function deleteSessionAction(sessionId: number) {
   try {
     const result = await deleteSession(sessionId)
-    
     if (!result) {
       throw new Error("Failed to delete session")
     }

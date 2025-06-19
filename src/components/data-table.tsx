@@ -7,6 +7,7 @@ import {
   useReactTable,
   getPaginationRowModel,
   getSortedRowModel,
+  getFilteredRowModel,
   SortingState,
 } from "@tanstack/react-table";
 
@@ -18,28 +19,33 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  ChevronsLeft, 
-  ChevronsRight 
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  Search,
+  X
 } from "lucide-react";
 import { memo, useMemo, useState } from "react";
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
+interface DataTableProps<TData> {
+  columns: ColumnDef<TData>[];
   data: TData[];
   isLoading?: boolean;
   pageSize?: number;
+  enableGlobalSearch?: boolean;
+  searchPlaceholder?: string;
 }
 
-
-
 const TableRowComponent = memo<{ row: any }>(({ row }) => (
-  <TableRow key={row.id}>
+  <TableRow data-state={row.getIsSelected() && "selected"}>
     {row.getVisibleCells().map((cell: any) => (
       <TableCell key={cell.id}>
         {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -48,18 +54,19 @@ const TableRowComponent = memo<{ row: any }>(({ row }) => (
   </TableRow>
 ));
 
-
-export function DataTable<TData, TValue>({
+export function DataTable<TData>({
   columns,
   data,
   isLoading = false,
   pageSize = 10,
-}: DataTableProps<TData, TValue>) {
+  enableGlobalSearch = true,
+  searchPlaceholder = "Search all columns...",
+}: DataTableProps<TData>) {
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [globalFilter, setGlobalFilter] = useState<string>("");
 
-  const memoizedColumns = useMemo(()=> columns,[columns])
-
-  const memoizedData = useMemo(()=> data, [data])
+  const memoizedColumns = useMemo(() => columns, [columns]);
+  const memoizedData = useMemo(() => data, [data]);
 
   const table = useReactTable({
     data: memoizedData,
@@ -67,9 +74,13 @@ export function DataTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     onSortingChange: setSorting,
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: "includesString", // Use case-insensitive search
     state: {
       sorting,
+      globalFilter,
     },
     initialState: {
       pagination: {
@@ -78,18 +89,9 @@ export function DataTable<TData, TValue>({
     },
   });
 
-  
-  // ADD THIS: Memoize pagination handlers
-  const paginationHandlers = useMemo(() => ({
-    goToFirstPage: () => table.setPageIndex(0),
-    goToPreviousPage: () => table.previousPage(),
-    goToNextPage: () => table.nextPage(),
-    goToLastPage: () => table.setPageIndex(table.getPageCount() - 1),
-  }), [table]);
-
-  if (isLoading) {
-    return <DataTableSkeleton columns={columns} pageSize={pageSize} />;
-  }
+  const handleClearSearch = () => {
+    setGlobalFilter("");
+  };
 
   if (isLoading) {
     return <DataTableSkeleton columns={columns} pageSize={pageSize} />;
@@ -97,65 +99,133 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="space-y-4">
+      {/* Global Search */}
+      {enableGlobalSearch && (
+        <div className="flex items-center space-x-2">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder={searchPlaceholder}
+              value={globalFilter ?? ""}
+              onChange={(event) => setGlobalFilter(event.target.value)}
+              className="pl-8 pr-8"
+            />
+            {globalFilter && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute right-0 top-0 h-full px-2 hover:bg-transparent"
+                onClick={handleClearSearch}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+          {globalFilter && (
+            <div className="text-sm text-muted-foreground">
+              {table.getFilteredRowModel().rows.length} of{" "}
+              {table.getCoreRowModel().rows.length} records found
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Table */}
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
+                  const canSort = header.column.getCanSort();
+                  const sortDirection = header.column.getIsSorted();
+
                   return (
                     <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
+                      {header.isPlaceholder ? null : (
+                        <div
+                          className={`flex items-center space-x-2 ${
+                            canSort
+                              ? "cursor-pointer select-none hover:bg-accent hover:text-accent-foreground rounded p-1 -m-1"
+                              : ""
+                          }`}
+                          onClick={
+                            canSort ? header.column.getToggleSortingHandler() : undefined
+                          }
+                        >
+                          <span>
+                            {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                          </span>
+                          {canSort && (
+                            <span className="ml-2">
+                              {sortDirection === "asc" ? (
+                                <ArrowUp className="h-4 w-4" />
+                              ) : sortDirection === "desc" ? (
+                                <ArrowDown className="h-4 w-4" />
+                              ) : (
+                                <ArrowUpDown className="h-4 w-4 opacity-50" />
+                              )}
+                            </span>
                           )}
+                        </div>
+                      )}
                     </TableHead>
                   );
                 })}
               </TableRow>
             ))}
           </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRowComponent key={row.id} row={row} />
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    No results found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRowComponent key={row.id} row={row} />
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  {globalFilter ? "No results found for your search." : "No results found."}
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
         </Table>
       </div>
 
-      {/* Pagination Controls */}
-      <DataTablePagination table={table} handlers={paginationHandlers}/>
+      {/* Pagination */}
+      <DataTablePagination table={table} />
     </div>
   );
 }
 
 // Skeleton Loading Component
-function DataTableSkeleton<TData, TValue>({ 
-  columns, 
-  pageSize = 10 
-}: { 
-  columns: ColumnDef<TData, TValue>[]; 
-  pageSize?: number; 
+function DataTableSkeleton<TData>({
+  columns,
+  pageSize = 10,
+}: {
+  columns: ColumnDef<TData>[];
+  pageSize?: number;
 }) {
   return (
     <div className="space-y-4">
+      {/* Search skeleton */}
+      <div className="flex items-center space-x-2">
+        <Skeleton className="h-10 w-[300px]" />
+      </div>
+
+      {/* Table skeleton */}
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
               {columns.map((_, index) => (
                 <TableHead key={index}>
-                  <Skeleton className="h-4 w-[120px]" />
+                  <Skeleton className="h-4 w-[100px]" />
                 </TableHead>
               ))}
             </TableRow>
@@ -165,7 +235,7 @@ function DataTableSkeleton<TData, TValue>({
               <TableRow key={rowIndex}>
                 {columns.map((_, colIndex) => (
                   <TableCell key={colIndex}>
-                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-[80px]" />
                   </TableCell>
                 ))}
               </TableRow>
@@ -173,16 +243,17 @@ function DataTableSkeleton<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      
-      {/* Skeleton Pagination */}
-      <div className="flex items-center justify-between px-2">
+
+      {/* Pagination skeleton */}
+      <div className="flex items-center justify-between">
         <Skeleton className="h-4 w-[100px]" />
         <div className="flex items-center space-x-2">
-          <Skeleton className="h-8 w-8" />
-          <Skeleton className="h-8 w-8" />
-          <Skeleton className="h-4 w-[100px]" />
-          <Skeleton className="h-8 w-8" />
-          <Skeleton className="h-8 w-8" />
+          <Skeleton className="h-8 w-[70px]" />
+          <div className="flex items-center space-x-1">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-8 w-8" />
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -190,18 +261,7 @@ function DataTableSkeleton<TData, TValue>({
 }
 
 // Pagination Component
-function DataTablePagination<TData>({ 
-  table,
-  handlers
-}: { 
-  table: any 
-  handlers?: {
-    goToFirstPage: () => void;
-    goToPreviousPage: () => void;
-    goToNextPage: () => void;
-    goToLastPage: () => void;
-  };
-}) {
+function DataTablePagination({ table }: { table: any }) {
   return (
     <div className="flex items-center justify-between px-2">
       <div className="flex-1 text-sm text-muted-foreground">
@@ -233,7 +293,7 @@ function DataTablePagination<TData>({
           <Button
             variant="outline"
             className="hidden h-8 w-8 p-0 lg:flex"
-            onClick={handlers?.goToFirstPage || (() => table.setPageIndex(0))}
+            onClick={() => table.setPageIndex(0)}
             disabled={!table.getCanPreviousPage()}
           >
             <span className="sr-only">Go to first page</span>
@@ -242,7 +302,7 @@ function DataTablePagination<TData>({
           <Button
             variant="outline"
             className="h-8 w-8 p-0"
-            onClick={handlers?.goToPreviousPage || (() => table.previousPage())}
+            onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
             <span className="sr-only">Go to previous page</span>
@@ -251,7 +311,7 @@ function DataTablePagination<TData>({
           <Button
             variant="outline"
             className="h-8 w-8 p-0"
-            onClick={handlers?.goToNextPage || (() => table.nextPage())}
+            onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
             <span className="sr-only">Go to next page</span>
@@ -260,7 +320,7 @@ function DataTablePagination<TData>({
           <Button
             variant="outline"
             className="hidden h-8 w-8 p-0 lg:flex"
-            onClick={handlers?.goToLastPage || (() => table.setPageIndex(table.getPageCount() - 1))}
+            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
             disabled={!table.getCanNextPage()}
           >
             <span className="sr-only">Go to last page</span>

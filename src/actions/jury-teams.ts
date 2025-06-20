@@ -10,7 +10,7 @@ export async function getTeamsForJury(juryId: number) {
 
     // Filter teams assigned to this jury and add marking status
     const assignedTeams = allTeams
-      .filter(team => team.juryid == juryId)
+      .filter(team => team.juryId == juryId)
     // console.log(assignedTeams)
     return assignedTeams;
   } catch (error) {

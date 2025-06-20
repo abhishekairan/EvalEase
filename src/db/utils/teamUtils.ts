@@ -163,7 +163,7 @@ export async function getTeamsWithData({ id, leaderId }: { id?: number; leaderId
       teamName: teams.teamName,
       createdAt: teams.createdAt,
       updatedAt: teams.updatedAt,
-      juryid: teams.juryId,
+      juryId: teams.juryId,
       room: teams.room,
       leaderId: {
         id: participants.id,

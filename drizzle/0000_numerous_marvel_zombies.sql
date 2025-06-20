@@ -80,6 +80,7 @@ CREATE TABLE `teams` (
 	`team_name` varchar(255) NOT NULL,
 	`leader_id` int NOT NULL,
 	`juryid` int,
+	`room` varchar(255),
 	`created_at` timestamp NOT NULL DEFAULT (now()),
 	`updated_at` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
 	CONSTRAINT `teams_id` PRIMARY KEY(`id`)

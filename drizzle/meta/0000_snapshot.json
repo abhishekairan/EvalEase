@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "01c3a7e0-9201-4370-bc25-72f38895e0ee",
+  "id": "8df1f1aa-d191-413b-93e2-61977b9c319f",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "admin": {
@@ -593,6 +593,13 @@
         "juryid": {
           "name": "juryid",
           "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "room": {
+          "name": "room",
+          "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false

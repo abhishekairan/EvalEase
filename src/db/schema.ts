@@ -63,6 +63,7 @@ export const teams = mysqlTable('teams', {
   teamName: varchar('team_name', { length: 255 }).notNull(),
   leaderId: int('leader_id').notNull().references(()=> participants.id, {onDelete: 'cascade'}),
   juryId: int('juryid').references(()=>jury.id, {onDelete: 'set null'}),
+  room: varchar('room', {length: 255}),
   ...timestamps,
 });
 

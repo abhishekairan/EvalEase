@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { participants, teams, teamMembers } from "@/db/schema";
-import { participantsDBType, participantsWithTeamType } from "@/zod/userSchema";
+import { participantsDBType } from "@/zod/userSchema";
 import { and, eq, sql } from "drizzle-orm";
 
 /**
@@ -153,7 +153,6 @@ export async function participantExists({ email }: { email: string }) {
 export async function getParticipantsWithTeam({ 
   id, 
   teamId, 
-  limit = 50, 
   offset = 0 
 }: { 
   id?: number; 
@@ -167,7 +166,7 @@ export async function getParticipantsWithTeam({
   if (teamId) conditions.push(eq(teams.id, teamId));
 
   // Use INNER JOINs for better performance when you need team data
-  let baseQuery = db
+  const baseQuery = db
     .select({
       id: participants.id,
       name: participants.name,
@@ -185,7 +184,6 @@ export async function getParticipantsWithTeam({
     .innerJoin(teamMembers, eq(participants.id, teamMembers.memberId)) // INNER JOIN - only participants with teams
     .innerJoin(teams, eq(teamMembers.teamId, teams.id)) // INNER JOIN - ensures team data exists
     .orderBy(participants.createdAt)
-    .limit(limit)
     .offset(offset);
 
   // Apply conditions properly

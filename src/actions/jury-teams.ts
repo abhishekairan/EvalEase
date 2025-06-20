@@ -1,7 +1,6 @@
 "use server";
 
 import { getTeamsWithData } from "@/db/utils";
-import { getMarks } from "@/db/utils";
 
 export async function getTeamsForJury(juryId: number) {
 

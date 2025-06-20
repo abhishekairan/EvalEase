@@ -14,7 +14,6 @@ import {
   IconSettings,
   IconHome2,
   IconNumber123,
-  IconNotebook,
   IconChecklist,
 } from "@tabler/icons-react"
 

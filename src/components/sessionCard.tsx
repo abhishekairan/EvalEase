@@ -130,14 +130,14 @@ export function SessionCard({
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Delete Session</AlertDialogTitle>
+                  <AlertDialogTitle>{"Delete Session"}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to delete "{session.name}"? This action cannot be undone.
-                    All marks and jury assignments for this session will be removed.
+                    {`Are you sure you want to delete ${session.name}? This action cannot be undone.
+                    All marks and jury assignments for this session will be removed.`}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel>{"Cancel"}</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() => handleAction("delete", onDeleteSession)}
                     className="bg-red-500 hover:bg-red-600"
@@ -218,7 +218,7 @@ export function SessionCard({
         {/* Progress Bar */}
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
-            <span>Completion Rate</span>
+            <span>{"Completion Rate"}</span>
             <span className="font-medium">{completionRate.toFixed(1)}%</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
@@ -246,12 +246,12 @@ export function SessionCard({
           {actionLoading === "start" ? (
             <div className="flex items-center gap-2">
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-              Starting...
+              {"Starting..."}
             </div>
           ) : (
             <div className="flex items-center gap-2">
               <Play className="h-4 w-4" />
-              Start
+              {"Start"}
             </div>
           )}
         </Button>
@@ -271,12 +271,12 @@ export function SessionCard({
           {actionLoading === "end" ? (
             <div className="flex items-center gap-2">
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-              Ending...
+              {"Ending..."}
             </div>
           ) : (
             <div className="flex items-center gap-2">
               <Square className="h-4 w-4" />
-              End
+              {"End"}
             </div>
           )}
         </Button>
@@ -293,42 +293,42 @@ export function SessionCard({
               {actionLoading === "shuffle" ? (
                 <div className="flex items-center gap-2">
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                  Shuffling...
+                  {"Shuffling..."}
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
                   <Shuffle className="h-4 w-4" />
-                  Shuffle
+                  {"Shuffle"}
                 </div>
               )}
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Shuffle Team Assignments</AlertDialogTitle>
+              <AlertDialogTitle>{"Shuffle Team Assignments"}</AlertDialogTitle>
               <AlertDialogDescription className="space-y-2">
                 <p>
-                  Are you sure you want to shuffle team assignments for "{session.name}"?
+                  {`Are you sure you want to shuffle team assignments for ${session.name}?`}
                 </p>
                 <div className="bg-blue-50 p-3 rounded-lg text-sm">
-                  <p><strong>Current Distribution:</strong></p>
-                  <p>• {stats.totalTeams} teams</p>
-                  <p>• {stats.totalJury} jury members</p>
-                  <p>• ~{Math.ceil(stats.totalTeams / Math.max(stats.totalJury, 1))} teams per jury member</p>
+                  <p><strong>{"Current Distribution:"}</strong></p>
+                  <p>• {stats.totalTeams} {"teams"}</p>
+                  <p>• {stats.totalJury} {"jury members"}</p>
+                  <p>• ~{Math.ceil(stats.totalTeams / Math.max(stats.totalJury, 1))} {"teams per jury member"}</p>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  This will randomly redistribute all teams among jury members in this session. 
-                  Existing marks and evaluations will remain unchanged.
+                  {`This will randomly redistribute all teams among jury members in this session. 
+                  Existing marks and evaluations will remain unchanged.`}
                 </p>
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel>{"Cancel"}</AlertDialogCancel>
               <AlertDialogAction
                 onClick={() => handleAction("shuffle", onShuffleStudents)}
                 className="bg-blue-500 hover:bg-blue-600"
               >
-                Shuffle Teams
+                {"Shuffle Teams"}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

@@ -2,7 +2,7 @@
 import { db } from "@/db";
 import { jury, creds } from "@/db/schema";
 import { juryDBType } from "@/zod/userSchema";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { hashPassword } from "@/lib/password";
 
 /**

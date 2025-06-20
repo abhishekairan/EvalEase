@@ -11,13 +11,15 @@ export default async function Homepage() {
     redirect("/login");
   }
   // Getting session 
-  const session =await getSessionById(Number(jury.user.session))
-
-  // Get teams assigned to this jury member
   let teamsData: any[] = []
-  // console.log(jury.user.session)
-  if(jury.user.session != 'null' && session?.startedAt && !(session?.endedAt)) {
-    teamsData = await getTeamsForJury(Number(jury.user.id));
+  if(jury.user.session != 'null'){
+
+    const session =await getSessionById(Number(jury.user.session))
+    // Get teams assigned to this jury member
+    // console.log(jury.user.session)
+    if(session?.startedAt && !(session?.endedAt)) {
+      teamsData = await getTeamsForJury(Number(jury.user.id));
+    }
   }
   
   // console.log("teamData:",teamsData)

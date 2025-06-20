@@ -1,7 +1,4 @@
 import { LoginForm } from "@/components/login-form"
-import { runDummyData } from "@/scripts/runDummyData"
-
-// runDummyData()
 
 export default function LoginPage() {
   return (

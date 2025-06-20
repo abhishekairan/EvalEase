@@ -44,16 +44,6 @@ const addSessionSchema = z.object({
 
 type AddSessionFormValues = z.infer<typeof addSessionSchema>
 
-interface JuryMember {
-  id: number
-  name: string
-  email: string
-  phoneNumber: string
-  session: number | null
-  createdAt: Date
-  updatedAt: Date
-}
-
 interface AddSessionFormProps {
   juryMembers: juryDBType[]
 }

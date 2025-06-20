@@ -1,7 +1,7 @@
 // db/sessionUtils.ts
 import { db } from "@/db"
 import { sessions, jury, teams, marks } from "@/db/schema"
-import { eq, count, avg, sql, and, inArray } from "drizzle-orm"
+import { eq, count, avg, sql, inArray } from "drizzle-orm"
 import { getJuryIdsBySession } from "./juryUtils"
 import { getTeamIds } from "./teamUtils"
 
@@ -148,9 +148,10 @@ export async function deleteSession(sessionId: number) {
 // Delete jury session
 export async function deleteJurysSession({juries}:{juries: number[]}){
   try{
-    const response = await db.update(jury).set({session: null}).where(inArray(jury.session,juries))
+    await db.update(jury).set({session: null}).where(inArray(jury.session,juries))
     return true
   }catch(err){
+    console.log(err)
     return false
   }
 }

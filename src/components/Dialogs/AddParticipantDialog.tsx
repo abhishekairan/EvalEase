@@ -54,8 +54,8 @@ interface AddParticipantDialogProps {
 }
 
 export const AddParticipantDialog = memo<AddParticipantDialogProps>(({ children, teams }: AddParticipantDialogProps) => {
+  
   const [open, setOpen] = useState(false);
-
   const memorizedTeams = useMemo(()=> teams, [teams])
 
   const form = useForm<AddParticipantFormData>({

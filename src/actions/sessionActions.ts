@@ -2,7 +2,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { createSession, updateJurySession, updateSession, deleteSession, getJuryBySession, getJuryIdsBySession, deleteJurysSession } from "@/db/utils"
+import { createSession, updateJurySession, updateSession, deleteSession, getJuryIdsBySession, deleteJurysSession } from "@/db/utils"
 import { shuffleTeamsInSession } from "@/db/utils"
 
 interface AddSessionData {

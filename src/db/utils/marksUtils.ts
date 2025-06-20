@@ -1,8 +1,7 @@
 import { db } from "@/db";
 import { marks, teams, participants, sessions } from "@/db/schema";
-import { MarksDBType, MarksDataType } from "@/zod/marksSchema";
+import { MarksDBType } from "@/zod/marksSchema";
 import { eq, and } from "drizzle-orm";
-import { getSessions } from "./sessionUtils";
 
 /**
  * Marks utility functions for database operations
@@ -43,13 +42,13 @@ export async function getMarks({ id, teamId, juryId, session, submitted }: {
   session?: number; 
   submitted?: boolean 
 } = {}) {
-  let query = db.select().from(marks);
+  const query = db.select().from(marks);
 
   if (id) {
     const data = await query.where(eq(marks.id, id));
     return data;
   } else {
-    let conditions = [];
+    const conditions = [];
 
     if (teamId) conditions.push(eq(marks.teamId, teamId));
     if (juryId) conditions.push(eq(marks.juryId, juryId));
@@ -177,7 +176,7 @@ export async function updateMark({ mark }: { mark: MarksDBType }) {
     throw new Error("Invalid mark relations: team, jury participant, or session does not exist");
   }
   
-  const { id, createdAt, updatedAt, ...updateData } = mark;
+  const { id, ...updateData } = mark;
   await db.update(marks).set(updateData).where(eq(marks.id, id));
   
   return await getMarks({ id: mark.id });
@@ -215,7 +214,7 @@ export async function getMarksWithData({ id, teamId, juryId, session }: {
   if (session) conditions.push(eq(marks.session, session));
 
   // Build the complete query with joins
-  let baseQuery = db
+  const baseQuery = db
     .select({
       // Mark fields
       id: marks.id,
@@ -233,7 +232,8 @@ export async function getMarksWithData({ id, teamId, juryId, session }: {
         leaderId: teams.leaderId,
         createdAt: teams.createdAt,
         updatedAt: teams.updatedAt,
-        juryid: teams.juryId
+        juryId: teams.juryId,
+        room: teams.room
       },
       // Jury data
       juryId: {

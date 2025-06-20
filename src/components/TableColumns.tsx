@@ -137,9 +137,7 @@ export const jurryColumns: ColumnDef<juryDBType>[] = [
     id: "jurryColumnsActions",
     header: "Actions",
     enableSorting: false, // Disable sorting for actions
-    cell: ({ row, table }) => {
-      const jury = row.original;
-      const meta = table.options.meta;
+    cell: ({ row }) => {
       return (
         <span
           // onClick={() => meta?.deleteTeam?.(team.id)}
@@ -161,6 +159,9 @@ export const teamColumns: ColumnDef<TeamDataType>[] = [
     accessorKey: "id",
     header: "ID",
     enableSorting: false,
+    cell: ({row})=>{
+      return <>HC_{row.original.id}</>
+    }
   },
   {
     id: "teamColumnsTeamName",
@@ -179,7 +180,7 @@ export const teamColumns: ColumnDef<TeamDataType>[] = [
     header: "Member 1",
     enableSorting: false,
     accessorFn: (row) => {
-      const member = row.members[0];
+      const member = row.members[1];
       return member ? member.name : "-";
     },
     cell: ({ getValue }) => {
@@ -191,7 +192,7 @@ export const teamColumns: ColumnDef<TeamDataType>[] = [
     header: "Member 2",
     enableSorting: false,
     accessorFn: (row) => {
-      const member = row.members[1];
+      const member = row.members[2];
       return member ? member.name : "-";
     },
     cell: ({ getValue }) => {
@@ -203,7 +204,7 @@ export const teamColumns: ColumnDef<TeamDataType>[] = [
     header: "Member 3",
     enableSorting: false,
     accessorFn: (row) => {
-      const member = row.members[2];
+      const member = row.members[3];
       return member ? member.name : "-";
     },
     cell: ({ getValue }) => {
@@ -214,9 +215,7 @@ export const teamColumns: ColumnDef<TeamDataType>[] = [
     id: "teamColumnsActions",
     header: "Actions",
     enableSorting: false,
-    cell: ({ row, table }) => {
-      const team = row.original;
-      const meta = table.options.meta;
+    cell: ({ row }) => {
       return (
         <span
           // onClick={() => meta?.deleteTeam?.(team.id)}
@@ -249,12 +248,12 @@ export const participantsColumns: ColumnDef<participantsWithTeamType>[] = [
     id: "participantsColumnsInstitudeName",
     accessorKey: "institude",
     header: "Institute",
-    enableSorting: false,
+    enableSorting: true,
   },
   {
     id: "participantsColumnsTeamName",
     header: "Team",
-    enableSorting: false,
+    enableSorting: true,
     accessorFn: (key) => {
       return key.teamName ? key.teamName : "-";
     },

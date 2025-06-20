@@ -34,7 +34,7 @@ async function ParticipantsContent() {
   try {
     const data = await getParticipantsWithTeam();
     const teams = await getTeamsForDropdown();
-    
+    console.log("Total participants: ",data.length)
     return (
       <>
         <div className="flex flex-wrap gap-4 mb-6">

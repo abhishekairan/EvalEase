@@ -1,11 +1,11 @@
 "use client";
 
 import {
-  ArrowRight,
   UsersRound,
   LogOutIcon,
   Users,
-  Crown
+  Crown,
+  House
 } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -141,6 +141,16 @@ const List2 = ({
                       <p className="text-sm font-medium text-gray-700">Members</p>
                       <p className="text-sm text-gray-600">
                         {team.members.length} member{team.members.length !== 1 ? 's' : ''}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <House className="h-4 w-4 text-red-500" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-700">Room</p>
+                      <p className="text-sm text-gray-600">
+                        {team.room}
                       </p>
                     </div>
                   </div>

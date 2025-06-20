@@ -7,9 +7,6 @@ export default auth((req) => {
   const isLoggedIn = !!req.auth
   const userRole = req.auth?.user?.role
 
-  // Public routes
-  const isPublicRoute = ["/login", "/register", "/"].includes(nextUrl.pathname)
-
   // Role-specific protected routes
   const isAdminRoute = nextUrl.pathname.startsWith("/dashboard")
   const isJuryRoute = nextUrl.pathname.startsWith("/home")

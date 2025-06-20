@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { teams, participants, teamMembers } from "@/db/schema";
-import { TeamDBType, TeamDataType } from "@/zod/teamSchema";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { TeamDBType } from "@/zod/teamSchema";
+import { and, eq, inArray } from "drizzle-orm";
 
 /**
  * Teams utility functions for database operations
@@ -157,13 +157,14 @@ export async function getTeamsWithData({ id, leaderId }: { id?: number; leaderId
   if (leaderId) teamConditions.push(eq(teams.leaderId, leaderId));
 
   // Query 1: Get teams with leaders using INNER JOIN
-  let teamsQuery = db
+  const teamsQuery = db
     .select({
       id: teams.id,
       teamName: teams.teamName,
       createdAt: teams.createdAt,
       updatedAt: teams.updatedAt,
       juryid: teams.juryId,
+      room: teams.room,
       leaderId: {
         id: participants.id,
         name: participants.name,
@@ -335,7 +336,7 @@ export async function getTeamIds(){
 
 export async function updateTeamjury({teamid,juryId}:{teamid: number, juryId: number|null}){
   try{
-    const response = await db.update(teams).set({juryId: juryId}).where(eq(teams.id,teamid))
+    await db.update(teams).set({juryId: juryId}).where(eq(teams.id,teamid))
     return true
   }catch(err){
     console.error(err)

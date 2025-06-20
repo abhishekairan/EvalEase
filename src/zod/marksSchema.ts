@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { teamDBSchema } from './teamSchema';
-import { juryDBSchema, participantsDBSchema } from './userSchema';
+import { juryDBSchema } from './userSchema';
 import { sessionDBSchema } from './sessionSchema';
 
 export const marksDBSchema = z.object({

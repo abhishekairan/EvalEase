@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Crown, Users, Mail, Phone, Building } from "lucide-react";
+import { Crown, Users, Mail, Phone } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -54,8 +54,7 @@ export default function MarksDialog({
     register,
     handleSubmit,
     formState: { errors },
-    reset,
-    watch
+    reset
   } = form;
 
   const onSubmit = async (data: MarksFormData) => {
@@ -78,8 +77,12 @@ export default function MarksDialog({
         submitted: true
       };
 
-      await submitMarks(markData);
-      toast.success("Marks submitted successfully!");
+      const {success} = await submitMarks(markData);
+      if(success){
+        toast.success("Marks submitted successfully!");
+      }else{
+        toast.error("Marks cannot be submitted!");
+      }
       onMarksSubmitted(team.id!);
       
       // Reset form

@@ -41,7 +41,6 @@ async function JuryContent(){
 const page = async () => {
   try{
 
-    const data = await getJury()
     return (
       <>
       <SiteHeader title="Jury" />
@@ -57,7 +56,7 @@ const page = async () => {
       </>
     );
   }catch(error){
-
+    console.log(error)
   }
 };
 

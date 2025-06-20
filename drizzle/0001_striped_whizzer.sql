@@ -1,0 +1,1 @@
+ALTER TABLE `teams` ADD `room` varchar(255);

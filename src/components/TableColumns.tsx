@@ -212,6 +212,14 @@ export const teamColumns: ColumnDef<TeamDataType>[] = [
     },
   },
   {
+    id: "teamColumnsRoom",
+    header: "Room",
+    enableSorting: true,
+    cell: ({ row }) => {
+      return <Badge variant={"outline"}>{row.original.room}</Badge>;
+    },
+  },
+  {
     id: "teamColumnsActions",
     header: "Actions",
     enableSorting: false,

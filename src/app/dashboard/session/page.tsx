@@ -22,7 +22,7 @@ function SessionsPageSkeleton() {
 async function SessionsContent() {
   try {
     const sessions = await getSessions()
-    
+    console.log("Session Recived for session page:", sessions)
     // Get stats for each session
     const sessionsWithStats = await Promise.all(
       sessions.map(async (session) => {

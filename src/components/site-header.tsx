@@ -19,9 +19,11 @@ export function SiteHeader({title}:SiteHeaderProp) {
         />
         <h1 className="text-base font-medium">{title || "Documents"}</h1>
         <div className="ml-auto flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={logoutAction}>
-              logout
-          </Button>
+          <form action={logoutAction}>
+            <Button variant="outline" size="sm">
+                logout
+            </Button>
+          </form>
         </div>
       </div>
     </header>

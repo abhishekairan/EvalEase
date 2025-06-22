@@ -49,6 +49,20 @@ export function SectionCards() {
           </CardTitle>
         </CardHeader>
       </Card>
+
+      <Card 
+        className="@container/card hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-primary/5 via-background to-card border border-border/50 backdrop-blur-sm flex-1"
+        data-slot="card"
+      >
+        <CardHeader className="space-y-3">
+          <CardDescription className="text-sm font-medium text-muted-foreground">
+            Total Sessions
+          </CardDescription>
+          <CardTitle className="text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
+            600
+          </CardTitle>
+        </CardHeader>
+      </Card>
     </div>
   )
 }

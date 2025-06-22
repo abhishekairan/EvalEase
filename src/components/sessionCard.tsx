@@ -288,7 +288,12 @@ export function SessionCard({
               variant="outline"
               size="sm"
               className="flex-1"
-              disabled={actionLoading === "shuffle" || isLoading}
+              disabled={
+                sessionStatus.status === "active" || 
+                sessionStatus.status === "ended" || 
+                actionLoading === "start" ||
+                isLoading
+              }
             >
               {actionLoading === "shuffle" ? (
                 <div className="flex items-center gap-2">

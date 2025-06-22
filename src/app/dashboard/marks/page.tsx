@@ -20,6 +20,7 @@ function MarksTableSkeleton() {
 async function MarksContent() {
   try {
     const data = await getMarksWithData();
+    console.log(data)
     
     return (
       <>
@@ -27,6 +28,8 @@ async function MarksContent() {
           columns={marksColumns} 
           data={data} 
           pageSize={15}
+          enableExport={true}
+          exportFilename={"Data"}
         />
       </>
     );

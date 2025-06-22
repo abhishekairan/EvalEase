@@ -1,4 +1,6 @@
 "use client";
+import { ExportButton } from "@/components/ExportButton";
+import { exportTableToExcel } from "@/lib/exportUtils";
 
 import {
   ColumnDef,
@@ -42,6 +44,8 @@ interface DataTableProps<TData> {
   pageSize?: number;
   enableGlobalSearch?: boolean;
   searchPlaceholder?: string;
+  enableExport?: boolean,
+  exportFilename?: string;
 }
 
 const TableRowComponent = memo<{ row: any }>(({ row }) => (
@@ -61,6 +65,8 @@ export function DataTable<TData>({
   pageSize = 10,
   enableGlobalSearch = true,
   searchPlaceholder = "Search all columns...",
+  exportFilename,
+  enableExport
 }: DataTableProps<TData>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState<string>("");
@@ -97,38 +103,61 @@ export function DataTable<TData>({
     return <DataTableSkeleton columns={columns} pageSize={pageSize} />;
   }
 
+  const handleExport = async (): Promise<boolean> => {
+    try {
+      // Get the currently filtered data (this respects search filters)
+      const filteredRows = table.getFilteredRowModel().rows;
+      const exportData = filteredRows.map(row => row.original);
+      
+      // Export the filtered data
+      return exportTableToExcel(exportData, columns, {
+        filename: exportFilename,
+        sheetName: 'Marks Data'
+      });
+    } catch (error) {
+      console.error('Export failed:', error);
+      return false;
+    }
+  };
+
+
   return (
     <div className="space-y-4">
-      {/* Global Search */}
-      {enableGlobalSearch && (
+      {/* Global Search and Export Controls */}
+      <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder={searchPlaceholder}
-              value={globalFilter ?? ""}
-              onChange={(event) => setGlobalFilter(event.target.value)}
-              className="pl-8 pr-8"
-            />
-            {globalFilter && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="absolute right-0 top-0 h-full px-2 hover:bg-transparent"
-                onClick={handleClearSearch}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-          {globalFilter && (
-            <div className="text-sm text-muted-foreground">
-              {table.getFilteredRowModel().rows.length} of{" "}
-              {table.getCoreRowModel().rows.length} records found
+          {enableGlobalSearch && (
+            <div className="relative">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder={searchPlaceholder}
+                value={globalFilter ?? ""}
+                onChange={(event) => setGlobalFilter(event.target.value)}
+                className="pl-8 pr-8"
+              />
+              {globalFilter && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-1 top-1 h-6 w-6 p-0"
+                  onClick={handleClearSearch}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              )}
             </div>
           )}
         </div>
-      )}
+        
+        {/* Export Button */}
+        {enableExport && (
+          <ExportButton
+            onExport={handleExport}
+            disabled={data.length === 0}
+          />
+        )}
+      </div>
+
 
       {/* Table */}
       <div className="rounded-md border">

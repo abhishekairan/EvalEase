@@ -26,6 +26,7 @@ export default async function Homepage() {
   return (
     <List2 
       teams={teamsData} 
+      heading = {`Welcome, ${jury.user.name}`}
       juryId={Number(jury.user.id)}
       sessionId={Number(jury.user.session)}
     />

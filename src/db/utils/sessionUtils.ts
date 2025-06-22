@@ -176,7 +176,6 @@ export async function getSessionsForDropdown() {
   
   return data;
 }
-
 /**
  * Shuffles team assignments among jury members in a session
  * @param sessionId - The session ID to shuffle teams for
@@ -197,20 +196,44 @@ export async function shuffleTeamsInSession(sessionId: number): Promise<boolean>
     if (allTeams.length === 0) {
       throw new Error("No teams found to shuffle")
     }
-    // Create shuffled assignments
-    const shuffledAssignments = createShuffledAssignments(
+
+    // Create shuffled assignments ensuring no team is assigned to multiple jury members
+    const shuffledAssignments = createUniqueShuffledAssignments(
       allTeams,
       juryMembers
     )
-    // console.log(shuffledAssignments) // => { '1': [ 8, 5, 2, 4 ], '2': [ 1, 6, 10 ], '7': [ 3, 7, 9 ] }
-    const queries = []
-    for(const [value, ids] of Object.entries(shuffledAssignments)){
-      queries.push(db.update(teams)
-        .set({ juryId: Number(value) })
-        .where(inArray(teams.id, ids)))
-    }
-    await Promise.all(queries);
 
+    // Validate that all teams are assigned exactly once
+    const assignedTeams = new Set<number>()
+    for (const teamIds of Object.values(shuffledAssignments)) {
+      for (const teamId of teamIds) {
+        if (assignedTeams.has(teamId)) {
+          throw new Error(`Team ${teamId} is assigned to multiple jury members`)
+        }
+        assignedTeams.add(teamId)
+      }
+    }
+
+    // Ensure all teams are assigned
+    if (assignedTeams.size !== allTeams.length) {
+      throw new Error("Not all teams were assigned to jury members")
+    }
+
+    // Execute database updates
+    const queries = []
+    for (const [juryId, teamIds] of Object.entries(shuffledAssignments)) {
+      if (teamIds.length > 0) {
+        queries.push(
+          db.update(teams)
+            .set({ juryId: Number(juryId) })
+            .where(inArray(teams.id, teamIds))
+        )
+      }
+    }
+
+    await Promise.all(queries)
+
+    console.log(`Successfully shuffled ${allTeams.length} teams among ${juryMembers.length} jury members`)
     return true
   } catch (error) {
     console.error("Error shuffling teams:", error)
@@ -219,42 +242,31 @@ export async function shuffleTeamsInSession(sessionId: number): Promise<boolean>
 }
 
 /**
- * Creates shuffled team-jury assignments with balanced distribution
- * @param teamIds - Array of team IDs
- * @param juryIds - Array of jury IDs
- * @returns Record<number, number[]> - Key-value pairs mapping jury IDs to arrays of team IDs
+ * Creates shuffled team assignments ensuring each team is assigned to exactly one jury member
+ * @param teams - Array of team IDs
+ * @param juryMembers - Array of jury member IDs
+ * @returns Object mapping jury IDs to arrays of team IDs
  */
-function createShuffledAssignments(teamIds: number[], juryIds: number[]): Record<number, number[]> {
-  const assignments: Record<number, number[]> = {}
+function createUniqueShuffledAssignments(
+  teams: number[],
+  juryMembers: number[]
+): Record<string, number[]> {
+  // Shuffle the teams array to randomize assignments
+  const shuffledTeams = [...teams].sort(() => Math.random() - 0.5)
   
-  // Initialize empty arrays for each jury member
-  juryIds.forEach(juryId => {
-    assignments[juryId] = []
+  // Initialize assignments object
+  const assignments: Record<string, number[]> = {}
+  juryMembers.forEach(juryId => {
+    assignments[juryId.toString()] = []
   })
-  
-  // Shuffle teams randomly
-  const shuffledTeams = [...teamIds].sort(() => Math.random() - 0.5)
-  
-  // Calculate base teams per jury and remainder
-  const teamsPerJury = Math.floor(shuffledTeams.length / juryIds.length)
-  const remainder = shuffledTeams.length % juryIds.length
-  
-  let teamIndex = 0
-  
-  // Distribute teams among jury members
-  for (let juryIndex = 0; juryIndex < juryIds.length; juryIndex++) {
-    const juryId = juryIds[juryIndex]
-    
-    // Calculate how many teams this jury member should get
-    const teamsForThisJury = teamsPerJury + (juryIndex < remainder ? 1 : 0)
-    
-    // Assign teams to this jury member
-    for (let i = 0; i < teamsForThisJury && teamIndex < shuffledTeams.length; i++) {
-      assignments[juryId].push(shuffledTeams[teamIndex])
-      teamIndex++
-    }
-  }
-  
+
+  // Distribute teams evenly among jury members
+  shuffledTeams.forEach((teamId, index) => {
+    const juryIndex = index % juryMembers.length
+    const juryId = juryMembers[juryIndex].toString()
+    assignments[juryId].push(teamId)
+  })
+
   return assignments
 }
 

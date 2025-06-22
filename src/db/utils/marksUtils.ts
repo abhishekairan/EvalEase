@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { marks, teams, participants, sessions } from "@/db/schema";
+import { marks, teams, participants, sessions, jury } from "@/db/schema";
 import { MarksDBType } from "@/zod/marksSchema";
 import { eq, and } from "drizzle-orm";
 
@@ -237,13 +237,12 @@ export async function getMarksWithData({ id, teamId, juryId, session }: {
       },
       // Jury data
       juryId: {
-        id: participants.id,
-        name: participants.name,
-        email: participants.email,
-        institude: participants.institude,
-        phoneNumber: participants.phoneNumber,
-        createdAt: participants.createdAt,
-        updatedAt: participants.updatedAt
+        id: jury.id,
+        name: jury.name,
+        email: jury.email,
+        phoneNumber: jury.phoneNumber,
+        createdAt: jury.createdAt,
+        updatedAt: jury.updatedAt
       },
       // Session data
       session: {
@@ -256,6 +255,7 @@ export async function getMarksWithData({ id, teamId, juryId, session }: {
     .from(marks)
     .innerJoin(teams, eq(marks.teamId, teams.id))
     .innerJoin(participants, eq(marks.juryId, participants.id))
+    .innerJoin(jury,eq(marks.juryId,jury.id))
     .innerJoin(sessions, eq(marks.session, sessions.id));
 
   // Apply conditions after all joins are complete

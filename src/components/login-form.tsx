@@ -188,13 +188,6 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
               {isSubmitting ? "Signing in..." : "Login"}
             </Button>
           </div>
-
-          <div className="mt-4 text-center text-sm">
-            {"Don't have an account?"}
-            <a href="/register" className="underline">
-              Sign up
-            </a>
-          </div>
         </form>
       </Form>
     </div>

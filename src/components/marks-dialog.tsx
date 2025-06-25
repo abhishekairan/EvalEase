@@ -225,7 +225,7 @@ export default function MarksDialog({
                   {/* Technical Score */}
                   <div className="space-y-2">
                     <Label htmlFor="technicalScore" className="text-sm font-medium">
-                      Technical Score (0-10)
+                      Code Quality (0-10)
                     </Label>
                     <Input
                       id="technicalScore"
@@ -246,7 +246,7 @@ export default function MarksDialog({
                   {/* Impact Score */}
                   <div className="space-y-2">
                     <Label htmlFor="impactScore" className="text-sm font-medium">
-                      Impact Score (0-10)
+                      Feasibility (0-10)
                     </Label>
                     <Input
                       id="impactScore"

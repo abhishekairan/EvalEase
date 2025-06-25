@@ -60,7 +60,7 @@ export const marksColumns: ColumnDef<MarksDataType>[] = [
   },
   {
     accessorKey: "technicalScore",
-    header: "Technical Score",
+    header: "Code Quality",
     enableSorting: false,
     cell: (value) => {
       const score = value.getValue() as number;
@@ -73,7 +73,7 @@ export const marksColumns: ColumnDef<MarksDataType>[] = [
   },
   {
     accessorKey: "impactScore",
-    header: "Impact Score",
+    header: "Feasibility Score",
     enableSorting: false,
     cell: (value) => {
       const score = value.getValue() as number;

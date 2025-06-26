@@ -12,7 +12,7 @@ export default auth((req) => {
 
   if (!isLoggedIn) {
     return NextResponse.redirect(new URL("/login", nextUrl))
-  }
+  } 
 
   // Role-based access control
   if (isLoggedIn) {
@@ -30,10 +30,6 @@ export default auth((req) => {
     else if (nextUrl.pathname === "/login") {
       const redirectPath = userRole === "admin" ? "/dashboard" : "/home"
       return NextResponse.redirect(new URL(redirectPath, nextUrl))
-    }
-
-    else{
-      return NextResponse.redirect(new URL("/login", nextUrl))
     }
   }
 

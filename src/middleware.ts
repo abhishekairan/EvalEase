@@ -27,7 +27,7 @@ export default auth((req) => {
     }
 
     // Redirect authenticated users away from login page
-    else if (nextUrl.pathname === "/login") {
+    else if (nextUrl.pathname === "/") {
       const redirectPath = userRole === "admin" ? "/dashboard" : "/home"
       return NextResponse.redirect(new URL(redirectPath, nextUrl))
     }

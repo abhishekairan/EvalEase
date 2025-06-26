@@ -7,6 +7,8 @@ import { SessionProvider } from "next-auth/react"
 
 import React from "react"
 
+export const dynamic = "force-dynamic";
+
 export default function Page({children}: Readonly<{children: React.ReactNode}>) {
   return (
     <SessionProvider>

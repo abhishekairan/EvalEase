@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "dffe2929-ac80-471e-a4d1-05495fcf3811",
+  "id": "cf27eaaa-cd84-4035-b0c6-e41ddd194415",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "admin": {
@@ -118,8 +118,8 @@
       },
       "checkConstraint": {}
     },
-    "jurry": {
-      "name": "jurry",
+    "jury": {
+      "name": "jury",
       "columns": {
         "id": {
           "name": "id",
@@ -184,9 +184,9 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "jurry_session_sessions_id_fk": {
-          "name": "jurry_session_sessions_id_fk",
-          "tableFrom": "jurry",
+        "jury_session_sessions_id_fk": {
+          "name": "jury_session_sessions_id_fk",
+          "tableFrom": "jury",
           "tableTo": "sessions",
           "columnsFrom": [
             "session"
@@ -199,16 +199,16 @@
         }
       },
       "compositePrimaryKeys": {
-        "jurry_id": {
-          "name": "jurry_id",
+        "jury_id": {
+          "name": "jury_id",
           "columns": [
             "id"
           ]
         }
       },
       "uniqueConstraints": {
-        "jurry_email_unique": {
-          "name": "jurry_email_unique",
+        "jury_email_unique": {
+          "name": "jury_email_unique",
           "columns": [
             "email"
           ]
@@ -645,10 +645,10 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "teams_juryid_jurry_id_fk": {
-          "name": "teams_juryid_jurry_id_fk",
+        "teams_juryid_jury_id_fk": {
+          "name": "teams_juryid_jury_id_fk",
           "tableFrom": "teams",
-          "tableTo": "jurry",
+          "tableTo": "jury",
           "columnsFrom": [
             "juryid"
           ],

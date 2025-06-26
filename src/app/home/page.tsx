@@ -4,6 +4,8 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getSessionById } from "@/db/utils";
 
+export const dynamic = "force-dynamic";
+
 export default async function Homepage() {
   // Get current jury member from session
   const jury = await auth();

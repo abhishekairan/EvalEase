@@ -17,7 +17,7 @@ CREATE TABLE `creds` (
 	CONSTRAINT `creds_email_unique` UNIQUE(`email`)
 );
 --> statement-breakpoint
-CREATE TABLE `jurry` (
+CREATE TABLE `jury` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`name` varchar(255) NOT NULL,
 	`email` varchar(255) NOT NULL,
@@ -26,8 +26,8 @@ CREATE TABLE `jurry` (
 	`role` varchar(255) NOT NULL DEFAULT 'jury',
 	`created_at` timestamp NOT NULL DEFAULT (now()),
 	`updated_at` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
-	CONSTRAINT `jurry_id` PRIMARY KEY(`id`),
-	CONSTRAINT `jurry_email_unique` UNIQUE(`email`)
+	CONSTRAINT `jury_id` PRIMARY KEY(`id`),
+	CONSTRAINT `jury_email_unique` UNIQUE(`email`)
 );
 --> statement-breakpoint
 CREATE TABLE `marks` (
@@ -87,11 +87,11 @@ CREATE TABLE `teams` (
 	CONSTRAINT `teams_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
-ALTER TABLE `jurry` ADD CONSTRAINT `jurry_session_sessions_id_fk` FOREIGN KEY (`session`) REFERENCES `sessions`(`id`) ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `jury` ADD CONSTRAINT `jury_session_sessions_id_fk` FOREIGN KEY (`session`) REFERENCES `sessions`(`id`) ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `marks` ADD CONSTRAINT `marks_team_id_teams_id_fk` FOREIGN KEY (`team_id`) REFERENCES `teams`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `marks` ADD CONSTRAINT `marks_jury_id_users_id_fk` FOREIGN KEY (`jury_id`) REFERENCES `users`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `marks` ADD CONSTRAINT `marks_session_sessions_id_fk` FOREIGN KEY (`session`) REFERENCES `sessions`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `team_members` ADD CONSTRAINT `team_members_team_id_teams_id_fk` FOREIGN KEY (`team_id`) REFERENCES `teams`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `team_members` ADD CONSTRAINT `team_members_member_id_users_id_fk` FOREIGN KEY (`member_id`) REFERENCES `users`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `teams` ADD CONSTRAINT `teams_leader_id_users_id_fk` FOREIGN KEY (`leader_id`) REFERENCES `users`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE `teams` ADD CONSTRAINT `teams_juryid_jurry_id_fk` FOREIGN KEY (`juryid`) REFERENCES `jurry`(`id`) ON DELETE set null ON UPDATE no action;
+ALTER TABLE `teams` ADD CONSTRAINT `teams_juryid_jury_id_fk` FOREIGN KEY (`juryid`) REFERENCES `jury`(`id`) ON DELETE set null ON UPDATE no action;

@@ -35,6 +35,7 @@ export const jury = mysqlTable('jurry',{
   email: varchar('email', { length: 255 }).notNull().unique(),
   session: int('session').references(() => sessions.id, {onDelete: 'set null'}),
   phoneNumber: varchar('phone_number', { length: 20 }).notNull(),
+  role: varchar('role', { length: 255 }).notNull().default('jury'),
   ...timestamps,
 })
 

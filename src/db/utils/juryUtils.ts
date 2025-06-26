@@ -22,11 +22,13 @@ import { hashPassword } from "@/lib/password";
 export async function getJury({ 
   id, 
   email, 
-  session 
+  session,
+  role
 }: { 
   id?: number; 
   email?: string; 
-  session?: number 
+  session?: number;
+  role?: string;
 } = {}) {
   const baseQuery = db.select().from(jury);
   
@@ -36,6 +38,8 @@ export async function getJury({
     return await baseQuery.where(eq(jury.email, email));
   } else if (session) {
     return await baseQuery.where(eq(jury.session, session));
+  } else if (role) {
+    return await baseQuery.where(eq(jury.role, role));
   }
   
   return await baseQuery;

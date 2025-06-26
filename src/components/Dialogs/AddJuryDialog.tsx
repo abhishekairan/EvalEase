@@ -32,40 +32,42 @@ import { juryDBSchema } from "@/zod/userSchema";
 import { addJuryAction } from "@/actions/juryForm";
 
 // Extend the jury schema for the form, omitting id and timestamps
-const addJurySchema = juryDBSchema.omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-}).extend({
-  password: z.string().min(8, "Password must be at least 8 characters long"),
-});
+const addJurySchema = juryDBSchema
+  .omit({
+    id: true,
+    createdAt: true,
+    updatedAt: true,
+  })
+  .extend({
+    password: z.string().min(8, "Password must be at least 8 characters long"),
+    // Add role field to schema
+    role: z.enum(["jury", "mentor"]),
+  });
 
 type AddJuryFormData = z.infer<typeof addJurySchema>;
-
 
 interface AddJuryDialogProps {
   children: React.ReactNode;
   sessions: {
-    id: number,
-    name: string
+    id: number;
+    name: string;
   }[];
 }
 
-export const AddJuryDialog = memo<AddJuryDialogProps>(({ children, sessions }) => {
+export const AddJuryDialog = memo(({ children, sessions }: AddJuryDialogProps) => {
   const [open, setOpen] = useState(false);
-  
-  // Memoize sessions to prevent unnecessary re-renders
   const memoizedSessions = useMemo(() => sessions, [sessions]);
-  
+
   const form = useForm<AddJuryFormData>({
     resolver: zodResolver(addJurySchema),
-    defaultValues: useMemo(() => ({
+    defaultValues: {
       name: "",
       email: "",
       phoneNumber: "",
       password: "",
       session: null,
-    }), []),
+      role: "jury", // Set default to "jury"
+    },
   });
 
   const onSubmit = useCallback(async (data: AddJuryFormData) => {
@@ -85,10 +87,8 @@ export const AddJuryDialog = memo<AddJuryDialogProps>(({ children, sessions }) =
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent className="w-[95vw] max-w-md sm:max-w-lg md:max-w-xl">
         <DialogHeader>
           <DialogTitle>Add Jury</DialogTitle>
         </DialogHeader>
@@ -101,13 +101,12 @@ export const AddJuryDialog = memo<AddJuryDialogProps>(({ children, sessions }) =
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter jury name" {...field} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="email"
@@ -115,13 +114,12 @@ export const AddJuryDialog = memo<AddJuryDialogProps>(({ children, sessions }) =
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter email address" type="email" {...field} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="phoneNumber"
@@ -129,13 +127,12 @@ export const AddJuryDialog = memo<AddJuryDialogProps>(({ children, sessions }) =
                 <FormItem>
                   <FormLabel>Phone Number</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter phone number" {...field} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="password"
@@ -143,13 +140,34 @@ export const AddJuryDialog = memo<AddJuryDialogProps>(({ children, sessions }) =
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter password" type="password" {...field} />
+                    <Input type="password" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
+            {/* Add the role field as a dropdown */}
+            <FormField
+              control={form.control}
+              name="role"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Role</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select role" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="jury">Jury</SelectItem>
+                      <SelectItem value="mentor">Mentor</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="session"
@@ -157,14 +175,12 @@ export const AddJuryDialog = memo<AddJuryDialogProps>(({ children, sessions }) =
                 <FormItem>
                   <FormLabel>Session</FormLabel>
                   <Select
-                    onValueChange={(value) => 
-                      field.onChange(value === "null" ? null : parseInt(value))
-                    }
+                    onValueChange={(value) => field.onChange(value === "null" ? null : parseInt(value))}
                     value={field.value?.toString() || "null"}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a session" />
+                        <SelectValue placeholder="No Session" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -180,8 +196,7 @@ export const AddJuryDialog = memo<AddJuryDialogProps>(({ children, sessions }) =
                 </FormItem>
               )}
             />
-
-            <div className="flex justify-end space-x-2">
+            <div className="flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={handleCancel}>
                 Cancel
               </Button>

@@ -124,6 +124,16 @@ export const jurryColumns: ColumnDef<juryDBType>[] = [
     enableSorting: false,
   },
   {
+    id: "jurryColumnsRole",
+    accessorKey: "role",
+    header: "Role",
+    enableSorting: true,
+    cell: (value) => {
+      const role = value.getValue() as string;
+      return <Badge variant={role === "jury" ? "green" : "orange"}>{role}</Badge>;
+    },
+  },
+  {
     id: "jurryColumnsSession",
     accessorKey: "session",
     header: "Session",

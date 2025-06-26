@@ -211,7 +211,7 @@ export function AddSessionForm({ juryMembers }: AddSessionFormProps) {
 
               {/* Jury Selection - Takes full width on mobile, 2 columns on desktop */}
               <div className="lg:col-span-2">
-                <Card>
+                <Card className="gap-0">
                   <CardHeader className="pb-4">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                       <CardTitle className="flex items-center gap-2 text-lg">
@@ -269,7 +269,7 @@ export function AddSessionForm({ juryMembers }: AddSessionFormProps) {
                     )}
 
                     {/* Responsive Table Container */}
-                    <div className="border rounded-lg overflow-hidden">
+                    <div className="border rounded-lg max-h-[400px] sm:max-h-[500px] overflow-auto">
                       <div className="overflow-x-auto">
                         <Table>
                           <TableHeader>
@@ -280,6 +280,7 @@ export function AddSessionForm({ juryMembers }: AddSessionFormProps) {
                               <TableHead className="min-w-[120px]">Name</TableHead>
                               <TableHead className="hidden sm:table-cell min-w-[200px]">Email</TableHead>
                               <TableHead className="hidden md:table-cell min-w-[120px]">Phone</TableHead>
+                              <TableHead className="w-20 text-center">Role</TableHead>
                               <TableHead className="w-20 text-center">Status</TableHead>
                             </TableRow>
                           </TableHeader>
@@ -302,7 +303,7 @@ export function AddSessionForm({ juryMembers }: AddSessionFormProps) {
                                 return (
                                   <TableRow 
                                     key={jury.id}
-                                    className={`${isSelected ? "bg-blue-50 border-blue-200" : ""} hover:bg-gray-50`}
+                                    className={` ${isSelected ? "bg-blue-50 border-blue-200" : ""} hover:bg-gray-50`}
                                   >
                                     <TableCell className="text-center">
                                       <Checkbox
@@ -340,12 +341,16 @@ export function AddSessionForm({ juryMembers }: AddSessionFormProps) {
                                     
                                     <TableCell className="text-center">
                                       <Badge 
+                                        variant={jury.role === "jury" ? "green" : "orange"}
+                                      >
+                                        {`${jury.role}`}
+                                      </Badge>
+                                    </TableCell>
+                                    
+                                    <TableCell className="text-center">
+                                      <Badge 
                                         variant={isAvailable ? "default" : "secondary"}
-                                        className={`text-xs ${
-                                          isAvailable 
-                                            ? "bg-green-500 hover:bg-green-600" 
-                                            : "bg-gray-500 hover:bg-gray-600"
-                                        }`}
+                                        className={`text-xs ${isAvailable ? "bg-orange-500 hover:bg-orange-600" : "bg-gray-500 hover:bg-gray-600"}`}
                                       >
                                         {isAvailable ? "Free" : `S${jury.session}`}
                                       </Badge>

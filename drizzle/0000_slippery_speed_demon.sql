@@ -23,6 +23,7 @@ CREATE TABLE `jurry` (
 	`email` varchar(255) NOT NULL,
 	`session` int,
 	`phone_number` varchar(20) NOT NULL,
+	`role` varchar(255) NOT NULL DEFAULT 'jury',
 	`created_at` timestamp NOT NULL DEFAULT (now()),
 	`updated_at` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
 	CONSTRAINT `jurry_id` PRIMARY KEY(`id`),

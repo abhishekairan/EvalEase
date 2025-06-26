@@ -27,6 +27,7 @@ export const juryDBSchema = baseUser.extend({
     session: z.coerce.number().positive().nullable().optional(),
     phoneNumber: z.coerce.string().regex(/^\+?[1-9]\d{1,14}$/, "Invalid phone number format. Use international format."),
     password: z.coerce.string().optional(),
+    role: z.coerce.string().default("jury").optional(),
 })
 // juryAdmin user database type
 export type juryDBType = z.infer<typeof juryDBSchema>

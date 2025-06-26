@@ -10,7 +10,7 @@ export default auth((req) => {
   const isJuryRoute = nextUrl.pathname.startsWith("/home")
 
 
-  if (!isLoggedIn) {
+  if (!isLoggedIn && !nextUrl.pathname.startsWith("/login")) {
     return NextResponse.redirect(new URL("/login", nextUrl))
   } 
 

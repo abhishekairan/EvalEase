@@ -29,7 +29,7 @@ export const admin = mysqlTable('admin',{
 })
 
 // Jury table
-export const jury = mysqlTable('jurry',{
+export const jury = mysqlTable('jury',{
   id: int('id').autoincrement().primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
   email: varchar('email', { length: 255 }).notNull().unique(),

@@ -106,7 +106,7 @@ export default function MarksDialog({
             Enter Marks for {team.teamName}
           </DialogTitle>
           <DialogDescription className="text-sm sm:text-base">
-            Please review team details and enter marks for each category (0-10)
+            Please review team details and enter marks for each category
           </DialogDescription>
         </DialogHeader>
 
@@ -173,7 +173,7 @@ export default function MarksDialog({
             <CardHeader className="pb-3">
               <CardTitle className="text-base sm:text-lg">Evaluation Marks</CardTitle>
               <p className="text-sm text-muted-foreground">
-                Enter scores from 0 to 10 for each category
+                Enter scores for each category
               </p>
             </CardHeader>
             <CardContent>
@@ -224,7 +224,7 @@ export default function MarksDialog({
                   {/* Technical Score */}
                   <div className="space-y-2">
                     <Label htmlFor="technicalScore" className="text-sm font-medium">
-                      Code Quality (0-10)
+                      Code Quality (0-15)
                     </Label>
                     <Input
                       id="technicalScore"
@@ -245,7 +245,7 @@ export default function MarksDialog({
                   {/* Impact Score */}
                   <div className="space-y-2">
                     <Label htmlFor="impactScore" className="text-sm font-medium">
-                      Feasibility (0-10)
+                      Feasibility (0-15)
                     </Label>
                     <Input
                       id="impactScore"

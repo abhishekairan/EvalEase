@@ -28,10 +28,10 @@ export const marksDataSchema = marksDBSchema.extend({
 export type MarksDataType = z.infer<typeof marksDataSchema>
 
 export const MarksFormSchema = z.object({
-  innovationScore: z.number().int().min(0).max(10),
-  presentationScore: z.number().int().min(0).max(10),
-  technicalScore: z.number().int().min(0).max(10),
-  impactScore: z.number().int().min(0).max(10),
+  innovationScore: z.number().int().min(-1,"Marks should range between 0-10").max(10).default(-1),
+  presentationScore: z.number().int().min(-1,"Marks should range between 0-10").max(10).default(-1),
+  technicalScore: z.number().int().min(-1,"Marks should range between 0-15").max(15).default(-1),
+  impactScore: z.number().int().min(-1,"Marks should range between 0-15").max(15).default(-1),
 });
 
 export type MarksFormData = z.infer<typeof MarksFormSchema>;

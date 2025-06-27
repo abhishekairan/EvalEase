@@ -189,7 +189,7 @@ export default function MarksDialog({
                       type="number"
                       min="0"
                       max="10"
-                      step="0.1"
+                      step="1"
                       {...register("innovationScore", { valueAsNumber: true })}
                       className="w-full"
                     />
@@ -210,7 +210,7 @@ export default function MarksDialog({
                       type="number"
                       min="0"
                       max="10"
-                      step="0.1"
+                      step="1"
                       {...register("presentationScore", { valueAsNumber: true })}
                       className="w-full"
                     />
@@ -230,8 +230,8 @@ export default function MarksDialog({
                       id="technicalScore"
                       type="number"
                       min="0"
-                      max="10"
-                      step="0.1"
+                      max="15"
+                      step="1"
                       {...register("technicalScore", { valueAsNumber: true })}
                       className="w-full"
                     />
@@ -251,8 +251,8 @@ export default function MarksDialog({
                       id="impactScore"
                       type="number"
                       min="0"
-                      max="10"
-                      step="0.1"
+                      max="15"
+                      step="1"
                       {...register("impactScore", { valueAsNumber: true })}
                       className="w-full"
                     />

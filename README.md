@@ -39,6 +39,7 @@ EvalEase is a full-stack web application designed to digitize and streamline the
 *Judge's scoring interface: Simple, intuitive, and mobile-friendly.*
 
 ![Team Shuffle](public/images/evalease_jury_login.png)
+
 *Smart shuffle: Fair and randomized team assignments for judges.*
 
 ---
@@ -64,6 +65,14 @@ EvalEase is a full-stack web application designed to digitize and streamline the
   - **Schema Validation:** All data validated with Zod schemas (see `src/zod/`)
   - **Export:** ExportButton and `exportUtils.ts` for easy data export.
 
+---
+
+>  Password for [vercel](https://evalease.vercel.app/)
+  - Username: admin@test.com
+  - password: admin@1234
+  - Type: Administrator
+
+> On panel you can create mock data to test the features as you like
 ---
 
 ## 🛠️ Setup Process

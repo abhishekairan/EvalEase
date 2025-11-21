@@ -64,6 +64,7 @@ export const AddParticipantDialog = memo<AddParticipantDialogProps>(({ children,
       name: "",
       email: "",
       phoneNumber: "",
+      institude: "",
       teamId: null,
     }),[])
   });
@@ -135,6 +136,23 @@ export const AddParticipantDialog = memo<AddParticipantDialogProps>(({ children,
                   <FormControl>
                     <Input 
                       placeholder="Enter phone number (international format)" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="institude"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Institute</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="Enter institute name" 
                       {...field} 
                     />
                   </FormControl>

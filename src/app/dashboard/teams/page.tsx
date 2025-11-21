@@ -48,7 +48,7 @@ async function TeamsContent() {
             <Button variant="secondary">Add Team</Button>
           </AddTeamDialog>
           
-          <Button variant="outline">Import From CSV</Button>
+          {/* <Button variant="outline">Import From CSV</Button> */}
         </div>
         
         <DataTable 

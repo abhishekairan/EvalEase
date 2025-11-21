@@ -30,6 +30,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { teamDBSchema } from "@/zod/teamSchema";
 import { addTeamAction } from "@/actions/teamForm";
+import { FileSliders } from "lucide-react";
 
 // Extend the team schema for the form
 const addTeamSchema = teamDBSchema.omit({
@@ -65,6 +66,7 @@ export function AddTeamDialog({ children, students }: AddTeamDialogProps) {
       member1Id: 0,
       member2Id: null,
       member3Id: null,
+      room: ""
     },
   });
 
@@ -112,7 +114,7 @@ export function AddTeamDialog({ children, students }: AddTeamDialogProps) {
               control={form.control}
               name="leaderId"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="w-full">
                   <FormLabel>Team Leader</FormLabel>
                   <Select
                     onValueChange={(value) => 
@@ -121,7 +123,7 @@ export function AddTeamDialog({ children, students }: AddTeamDialogProps) {
                     value={field.value?.toString() || "null"}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select team leader" />
                       </SelectTrigger>
                     </FormControl>
@@ -143,7 +145,7 @@ export function AddTeamDialog({ children, students }: AddTeamDialogProps) {
               control={form.control}
               name="member1Id"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="w-full">
                   <FormLabel>Team Member 1</FormLabel>
                   <Select
                     onValueChange={(value) => 
@@ -152,7 +154,7 @@ export function AddTeamDialog({ children, students }: AddTeamDialogProps) {
                     value={field.value?.toString() || "null"}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select team member" />
                       </SelectTrigger>
                     </FormControl>
@@ -174,7 +176,7 @@ export function AddTeamDialog({ children, students }: AddTeamDialogProps) {
               control={form.control}
               name="member2Id"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="w-full">
                   <FormLabel>Team Member 2</FormLabel>
                   <Select
                     onValueChange={(value) => 
@@ -183,7 +185,7 @@ export function AddTeamDialog({ children, students }: AddTeamDialogProps) {
                     value={field.value?.toString() || "null"}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select team member" />
                       </SelectTrigger>
                     </FormControl>
@@ -205,7 +207,7 @@ export function AddTeamDialog({ children, students }: AddTeamDialogProps) {
               control={form.control}
               name="member3Id"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="w-full">
                   <FormLabel>Team Member 3</FormLabel>
                   <Select
                     onValueChange={(value) => 
@@ -214,7 +216,7 @@ export function AddTeamDialog({ children, students }: AddTeamDialogProps) {
                     value={field.value?.toString() || "null"}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select team member" />
                       </SelectTrigger>
                     </FormControl>
@@ -227,6 +229,20 @@ export function AddTeamDialog({ children, students }: AddTeamDialogProps) {
                       ))}
                     </SelectContent>
                   </Select>
+                  <FormMessage />
+                </FormItem>
+                
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="room"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Room</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter room" {...field} value={field.value ?? ""}/>
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

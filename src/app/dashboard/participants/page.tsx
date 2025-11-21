@@ -4,7 +4,7 @@ import { participantsColumns } from "@/components/TableColumns";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AddParticipantDialog } from "@/components/Dialogs/AddParticipantDialog";
-import { getParticipantsWithTeam, getTeamsForDropdown } from "@/db/utils";
+import { getParticipants, getParticipantsWithTeam, getTeamsForDropdown } from "@/db/utils";
 import { Suspense } from "react";
 
 // Enhanced skeleton loading component
@@ -32,7 +32,7 @@ function ParticipantsPageSkeleton() {
 // Main participants content component
 async function ParticipantsContent() {
   try {
-    const data = await getParticipantsWithTeam();
+    const data = await getParticipants();
     const teams = await getTeamsForDropdown();
     console.log("Total participants: ",data.length)
     return (
@@ -42,7 +42,7 @@ async function ParticipantsContent() {
             <Button variant="secondary">Add Participant</Button>
           </AddParticipantDialog>
           
-          <Button variant="outline">Import From CSV</Button>
+          {/* <Button variant="outline">Import From CSV</Button> */}
         </div>
         
         <DataTable 

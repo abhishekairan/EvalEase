@@ -68,6 +68,32 @@ export async function createParticipant({ participant }: { participant: particip
   return await getParticipants({ id: response[0].id });
 }
 
+
+
+/**
+ * Creates a new participant in the database
+ * 
+ * @param params - Parameters object
+ * @param params.participant - List of participant data conforming to participantsDBType schema
+ * @returns Promise<participantsDBType[]> - Array containing the newly created participant, or empty array if creation failed
+ * 
+ * @example
+ * const newParticipant = {
+ *   name: "Alice Johnson",
+ *   email: "alice@example.com",
+ *   institude: "Stanford University",
+ *   phoneNumber: "+1234567890"
+ * };
+ * const result = await createParticipant({ participant: newParticipant });
+ */
+export async function createParticipants({ participant: participants_data }: { participant: participantsDBType[] }) {
+  const response = await db.insert(participants).values(participants_data).$returningId();
+  
+  if (response.length <= 0) return [];
+  
+  return await getParticipants({ id: response[0].id });
+}
+
 /**
  * Deletes a participant from the database
  * 

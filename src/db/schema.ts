@@ -80,7 +80,7 @@ export const teamMembers = mysqlTable('team_members', {
 export const marks = mysqlTable('marks', {
   id: int('id').autoincrement().primaryKey(),
   teamId: int('team_id').notNull().references(()=> teams.id, {onDelete: 'cascade'}),
-  juryId: int('jury_id').notNull().references(()=> participants.id, {onDelete: 'cascade'}),
+  juryId: int('jury_id').notNull().references(()=> jury.id, {onDelete: 'cascade'}),
   session: int('session').references(() => sessions.id, {onDelete: 'cascade'}).notNull(),
   innovationScore: int('innovation_score').notNull(),
   presentationScore: int('presentation_score').notNull(),

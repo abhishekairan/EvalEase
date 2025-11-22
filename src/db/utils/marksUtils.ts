@@ -90,6 +90,7 @@ export async function getMarks({ id, teamId, juryId, session, submitted }: {
  */
 export async function createMark({ mark }: { mark: Omit<MarksDBType, 'id' | 'createdAt' | 'updatedAt'> }) {
   // Validate foreign key relations
+  console.log("Creating mark:", mark);
   const isValid = await validateMarkRelations({ 
     teamId: mark.teamId, 
     juryId: mark.juryId, 
@@ -110,7 +111,6 @@ export async function createMark({ mark }: { mark: Omit<MarksDBType, 'id' | 'cre
   if (existingMark.length > 0) {
     throw new Error("Mark already exists for this team-jury-session combination");
   }
-
   const response = await db.insert(marks).values(mark).$returningId();
   
   if (response.length <= 0) return [];
@@ -255,7 +255,6 @@ export async function getMarksWithData({ id, teamId, juryId, session }: {
     })
     .from(marks)
     .innerJoin(teams, eq(marks.teamId, teams.id))
-    .innerJoin(participants, eq(marks.juryId, participants.id))
     .innerJoin(jury,eq(marks.juryId,jury.id))
     .innerJoin(sessions, eq(marks.session, sessions.id));
 
@@ -265,8 +264,9 @@ export async function getMarksWithData({ id, teamId, juryId, session }: {
   } else if (conditions.length > 1) {
     return await baseQuery.where(and(...conditions));
   }
-
-  return await baseQuery;
+  const result = await baseQuery
+  // console.log("result",result)
+  return result;
 }
 
 
@@ -292,14 +292,17 @@ export async function validateMarkRelations({ teamId, juryId, session }: {
 }) {
   // Check if team exists
   const teamData = await db.select().from(teams).where(eq(teams.id, teamId));
+  // console.log("Team data:", teamData);
   if (teamData.length === 0) return false;
   
   // Check if jury participant exists
-  const juryData = await db.select().from(participants).where(eq(participants.id, juryId));
+  const juryData = await db.select().from(jury).where(eq(jury.id, juryId));
+  // console.log("Jury data:", juryData);
   if (juryData.length === 0) return false;
   
   // Check if session exists
   const sessionData = await db.select().from(sessions).where(eq(sessions.id, session));
+  // console.log("Session data:", sessionData);
   if (sessionData.length === 0) return false;
   
   return true;

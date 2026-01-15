@@ -1,8 +1,8 @@
 // lib/utils/juryUtils.ts
 import { db } from "@/db";
-import { jury, creds } from "@/db/schema";
+import { jury, creds, jurySessions, sessions } from "@/db/schema";
 import { juryDBType } from "@/zod/userSchema";
-import { eq } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import { hashPassword } from "@/lib/password";
 
 /**
@@ -16,18 +16,17 @@ import { hashPassword } from "@/lib/password";
  * @param params - Optional parameters object
  * @param params.id - Optional jury ID to filter by
  * @param params.email - Optional email to filter by
- * @param params.session - Optional session ID to filter by
+ * @param params.role - Optional role to filter by
  * @returns Promise - Array of jury objects matching the criteria
+ * @note For session-based filtering, use getJuryBySession instead
  */
 export async function getJury({ 
   id, 
-  email, 
-  session,
+  email,
   role
 }: { 
   id?: number; 
-  email?: string; 
-  session?: number;
+  email?: string;
   role?: string;
 } = {}) {
   const baseQuery = db.select().from(jury);
@@ -36,8 +35,6 @@ export async function getJury({
     return await baseQuery.where(eq(jury.id, id));
   } else if (email) {
     return await baseQuery.where(eq(jury.email, email));
-  } else if (session) {
-    return await baseQuery.where(eq(jury.session, session));
   } else if (role) {
     return await baseQuery.where(eq(jury.role, role));
   }
@@ -267,33 +264,49 @@ export async function getJuryForAuth({ email }: { email: string }) {
 }
 
 /**
- * Gets all jury members for a specific session
+ * Gets all jury members for a specific session using junction table
  * @param params - Parameters object
  * @param params.sessionId - Session ID to filter by
  * @returns Promise - Array of jury members in the session
  */
 export async function getJuryBySession({ sessionId }: { sessionId: number }) {
-  return await getJury({ session: sessionId });
+  const result = await db
+    .select({
+      id: jury.id,
+      name: jury.name,
+      email: jury.email,
+      phoneNumber: jury.phoneNumber,
+      role: jury.role,
+      createdAt: jury.createdAt,
+      updatedAt: jury.updatedAt,
+    })
+    .from(jurySessions)
+    .innerJoin(jury, eq(jurySessions.juryId, jury.id))
+    .where(eq(jurySessions.sessionId, sessionId));
+  
+  return result;
 }
 
 /**
- * Gets all jury members IDs for a specific session
+ * Gets all jury member IDs for a specific session using junction table
  * @param params - Parameters object
  * @param params.sessionId - Session ID to filter by
- * @returns Promise - Array of jury members in the session
+ * @returns Promise - Array of jury IDs in the session
  */
 export async function getJuryIdsBySession({ sessionId }: { sessionId: number }) {
-  const juryIds = await db.select({
-    id: jury.id
-  }).from(jury).where(eq(jury.session,sessionId));
-  return juryIds.map((j)=> j.id)
+  const juryIds = await db
+    .select({ id: jurySessions.juryId })
+    .from(jurySessions)
+    .where(eq(jurySessions.sessionId, sessionId));
+  
+  return juryIds.map((j) => j.id);
 }
 
 /**
- * Assigns jury member to a session
+ * Assigns jury member to a session using junction table
  * @param params - Parameters object
  * @param params.juryId - Jury member ID
- * @param params.sessionId - Session ID to assign
+ * @param params.sessionId - Session ID to assign (null to remove from all sessions)
  * @returns Promise - Returns true if assignment was successful
  */
 export async function assignJuryToSession({ 
@@ -304,9 +317,26 @@ export async function assignJuryToSession({
   sessionId: number | null
 }) {
   try {
-    await db.update(jury)
-      .set({ session: sessionId })
-      .where(eq(jury.id, juryId));
+    if (sessionId === null) {
+      // Remove jury from all sessions
+      await db.delete(jurySessions)
+        .where(eq(jurySessions.juryId, juryId));
+    } else {
+      // Check if assignment already exists
+      const existing = await db
+        .select()
+        .from(jurySessions)
+        .where(sql`${jurySessions.juryId} = ${juryId} AND ${jurySessions.sessionId} = ${sessionId}`)
+        .limit(1);
+      
+      if (existing.length === 0) {
+        // Add new jury-session relationship
+        await db.insert(jurySessions).values({
+          juryId,
+          sessionId
+        });
+      }
+    }
     return true;
   } catch (error) {
     console.error('Error assigning jury to session:', error);
@@ -315,19 +345,90 @@ export async function assignJuryToSession({
 }
 
 /**
- * Removes jury member from session
+ * Removes jury member from all sessions using junction table
  * @param params - Parameters object
  * @param params.juryId - Jury member ID
  * @returns Promise - Returns true if removal was successful
  */
-export async function removeJuryFromSession({ juryId }: { juryId: number }) {
+/**
+ * Removes a jury member from a specific session
+ * @param params - Parameters object
+ * @param params.juryId - Jury member ID
+ * @param params.sessionId - Session ID to remove jury from
+ * @returns Promise - Returns true if removal was successful
+ */
+export async function removeJuryFromSession({ 
+  juryId, 
+  sessionId 
+}: { 
+  juryId: number;
+  sessionId?: number;
+}) {
   try {
-    await db.update(jury)
-      .set({ session: null })
-      .where(eq(jury.id, juryId));
+    if (sessionId) {
+      // Remove from specific session
+      await db.delete(jurySessions)
+        .where(
+          sql`${jurySessions.juryId} = ${juryId} AND ${jurySessions.sessionId} = ${sessionId}`
+        );
+    } else {
+      // Remove from all sessions
+      await db.delete(jurySessions)
+        .where(eq(jurySessions.juryId, juryId));
+    }
     return true;
   } catch (error) {
     console.error('Error removing jury from session:', error);
     return false;
+  }
+}
+
+/**
+ * Retrieves sessions for a specific jury member with full session details
+ * @param params - Parameters object
+ * @param params.juryId - Jury member ID
+ * @returns Promise - Array of session objects the jury is assigned to
+ */
+export async function getSessionsForJury({ juryId }: { juryId: number }) {
+  try {
+    const result = await db
+      .select({
+        id: sessions.id,
+        name: sessions.name,
+        startedAt: sessions.startedAt,
+        endedAt: sessions.endedAt,
+      })
+      .from(jurySessions)
+      .innerJoin(sessions, eq(jurySessions.sessionId, sessions.id))
+      .where(eq(jurySessions.juryId, juryId));
+    
+    return result;
+  } catch (error) {
+    console.error('Error fetching sessions for jury:', error);
+    return [];
+  }
+}
+
+/**
+ * Retrieves jury members with their assigned sessions
+ * @param params - Optional parameters object
+ * @param params.id - Optional jury ID to filter by
+ * @returns Promise - Array of jury objects with their session details
+ */
+export async function getJuryWithSessions({ id }: { id?: number } = {}) {
+  try {
+    const juryList = await getJury({ id });
+    
+    const juryWithSessions = await Promise.all(
+      juryList.map(async (j) => {
+        const sessions = await getSessionsForJury({ juryId: j.id! });
+        return { ...j, sessions };
+      })
+    );
+    
+    return juryWithSessions;
+  } catch (error) {
+    console.error('Error fetching jury with sessions:', error);
+    return [];
   }
 }

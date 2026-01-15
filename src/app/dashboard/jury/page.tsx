@@ -1,28 +1,32 @@
-import { DataTable } from "@/components/data-table";
 import { AddJuryDialog } from "@/components/Dialogs/AddJuryDialog";
 import { SiteHeader } from "@/components/site-header";
-import { jurryColumns } from "@/components/TableColumns";
+import { JuryDataTable } from "@/components/JuryDataTable";
 import { Button } from "@/components/ui/button";
-import { getJury, getSessionsForDropdown } from "@/db/utils";
+import { getJuryWithSessions, getSessionsForDropdown } from "@/db/utils";
 import React, { Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function JurryTableSkeleton(){
   return (
-    <DataTable columns={jurryColumns} data={[]} isLoading={true} pageSize={5}/>
+    <div className="space-y-4">
+      <Skeleton className="h-10 w-full" />
+      <Skeleton className="h-64 w-full" />
+    </div>
   )
 }
 
 
 async function JuryContent(){
   try{
-    const data = await getJury()
+    const data = await getJuryWithSessions()
     const sessions = await getSessionsForDropdown()
+    
     return(
       <>
         <AddJuryDialog sessions={sessions}>
           <Button variant={"secondary"}>Add Jury</Button>
         </AddJuryDialog>
-        <DataTable columns={jurryColumns} data={data} />
+        <JuryDataTable data={data} sessions={sessions} />
       </>
     )
   }catch(error){

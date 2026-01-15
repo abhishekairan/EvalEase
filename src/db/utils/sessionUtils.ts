@@ -1,6 +1,6 @@
 // db/sessionUtils.ts
 import { db } from "@/db"
-import { sessions, jury, teams, marks } from "@/db/schema"
+import { sessions, jury, teams, marks, jurySessions } from "@/db/schema"
 import { eq, count, avg, sql, inArray } from "drizzle-orm"
 import { getJuryIdsBySession } from "./juryUtils"
 import { getTeamIds } from "./teamUtils"
@@ -28,11 +28,11 @@ export async function getSessionById(id: number) {
 // Add this function to db/sessionUtils.ts
 export async function getSessionStats(sessionId: number) {
   try {
-    // Get total jury assigned to this session
+    // Get total jury assigned to this session using junction table
     const juryCount = await db
       .select({ count: count() })
-      .from(jury)
-      .where(eq(jury.session, sessionId))
+      .from(jurySessions)
+      .where(eq(jurySessions.sessionId, sessionId))
 
     // Get total teams (all teams participate in all sessions)
     const teamCount = await db
@@ -121,11 +121,10 @@ export async function updateSession({
 
 export async function deleteSession(sessionId: number) {
   try {
-    // First, unassign jury members from this session
+    // First, remove all jury-session relationships for this session
     await db
-      .update(jury)
-      .set({ session: null })
-      .where(eq(jury.session, sessionId))
+      .delete(jurySessions)
+      .where(eq(jurySessions.sessionId, sessionId))
 
     // Delete marks for this session
     await db
@@ -146,9 +145,16 @@ export async function deleteSession(sessionId: number) {
 
 
 // Delete jury session
+/**
+ * Removes jury members from specific sessions using junction table
+ * @param params - Parameters object
+ * @param params.juries - Array of session IDs to remove jury from
+ * @returns Promise - Boolean indicating success
+ */
 export async function deleteJurysSession({juries}:{juries: number[]}){
   try{
-    await db.update(jury).set({session: null}).where(inArray(jury.session,juries))
+    // Delete all jury-session relationships for the specified sessions
+    await db.delete(jurySessions).where(inArray(jurySessions.sessionId, juries));
     return true
   }catch(err){
     console.log(err)
@@ -156,12 +162,32 @@ export async function deleteJurysSession({juries}:{juries: number[]}){
   }
 }
 
+/**
+ * Assigns a jury member to a session using junction table
+ * @param params - Parameters object
+ * @param params.juryId - Jury member ID
+ * @param params.sessionId - Session ID
+ * @returns Promise - Updated record or null
+ */
 export async function updateJurySession({ juryId, sessionId }: { juryId: number; sessionId: number }) {
   try {
-    return await db
-      .update(jury)
-      .set({ session: sessionId })
-      .where(eq(jury.id, juryId))
+    // Check if relationship already exists
+    const existing = await db
+      .select()
+      .from(jurySessions)
+      .where(sql`${jurySessions.juryId} = ${juryId} AND ${jurySessions.sessionId} = ${sessionId}`)
+      .limit(1);
+    
+    if (existing.length > 0) {
+      return existing[0]; // Already assigned
+    }
+    
+    // Create new jury-session relationship
+    const result = await db
+      .insert(jurySessions)
+      .values({ juryId, sessionId });
+    
+    return result;
   } catch (error) {
     console.error("Error updating jury session:", error)
     return null
@@ -306,11 +332,11 @@ export async function getTeamDistribution(sessionId: number) {
  */
 export async function getTeamsBySession(sessionId: number) {
   try {
-    // Get all jury members for this session
+    // Get all jury members for this session using junction table
     const sessionJury = await db
-      .select({ id: jury.id })
-      .from(jury)
-      .where(eq(jury.session, sessionId))
+      .select({ id: jurySessions.juryId })
+      .from(jurySessions)
+      .where(eq(jurySessions.sessionId, sessionId))
     
     const juryIds = sessionJury.map(j => j.id)
     

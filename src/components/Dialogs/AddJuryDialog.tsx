@@ -18,6 +18,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import {
   Select,
@@ -28,6 +29,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { juryDBSchema } from "@/zod/userSchema";
 import { addJuryAction } from "@/actions/juryForm";
 
@@ -37,11 +39,12 @@ const addJurySchema = juryDBSchema
     id: true,
     createdAt: true,
     updatedAt: true,
+    session: true, // Remove session field, use sessionIds instead
   })
   .extend({
     password: z.string().min(8, "Password must be at least 8 characters long"),
-    // Add role field to schema
     role: z.enum(["jury", "mentor"]),
+    sessionIds: z.array(z.number()), // Support multiple sessions
   });
 
 type AddJuryFormData = z.infer<typeof addJurySchema>;
@@ -65,7 +68,7 @@ export const AddJuryDialog = memo(({ children, sessions }: AddJuryDialogProps) =
       email: "",
       phoneNumber: "",
       password: "",
-      session: null,
+      sessionIds: [],
       role: "jury", // Set default to "jury"
     },
   });
@@ -170,28 +173,51 @@ export const AddJuryDialog = memo(({ children, sessions }: AddJuryDialogProps) =
             />
             <FormField
               control={form.control}
-              name="session"
-              render={({ field }) => (
+              name="sessionIds"
+              render={() => (
                 <FormItem>
-                  <FormLabel>Session</FormLabel>
-                  <Select
-                    onValueChange={(value) => field.onChange(value === "null" ? null : parseInt(value))}
-                    value={field.value?.toString() || "null"}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="No Session" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="null">No Session</SelectItem>
-                      {memoizedSessions.map((session) => (
-                        <SelectItem key={session.id} value={session.id.toString()}>
-                          {session.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="mb-4">
+                    <FormLabel className="text-base">Sessions</FormLabel>
+                    <FormDescription>
+                      Select the sessions this jury member will participate in
+                    </FormDescription>
+                  </div>
+                  <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-4">
+                    {memoizedSessions.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">No sessions available</p>
+                    ) : (
+                      memoizedSessions.map((session) => (
+                        <FormField
+                          key={session.id}
+                          control={form.control}
+                          name="sessionIds"
+                          render={({ field }) => (
+                            <FormItem
+                              className="flex flex-row items-start space-x-3 space-y-0"
+                            >
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value?.includes(session.id)}
+                                  onCheckedChange={(checked) => {
+                                    return checked
+                                      ? field.onChange([...field.value, session.id])
+                                      : field.onChange(
+                                          field.value?.filter(
+                                            (value) => value !== session.id
+                                          )
+                                        )
+                                  }}
+                                />
+                              </FormControl>
+                              <FormLabel className="text-sm font-normal cursor-pointer">
+                                {session.name}
+                              </FormLabel>
+                            </FormItem>
+                          )}
+                        />
+                      ))
+                    )}
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}

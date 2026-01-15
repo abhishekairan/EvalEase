@@ -137,7 +137,6 @@ export function JurySelectionStep({
                     </TableRow>
                   ) : (
                     juryMembers.map((jury) => {
-                      const isAvailable = jury.session === null
                       const isSelected = selectedJury.includes(jury.id!)
                       
                       return (
@@ -153,7 +152,7 @@ export function JurySelectionStep({
                               onCheckedChange={(checked) => 
                                 onJurySelection(jury.id!, checked as boolean)
                               }
-                              disabled={!isAvailable || isSubmitting}
+                              disabled={isSubmitting}
                               className={isSelected ? "border-blue-500" : ""}
                             />
                           </TableCell>
@@ -177,10 +176,10 @@ export function JurySelectionStep({
                           
                           <TableCell className="text-center">
                             <Badge 
-                              variant={isAvailable ? "default" : "secondary"}
-                              className={isAvailable ? "bg-green-500 hover:bg-green-600" : ""}
+                              variant="default"
+                              className="bg-green-500 hover:bg-green-600"
                             >
-                              {isAvailable ? "Free" : `Session ${jury.session}`}
+                              Available
                             </Badge>
                           </TableCell>
                         </TableRow>

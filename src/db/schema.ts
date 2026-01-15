@@ -33,9 +33,16 @@ export const jury = mysqlTable('jury',{
   id: int('id').autoincrement().primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
   email: varchar('email', { length: 255 }).notNull().unique(),
-  session: int('session').references(() => sessions.id, {onDelete: 'set null'}),
   phoneNumber: varchar('phone_number', { length: 20 }).notNull(),
   role: varchar('role', { length: 255 }).notNull().default('jury'),
+  ...timestamps,
+})
+
+// Jury-Sessions junction table (many-to-many relationship)
+export const jurySessions = mysqlTable('jury_sessions', {
+  id: int('id').autoincrement().primaryKey(),
+  juryId: int('jury_id').notNull().references(() => jury.id, {onDelete: 'cascade'}),
+  sessionId: int('session_id').notNull().references(() => sessions.id, {onDelete: 'cascade'}),
   ...timestamps,
 })
 

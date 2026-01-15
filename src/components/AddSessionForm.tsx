@@ -91,12 +91,10 @@ export function AddSessionForm({ juryMembers, teams }: AddSessionFormProps) {
   }
 
   const selectAllJury = () => {
-    const availableJury = juryMembers
-      .filter(jury => jury.session === null)
-      .map(jury => jury.id!)
+    const allJuryIds = juryMembers.map(jury => jury.id!)
     
-    setSelectedJury(availableJury)
-    form.setValue("selectedJury", availableJury)
+    setSelectedJury(allJuryIds)
+    form.setValue("selectedJury", allJuryIds)
     clearErrors("selectedJury")
   }
 
@@ -158,9 +156,9 @@ export function AddSessionForm({ juryMembers, teams }: AddSessionFormProps) {
 
   const selectedJuryMembers = juryMembers.filter(j => selectedJury.includes(j.id!))
 
-  // Filter jury members - available vs assigned
-  const availableJury = juryMembers.filter(jury => jury.session === null)
-  const assignedJury = juryMembers.filter(jury => jury.session !== null)
+  // All jury members are available for assignment (can be in multiple sessions)
+  const availableJury = juryMembers
+  const assignedJury: typeof juryMembers = []
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50">

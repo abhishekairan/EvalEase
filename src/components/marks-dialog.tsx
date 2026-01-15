@@ -205,7 +205,7 @@ export default function MarksDialog({
               </div>
 
               {/* Team Members */}
-              {team.members.length > 0 && (
+              {team.members && team.members.length > 0 && (
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
                     <Users className="h-4 w-4" />

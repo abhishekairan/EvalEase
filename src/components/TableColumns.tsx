@@ -135,12 +135,21 @@ export const jurryColumns: ColumnDef<juryDBType>[] = [
   },
   {
     id: "jurryColumnsSession",
-    accessorKey: "session",
-    header: "Session",
+    accessorKey: "sessions",
+    header: "Sessions",
     enableSorting: true,
     cell: (value) => {
-      const session = value.getValue() as number | null | undefined;
-      return session ? <Badge>In Session</Badge> : <Badge variant="secondary">No Session</Badge>;
+      const sessions = value.getValue() as Array<{ id: number; name: string }> | undefined;
+      if (!sessions || sessions.length === 0) {
+        return <Badge variant="secondary">No Sessions</Badge>;
+      }
+      return (
+        <div className="flex flex-wrap gap-1">
+          {sessions.map((session) => (
+            <Badge key={session.id} variant="default">{session.name}</Badge>
+          ))}
+        </div>
+      );
     },
   },
   {

@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { marks, teams, participants, sessions, jury } from "@/db/schema";
+import { marks, teams, sessions, jury } from "@/db/schema";
 import { MarksDBType } from "@/zod/marksSchema";
 import { eq, and } from "drizzle-orm";
 
@@ -206,6 +206,7 @@ export async function getMarksWithData({ id, teamId, juryId, session }: {
   session?: number
 } = {}) {
   // Build conditions array first
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const conditions: any[] = [];
   
   if (id) conditions.push(eq(marks.id, id));

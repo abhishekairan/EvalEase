@@ -17,7 +17,7 @@ export function exportTableToExcel<TData>(
   try {
     // Transform data based on column definitions
     const exportData = data.map(row => {
-      const exportRow: Record<string, any> = {};
+      const exportRow: Record<string, string | number | boolean> = {};
       
       columns.forEach((column,index) => {
         let value;
@@ -40,10 +40,13 @@ export function exportTableToExcel<TData>(
         } else if ('accessorKey' in column && column.accessorKey) {
           // Handle nested properties like "teamId.teamName"
           const keys = String(column.accessorKey).split('.');
-          value = keys.reduce((obj, key) => obj?.[key], row as any);
+          value = keys.reduce<unknown>((obj, key) => {
+            const record = obj as Record<string, unknown>;
+            return record?.[key];
+          }, row as Record<string, unknown>);
         } else if (column.id) {
           // Fallback to id if available
-          value = (row as any)[column.id];
+          value = (row as Record<string, unknown>)[column.id];
         }
         
         // Clean up the value for Excel export
@@ -51,7 +54,7 @@ export function exportTableToExcel<TData>(
           value = JSON.stringify(value);
         }
         
-        exportRow[headerText] = value ?? '';
+        exportRow[headerText] = (value as string | number | boolean) ?? '';
       });
       
       return exportRow;

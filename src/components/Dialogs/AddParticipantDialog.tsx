@@ -53,7 +53,7 @@ interface AddParticipantDialogProps {
   teams: Team[];
 }
 
-export const AddParticipantDialog = memo<AddParticipantDialogProps>(({ children, teams }: AddParticipantDialogProps) => {
+export const AddParticipantDialog = memo<AddParticipantDialogProps>(function AddParticipantDialog({ children, teams }: AddParticipantDialogProps) {
   
   const [open, setOpen] = useState(false);
   const memorizedTeams = useMemo(()=> teams, [teams])

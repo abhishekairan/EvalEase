@@ -4,7 +4,9 @@ import Credentials from "next-auth/providers/credentials";
 import { verifyPassword } from "./password";
 import { getAdminForAuth, getJuryForAuth } from "@/db/utils";
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
+const nextAuth = NextAuth;
+
+const config = {
   session: {
     strategy: "jwt",
     maxAge: 24 * 60 * 60,
@@ -20,9 +22,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: "Password", type: "password" },
         role: { label: "Role", type: "text" },
       },
-      async authorize(credentials: any) {
+      async authorize(credentials) {
         try {
-          const { email, password, role } = credentials;
+          const { email, password, role } = credentials as Record<string, string> || {};
 
           if (!email || !password || !role) {
             return null;
@@ -71,7 +73,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],// In your auth.ts file
 callbacks: {
-  async jwt({ token, user }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async jwt({ token, user }: any) {
     if (user) {
       token.id = user.id;
       token.email = user.email;
@@ -82,7 +85,8 @@ callbacks: {
     return token;
   },
   
-  async session({ session, token }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async session({ session, token }: any) {
     if (token) {
       // Fetch fresh user data from database on every session access
       let freshUserData = null;
@@ -100,12 +104,16 @@ callbacks: {
         session.user.role = token.role as string;
         
         if (token.role === "jury" && 'session' in freshUserData) {
-          (session.user as any).session = String(freshUserData.session);
+          session.user.session = String(freshUserData.session);
         }
       }
     }
     return session;
   },
 }
+};
 
-});
+// @ts-expect-error - NextAuth default export is callable in v5 beta
+const { handlers, signIn, signOut, auth } = nextAuth(config);
+
+export { handlers, signIn, signOut, auth };

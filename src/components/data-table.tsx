@@ -11,10 +11,12 @@ import {
   getSortedRowModel,
   getFilteredRowModel,
   SortingState,
+  Row,
+  Table,
 } from "@tanstack/react-table";
 
 import {
-  Table,
+  Table as UITable,
   TableBody,
   TableCell,
   TableHead,
@@ -48,15 +50,17 @@ interface DataTableProps<TData> {
   exportFilename?: string;
 }
 
-const TableRowComponent = memo<{ row: any }>(({ row }) => (
-  <TableRow data-state={row.getIsSelected() && "selected"}>
-    {row.getVisibleCells().map((cell: any) => (
-      <TableCell key={cell.id}>
-        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-      </TableCell>
-    ))}
-  </TableRow>
-));
+const TableRowComponent = memo<{ row: Row<unknown> }>(function TableRowComponent({ row }) {
+  return (
+    <TableRow data-state={row.getIsSelected() && "selected"}>
+      {row.getVisibleCells().map((cell) => (
+        <TableCell key={cell.id}>
+          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+        </TableCell>
+      ))}
+    </TableRow>
+  );
+});
 
 export function DataTable<TData>({
   columns,
@@ -161,7 +165,7 @@ export function DataTable<TData>({
 
       {/* Table */}
       <div className="rounded-md border">
-        <Table>
+        <UITable>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -223,7 +227,7 @@ export function DataTable<TData>({
               </TableRow>
             )}
           </TableBody>
-        </Table>
+        </UITable>
       </div>
 
       {/* Pagination */}
@@ -249,7 +253,7 @@ function DataTableSkeleton<TData>({
 
       {/* Table skeleton */}
       <div className="rounded-md border">
-        <Table>
+        <UITable>
           <TableHeader>
             <TableRow>
               {columns.map((_, index) => (
@@ -270,7 +274,7 @@ function DataTableSkeleton<TData>({
               </TableRow>
             ))}
           </TableBody>
-        </Table>
+        </UITable>
       </div>
 
       {/* Pagination skeleton */}
@@ -290,7 +294,7 @@ function DataTableSkeleton<TData>({
 }
 
 // Pagination Component
-function DataTablePagination({ table }: { table: any }) {
+function DataTablePagination<TData>({ table }: { table: Table<TData> }) {
   return (
     <div className="flex items-center justify-between px-2">
       <div className="flex-1 text-sm text-muted-foreground">

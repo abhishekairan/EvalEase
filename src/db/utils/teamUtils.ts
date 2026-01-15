@@ -30,6 +30,7 @@ import { and, eq, inArray } from "drizzle-orm";
  * const leaderTeams = await getTeams({ leaderId: 456 });
  */
 export async function getTeams({ id, leaderId, teamName }: { id?: number; leaderId?: number; teamName?: string } = {}) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const conditions: any[] = []
   const baseQuery = db.select().from(teams);
   
@@ -210,7 +211,7 @@ export async function getTeamsWithData({ id, leaderId }: { id?: number; leaderId
     .where(inArray(teamMembers.teamId, teamIds));
 
   // Group members by team
-  const membersMap = new Map<number, any[]>();
+  const membersMap = new Map<number, typeof membersData[0]['member'][]>();
   
   for (const memberRow of membersData) {
     if (!membersMap.has(memberRow.teamId)) {

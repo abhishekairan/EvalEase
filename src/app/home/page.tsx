@@ -13,7 +13,7 @@ export default async function Homepage() {
     redirect("/login");
   }
   // Getting session 
-  let teamsData: any[] = []
+  let teamsData: Awaited<ReturnType<typeof getTeamsForJury>> = []
   if(jury.user.session != 'null'){
 
     const session =await getSessionById(Number(jury.user.session))

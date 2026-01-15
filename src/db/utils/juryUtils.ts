@@ -176,7 +176,9 @@ export async function updateJury({ jury: juryData }: { jury: juryDBType }) {
   if (!juryData.id) return [];
   
   try {
-    const { password, ...updateData } = juryData;
+    // Password is destructured for security but not used in update
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _password, ...updateData } = juryData;
     await db.update(jury).set(updateData).where(eq(jury.id, juryData.id));
     return await getJury({ id: juryData.id });
   } catch (error) {

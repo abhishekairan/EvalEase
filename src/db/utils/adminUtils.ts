@@ -100,7 +100,9 @@ export async function updateAdmin({ admin: adminData }: { admin: adminDBType }) 
   if (!adminData.id) return [];
   
   try {
-    const { password, ...updateData } = adminData;
+    // Password is destructured for security but not used in update
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _password, ...updateData } = adminData;
     await db.update(admin).set(updateData).where(eq(admin.id, adminData.id));
     return await getAdmins({ id: adminData.id });
   } catch (error) {

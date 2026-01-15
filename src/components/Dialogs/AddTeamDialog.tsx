@@ -30,7 +30,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { teamDBSchema } from "@/zod/teamSchema";
 import { addTeamAction } from "@/actions/teamForm";
-import { FileSliders } from "lucide-react";
 
 // Extend the team schema for the form
 const addTeamSchema = teamDBSchema.omit({

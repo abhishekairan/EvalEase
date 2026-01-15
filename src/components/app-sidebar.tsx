@@ -105,7 +105,7 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { data: session, status } = useSession()
+  const { data: session } = useSession()
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -128,8 +128,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={{
-            name: session?.user.name || "Admin User",
-            email: session?.user.email || "m@example.com",
+            name: session?.user?.name || "Admin User",
+            email: session?.user?.email || "m@example.com",
             avatar: "/avatars/shadcn.jpg"}} />
       </SidebarFooter>
     </Sidebar>

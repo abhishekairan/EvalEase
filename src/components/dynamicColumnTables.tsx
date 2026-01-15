@@ -13,7 +13,7 @@ type TableDataType = MarksDataType | participantsDBType | TeamDataType | TeamMem
 
 export default function DynamicColumnTable() {
   const [activeView, setActiveView] = useState("participants");
-  const [currentData, setCurrentData] = useState<TableDataType[]>([])
+  const [currentData] = useState<TableDataType[]>([])
 
   useEffect(() => {
     

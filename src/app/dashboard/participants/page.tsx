@@ -4,7 +4,7 @@ import { participantsColumns } from "@/components/TableColumns";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AddParticipantDialog } from "@/components/Dialogs/AddParticipantDialog";
-import { getParticipants, getParticipantsWithTeam, getTeamsForDropdown } from "@/db/utils";
+import { getParticipants, getTeamsForDropdown } from "@/db/utils";
 import { Suspense } from "react";
 
 // Enhanced skeleton loading component

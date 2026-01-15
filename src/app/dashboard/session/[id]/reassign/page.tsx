@@ -1,6 +1,6 @@
 // app/dashboard/session/[id]/reassign/page.tsx
 import { notFound, redirect } from "next/navigation"
-import { getSessionById, getTeamsBySession, getJuryBySession } from "@/db/utils"
+import { getSessionById, getTeamsBySession, getJuryBySession, getParticipants, getTeamMembersWithData } from "@/db/utils"
 import { ReassignTeamsForm } from "@/components/ReassignTeamsForm"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -33,10 +33,24 @@ export default async function ReassignTeamsPage({ params }: PageProps) {
   }
 
   // Fetch teams and jury for this session
-  const [teams, juryMembers] = await Promise.all([
+  const [rawTeams, juryMembers] = await Promise.all([
     getTeamsBySession(sessionId),
     getJuryBySession({ sessionId })
   ])
+
+  // Populate teams with leader and members
+  const teams = await Promise.all(
+    rawTeams.map(async (team) => {
+      const [leader] = await getParticipants({ id: team.leaderId })
+      const memberData = await getTeamMembersWithData({ teamId: team.id! })
+      const members = memberData.map(m => m.memberId)
+      return {
+        ...team,
+        leaderId: leader,
+        members
+      }
+    })
+  )
 
   if (!teams || teams.length === 0) {
     return (

@@ -87,5 +87,6 @@ export const marks = mysqlTable('marks', {
   technicalScore: int('technical_score').notNull(),
   impactScore: int('impact_score').notNull(),
   submitted: boolean('submitted').default(false).notNull(),
+  locked: boolean('locked').default(false).notNull(),
   ...timestamps,
 });

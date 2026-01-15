@@ -6,30 +6,20 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useRouter } from "next/navigation"
 import { z } from "zod"
 import { useState } from "react"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { Input } from "@/components/ui/input"
+import { Form } from "@/components/ui/form"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Badge } from "@/components/ui/badge"
-import { Calendar, Users, Mail, Phone, ArrowLeft } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ArrowLeft } from "lucide-react"
 import { addSessionAction } from "@/actions/sessionActions"
-import { juryDBType } from "@/zod"
+import { juryDBType, TeamDataType } from "@/zod"
+import { toast } from "sonner"
+import { ProgressSidebar } from "./AddSessionForm/ProgressSidebar"
+import { SessionSummaryCard } from "./AddSessionForm/SessionSummaryCard"
+import { HeaderStats } from "./AddSessionForm/HeaderStats"
+import { SessionDetailsStep } from "./AddSessionForm/SessionDetailsStep"
+import { JurySelectionStep } from "./AddSessionForm/JurySelectionStep"
+import { TeamAssignmentStep } from "./AddSessionForm/TeamAssignmentStep"
+
 
 // Zod schema for session validation
 const addSessionSchema = z.object({
@@ -46,11 +36,14 @@ type AddSessionFormValues = z.infer<typeof addSessionSchema>
 
 interface AddSessionFormProps {
   juryMembers: juryDBType[]
+  teams: TeamDataType[]
 }
 
-export function AddSessionForm({ juryMembers }: AddSessionFormProps) {
+export function AddSessionForm({ juryMembers, teams }: AddSessionFormProps) {
   const router = useRouter()
   const [selectedJury, setSelectedJury] = useState<number[]>([])
+  const [currentStep, setCurrentStep] = useState<"details" | "jury" | "teams">("details")
+  const [teamAssignments, setTeamAssignments] = useState<Map<number, number>>(new Map())
 
   const form = useForm<AddSessionFormValues>({
     resolver: zodResolver(addSessionSchema),
@@ -65,7 +58,11 @@ export function AddSessionForm({ juryMembers }: AddSessionFormProps) {
     formState: { isSubmitting, errors },
     setError,
     clearErrors,
+    watch,
   } = form
+
+  // Watch form fields for reactive updates
+  const sessionName = watch("name")
 
   const handleJurySelection = (juryId: number, checked: boolean) => {
     let newSelection: number[]
@@ -74,6 +71,15 @@ export function AddSessionForm({ juryMembers }: AddSessionFormProps) {
       newSelection = [...selectedJury, juryId]
     } else {
       newSelection = selectedJury.filter(id => id !== juryId)
+      
+      // Remove team assignments for this jury member
+      const updatedAssignments = new Map(teamAssignments)
+      for (const [teamId, assignedJuryId] of updatedAssignments.entries()) {
+        if (assignedJuryId === juryId) {
+          updatedAssignments.delete(teamId)
+        }
+      }
+      setTeamAssignments(updatedAssignments)
     }
     
     setSelectedJury(newSelection)
@@ -97,6 +103,8 @@ export function AddSessionForm({ juryMembers }: AddSessionFormProps) {
   const clearAllJury = () => {
     setSelectedJury([])
     form.setValue("selectedJury", [])
+    // Clear all team assignments when clearing jury
+    setTeamAssignments(new Map())
   }
 
   const onSubmit = async (data: AddSessionFormValues) => {
@@ -106,9 +114,11 @@ export function AddSessionForm({ juryMembers }: AddSessionFormProps) {
       const result = await addSessionAction({
         name: data.name,
         juryIds: data.selectedJury,
+        teamAssignments: teamAssignments,
       })
 
       if (result.success) {
+        toast.success("Session created successfully!")
         router.push("/dashboard/session")
         router.refresh()
       }
@@ -118,292 +128,160 @@ export function AddSessionForm({ juryMembers }: AddSessionFormProps) {
         type: "manual",
         message: "Failed to create session. Please try again.",
       })
+      toast.error("Failed to create session")
     }
   }
+
+  const canProceedToJury = () => {
+    return sessionName?.trim().length > 0
+  }
+
+  const canProceedToTeams = () => {
+    return selectedJury.length > 0
+  }
+
+  const handleNext = () => {
+    if (currentStep === "details" && canProceedToJury()) {
+      setCurrentStep("jury")
+    } else if (currentStep === "jury" && canProceedToTeams()) {
+      setCurrentStep("teams")
+    }
+  }
+
+  const handleBack = () => {
+    if (currentStep === "teams") {
+      setCurrentStep("jury")
+    } else if (currentStep === "jury") {
+      setCurrentStep("details")
+    }
+  }
+
+  const selectedJuryMembers = juryMembers.filter(j => selectedJury.includes(j.id!))
 
   // Filter jury members - available vs assigned
   const availableJury = juryMembers.filter(jury => jury.session === null)
   const assignedJury = juryMembers.filter(jury => jury.session !== null)
 
   return (
-    <div className=" bg-gray-50/50">
-      {/* Mobile-first responsive container */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
-        
-        {/* Header Section - Responsive */}
-        <div className="mb-6 sm:mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50">
+      {/* Header Section - Fixed at top with gradient */}
+      <div className="bg-white border-b sticky top-0 z-20 shadow-sm">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-5">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => router.back()}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 hover:bg-gray-100"
               >
                 <ArrowLeft className="h-4 w-4" />
                 <span className="hidden sm:inline">Back</span>
               </Button>
               <div>
-                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                   Add New Session
                 </h1>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Create a new session and assign jury members
+                <p className="text-sm text-muted-foreground hidden sm:block">
+                  Create a new session with jury and team assignments
                 </p>
               </div>
             </div>
+            
+            {/* Desktop: Quick stats */}
+            <HeaderStats 
+              sessionName={sessionName}
+              selectedJuryCount={selectedJury.length}
+              teamsAssignedCount={teamAssignments.size}
+            />
           </div>
         </div>
-
-        <Form {...form}>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            
-            {/* Responsive Grid Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              
-              {/* Session Information - Takes full width on mobile, 1 column on desktop */}
-              <div className="lg:col-span-1">
-                <Card className="h-fit">
-                  <CardHeader className="pb-4">
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <Calendar className="h-5 w-5" />
-                      Session Information
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Session Name</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="e.g., Morning Session, Round 1"
-                              disabled={isSubmitting}
-                              className="w-full"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    {/* Stats Summary - Mobile Responsive */}
-                    <div className="mt-6 grid grid-cols-2 gap-4">
-                      <div className="text-center p-3 bg-blue-50 rounded-lg">
-                        <div className="text-lg sm:text-xl font-bold text-blue-600">
-                          {availableJury.length}
-                        </div>
-                        <div className="text-xs sm:text-sm text-blue-600">Available</div>
-                      </div>
-                      <div className="text-center p-3 bg-green-50 rounded-lg">
-                        <div className="text-lg sm:text-xl font-bold text-green-600">
-                          {selectedJury.length}
-                        </div>
-                        <div className="text-xs sm:text-sm text-green-600">Selected</div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Jury Selection - Takes full width on mobile, 2 columns on desktop */}
-              <div className="lg:col-span-2">
-                <Card className="gap-0">
-                  <CardHeader className="pb-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                      <CardTitle className="flex items-center gap-2 text-lg">
-                        <Users className="h-5 w-5" />
-                        Select Jury Members
-                      </CardTitle>
-                      
-                      {/* Action Buttons - Responsive Stack */}
-                      <div className="flex flex-col sm:flex-row gap-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={selectAllJury}
-                          disabled={isSubmitting || availableJury.length === 0}
-                          className="w-full sm:w-auto text-xs sm:text-sm"
-                        >
-                          Select All
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={clearAllJury}
-                          disabled={isSubmitting || selectedJury.length === 0}
-                          className="w-full sm:w-auto text-xs sm:text-sm"
-                        >
-                          Clear All
-                        </Button>
-                      </div>
-                    </div>
-                    
-                    {/* Stats Bar - Mobile Responsive */}
-                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                        Available: {availableJury.length}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        Selected: {selectedJury.length}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
-                        Assigned: {assignedJury.length}
-                      </span>
-                    </div>
-                  </CardHeader>
-                  
-                  <CardContent className="p-0 sm:p-6">
-                    {errors.selectedJury && (
-                      <div className="mx-4 sm:mx-0 mb-4 text-sm text-red-500 p-3 bg-red-50 rounded-lg">
-                        {errors.selectedJury.message}
-                      </div>
-                    )}
-
-                    {/* Responsive Table Container */}
-                    <div className="border rounded-lg max-h-[400px] sm:max-h-[500px] overflow-auto">
-                      <div className="overflow-x-auto">
-                        <Table>
-                          <TableHeader>
-                            <TableRow className="bg-gray-50">
-                              <TableHead className="w-12 text-center">
-                                <span className="sr-only">Select</span>
-                              </TableHead>
-                              <TableHead className="min-w-[120px]">Name</TableHead>
-                              <TableHead className="hidden sm:table-cell min-w-[200px]">Email</TableHead>
-                              <TableHead className="hidden md:table-cell min-w-[120px]">Phone</TableHead>
-                              <TableHead className="w-20 text-center">Role</TableHead>
-                              <TableHead className="w-20 text-center">Status</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {juryMembers.length === 0 ? (
-                              <TableRow>
-                                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                                  <div className="flex flex-col items-center gap-2">
-                                    <Users className="h-8 w-8 text-gray-300" />
-                                    <p>No jury members found</p>
-                                    <p className="text-xs">Please add jury members first</p>
-                                  </div>
-                                </TableCell>
-                              </TableRow>
-                            ) : (
-                              juryMembers.map((jury) => {
-                                const isAvailable = jury.session === null
-                                const isSelected = selectedJury.includes(jury.id!)
-                                
-                                return (
-                                  <TableRow 
-                                    key={jury.id}
-                                    className={` ${isSelected ? "bg-blue-50 border-blue-200" : ""} hover:bg-gray-50`}
-                                  >
-                                    <TableCell className="text-center">
-                                      <Checkbox
-                                        checked={isSelected}
-                                        onCheckedChange={(checked) => 
-                                          handleJurySelection(jury.id!, checked as boolean)
-                                        }
-                                        disabled={!isAvailable || isSubmitting}
-                                      />
-                                    </TableCell>
-                                    
-                                    <TableCell className="font-medium">
-                                      <div className="flex flex-col">
-                                        <span className="truncate">{jury.name}</span>
-                                        {/* Show email on mobile when email column is hidden */}
-                                        <span className="sm:hidden text-xs text-muted-foreground truncate">
-                                          {jury.email}
-                                        </span>
-                                      </div>
-                                    </TableCell>
-                                    
-                                    <TableCell className="hidden sm:table-cell">
-                                      <div className="flex items-center gap-2">
-                                        <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                                        <span className="truncate">{jury.email}</span>
-                                      </div>
-                                    </TableCell>
-                                    
-                                    <TableCell className="hidden md:table-cell">
-                                      <div className="flex items-center gap-2">
-                                        <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                                        <span className="truncate">{jury.phoneNumber}</span>
-                                      </div>
-                                    </TableCell>
-                                    
-                                    <TableCell className="text-center">
-                                      <Badge 
-                                        variant={jury.role === "jury" ? "green" : "orange"}
-                                      >
-                                        {`${jury.role}`}
-                                      </Badge>
-                                    </TableCell>
-                                    
-                                    <TableCell className="text-center">
-                                      <Badge 
-                                        variant={isAvailable ? "default" : "secondary"}
-                                        className={`text-xs ${isAvailable ? "bg-orange-500 hover:bg-orange-600" : "bg-gray-500 hover:bg-gray-600"}`}
-                                      >
-                                        {isAvailable ? "Free" : `S${jury.session}`}
-                                      </Badge>
-                                    </TableCell>
-                                  </TableRow>
-                                )
-                              })
-                            )}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-
-            {/* Error Display */}
-            {errors.root && (
-              <div className="text-sm text-red-500 text-center bg-red-50 p-4 rounded-lg border border-red-200">
-                {errors.root.message}
-              </div>
-            )}
-
-            {/* Action Buttons - Responsive */}
-            <div className="flex flex-col sm:flex-row justify-end gap-3 pt-6 border-t">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => router.back()}
-                disabled={isSubmitting}
-                className="w-full sm:w-auto order-2 sm:order-1"
-              >
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={isSubmitting || selectedJury.length === 0}
-                className="w-full sm:w-auto order-1 sm:order-2"
-              >
-                {isSubmitting ? (
-                  <div className="flex items-center gap-2">
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                    Creating Session...
-                  </div>
-                ) : (
-                  "Create Session"
-                )}
-              </Button>
-            </div>
-          </form>
-        </Form>
       </div>
+
+      <Form {...form}>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          {/* Desktop: Split layout | Mobile: Stacked */}
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+            <div className="lg:grid lg:grid-cols-12 lg:gap-8 xl:gap-10">
+              
+              {/* Left Sidebar - Progress Steps */}
+              <div className="lg:col-span-3 mb-6 lg:mb-0">
+                <div className="lg:sticky lg:top-28">
+                  <ProgressSidebar 
+                    currentStep={currentStep}
+                    canProceedToJury={canProceedToJury()}
+                    canProceedToTeams={canProceedToTeams()}
+                  />
+
+                  {/* Desktop: Session summary card */}
+                  <SessionSummaryCard 
+                    sessionName={sessionName}
+                    selectedJuryCount={selectedJury.length}
+                    teamsAssignedCount={teamAssignments.size}
+                    totalTeamsCount={teams.length}
+                  />
+                </div>
+              </div>
+
+              {/* Right Content Area - Enhanced */}
+              <div className="lg:col-span-9">
+                <Tabs value={currentStep} onValueChange={(v) => setCurrentStep(v as typeof currentStep)}>
+                  <TabsList className="hidden">
+                    <TabsTrigger value="details">Details</TabsTrigger>
+                    <TabsTrigger value="jury">Jury</TabsTrigger>
+                    <TabsTrigger value="teams">Teams</TabsTrigger>
+                  </TabsList>
+
+                  {/* Step 1: Session Details */}
+                  <TabsContent value="details">
+                    <SessionDetailsStep 
+                      control={form.control}
+                      isSubmitting={isSubmitting}
+                      canProceed={canProceedToJury()}
+                      onNext={handleNext}
+                    />
+                  </TabsContent>
+
+                  {/* Step 2: Jury Selection */}
+                  <TabsContent value="jury">
+                    <JurySelectionStep 
+                      juryMembers={juryMembers}
+                      selectedJury={selectedJury}
+                      availableJury={availableJury}
+                      assignedJury={assignedJury}
+                      isSubmitting={isSubmitting}
+                      errors={errors}
+                      onJurySelection={handleJurySelection}
+                      onSelectAll={selectAllJury}
+                      onClearAll={clearAllJury}
+                      onBack={handleBack}
+                      onNext={handleNext}
+                      canProceed={canProceedToTeams()}
+                    />
+                  </TabsContent>
+
+                  {/* Step 3: Team Assignment */}
+                  <TabsContent value="teams">
+                    <TeamAssignmentStep 
+                      teams={teams}
+                      selectedJuryMembers={selectedJuryMembers}
+                      allJuryMembers={juryMembers}
+                      teamAssignments={teamAssignments}
+                      sessionName={sessionName}
+                      isSubmitting={isSubmitting}
+                      errors={errors}
+                      onAssignmentsChange={setTeamAssignments}
+                      onJuryAdd={(juryId) => handleJurySelection(juryId, true)}
+                      onJuryRemove={(juryId) => handleJurySelection(juryId, false)}
+                      onBack={handleBack}
+                    />
+                  </TabsContent>
+                </Tabs>
+              </div>
+            </div>
+          </div>
+        </form>
+      </Form>
     </div>
   )
 }

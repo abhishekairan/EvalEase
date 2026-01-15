@@ -190,7 +190,7 @@ export async function shuffleTeamsInSession(sessionId: number): Promise<boolean>
       throw new Error("No jury members found in this session")
     }
 
-    // Get all teams (assuming all teams participate in all sessions)
+    // Get all teams - shuffle ALL teams, overwriting existing assignments
     const allTeams = await getTeamIds()
 
     if (allTeams.length === 0) {
@@ -294,6 +294,38 @@ export async function getTeamDistribution(sessionId: number) {
     return distribution
   } catch (error) {
     console.error("Error getting team distribution:", error)
+    return []
+  }
+}
+
+/**
+ * Gets all teams with their current jury assignments for a session
+ * Returns teams that are assigned to jury members in the specified session
+ * @param sessionId - The session ID
+ * @returns Promise<Array> - Teams with jury assignments
+ */
+export async function getTeamsBySession(sessionId: number) {
+  try {
+    // Get all jury members for this session
+    const sessionJury = await db
+      .select({ id: jury.id })
+      .from(jury)
+      .where(eq(jury.session, sessionId))
+    
+    const juryIds = sessionJury.map(j => j.id)
+    
+    if (juryIds.length === 0) {
+      // No jury assigned to session, return all teams with no assignments
+      return await db.select().from(teams)
+    }
+
+    // Get all teams, filtering to show those assigned to session jury
+    // or all teams if we want to allow assignment
+    const allTeams = await db.select().from(teams)
+    
+    return allTeams
+  } catch (error) {
+    console.error("Error getting teams by session:", error)
     return []
   }
 }

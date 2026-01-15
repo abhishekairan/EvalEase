@@ -12,13 +12,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Mail, Phone } from "lucide-react";
-import { useState } from "react";
+import { Users, Mail, Phone, Lock, LockOpen } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { submitMarks } from "@/actions/marks";
+import { submitMarks, lockMarks } from "@/actions/marks";
 import { toast } from "sonner";
-import { MarksFormData, MarksFormSchema, TeamDataType } from "@/zod";
+import { MarksFormData, MarksFormSchema, TeamDataType, MarksDBType } from "@/zod";
+import { getMarks } from "@/db/utils";
 
 interface MarksDialogProps {
   open: boolean;
@@ -27,6 +28,7 @@ interface MarksDialogProps {
   juryId?: number;
   sessionId?: number | null;
   onMarksSubmitted: (teamId: number) => void;
+  existingMark?: MarksDBType | null;
 }
 
 export default function MarksDialog({
@@ -35,17 +37,20 @@ export default function MarksDialog({
   team,
   juryId,
   sessionId,
-  onMarksSubmitted
+  onMarksSubmitted,
+  existingMark
 }: MarksDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLocking, setIsLocking] = useState(false);
+  const [isLocked, setIsLocked] = useState(existingMark?.locked || false);
   
   const form = useForm({
     resolver: zodResolver(MarksFormSchema),
     defaultValues: {
-      innovationScore: 0,
-      presentationScore: 0,
-      technicalScore: 0,
-      impactScore: 0,
+      innovationScore: existingMark?.innovationScore || 0,
+      presentationScore: existingMark?.presentationScore || 0,
+      technicalScore: existingMark?.technicalScore || 0,
+      impactScore: existingMark?.impactScore || 0,
     },
   });
 
@@ -56,9 +61,35 @@ export default function MarksDialog({
     reset
   } = form;
 
+  // Update form when existing mark changes or dialog opens
+  useEffect(() => {
+    if (existingMark) {
+      reset({
+        innovationScore: existingMark.innovationScore,
+        presentationScore: existingMark.presentationScore,
+        technicalScore: existingMark.technicalScore,
+        impactScore: existingMark.impactScore,
+      });
+      setIsLocked(existingMark.locked || false);
+    } else {
+      reset({
+        innovationScore: 0,
+        presentationScore: 0,
+        technicalScore: 0,
+        impactScore: 0,
+      });
+      setIsLocked(false);
+    }
+  }, [existingMark, reset, open]);
+
   const onSubmit = async (data: MarksFormData) => {
     if (!juryId || !sessionId) {
       toast.error("Missing jury or session information");
+      return;
+    }
+
+    if (isLocked) {
+      toast.error("This mark is locked and cannot be edited");
       return;
     }
 
@@ -75,16 +106,14 @@ export default function MarksDialog({
         submitted: true
       };
 
-      const {success} = await submitMarks(markData);
-      if(success){
-        toast.success("Marks submitted successfully!");
+      const result = await submitMarks(markData);
+      if(result.success){
+        toast.success(result.message || "Marks saved successfully!");
+        onMarksSubmitted(team.id!);
+        onClose();
       }else{
-        toast.error("Marks cannot be submitted!");
+        toast.error(result.message || "Marks cannot be submitted!");
       }
-
-      onMarksSubmitted(team.id!);
-      reset();
-      onClose();
     } catch (error) {
       console.error("Error submitting marks:", error);
       toast.error("Failed to submit marks. Please try again.");
@@ -93,20 +122,58 @@ export default function MarksDialog({
     }
   };
 
+  const handleLockMarks = async () => {
+    if (!existingMark?.id) {
+      toast.error("No marks to lock. Please save marks first.");
+      return;
+    }
+
+    setIsLocking(true);
+    try {
+      const result = await lockMarks({ markId: existingMark.id });
+      if (result.success) {
+        toast.success(result.message || "Marks locked successfully!");
+        setIsLocked(true);
+        onMarksSubmitted(team.id!);
+      } else {
+        toast.error(result.message || "Failed to lock marks");
+      }
+    } catch (error) {
+      console.error("Error locking marks:", error);
+      toast.error("Failed to lock marks. Please try again.");
+    } finally {
+      setIsLocking(false);
+    }
+  };
+
   const handleClose = () => {
-    reset();
+    if (!isLocked) {
+      reset();
+    }
     onClose();
   };
+
+  const isEditing = !!existingMark;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="w-[95vw] max-w-4xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader className="space-y-3">
-          <DialogTitle className="text-lg sm:text-xl lg:text-2xl font-semibold">
-            Enter Marks for {team.teamName}
-          </DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-lg sm:text-xl lg:text-2xl font-semibold">
+              {isEditing ? "Edit" : "Enter"} Marks for {team.teamName}
+            </DialogTitle>
+            {isLocked && (
+              <div className="flex items-center gap-2 bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm">
+                <Lock className="h-4 w-4" />
+                <span>Locked</span>
+              </div>
+            )}
+          </div>
           <DialogDescription className="text-sm sm:text-base">
-            Please review team details and enter marks for each category
+            {isLocked 
+              ? "These marks are locked and cannot be edited" 
+              : "Please review team details and enter marks for each category"}
           </DialogDescription>
         </DialogHeader>
 
@@ -190,6 +257,7 @@ export default function MarksDialog({
                       min="0"
                       max="10"
                       step="1"
+                      disabled={isLocked}
                       {...register("innovationScore", { valueAsNumber: true })}
                       className="w-full"
                     />
@@ -211,6 +279,7 @@ export default function MarksDialog({
                       min="0"
                       max="10"
                       step="1"
+                      disabled={isLocked}
                       {...register("presentationScore", { valueAsNumber: true })}
                       className="w-full"
                     />
@@ -232,6 +301,7 @@ export default function MarksDialog({
                       min="0"
                       max="15"
                       step="1"
+                      disabled={isLocked}
                       {...register("technicalScore", { valueAsNumber: true })}
                       className="w-full"
                     />
@@ -253,6 +323,7 @@ export default function MarksDialog({
                       min="0"
                       max="15"
                       step="1"
+                      disabled={isLocked}
                       {...register("impactScore", { valueAsNumber: true })}
                       className="w-full"
                     />
@@ -271,15 +342,35 @@ export default function MarksDialog({
                     onClick={handleClose}
                     className="w-full sm:w-auto order-2 sm:order-1"
                   >
-                    Cancel
+                    {isLocked ? "Close" : "Cancel"}
                   </Button>
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full sm:w-auto order-1 sm:order-2"
-                  >
-                    {isSubmitting ? "Submitting..." : "Submit Marks"}
-                  </Button>
+                  {!isLocked && (
+                    <>
+                      <Button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="w-full sm:w-auto order-1 sm:order-2"
+                      >
+                        {isSubmitting ? "Saving..." : (isEditing ? "Update Marks" : "Submit Marks")}
+                      </Button>
+                      {isEditing && existingMark && (
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          onClick={handleLockMarks}
+                          disabled={isLocking}
+                          className="w-full sm:w-auto order-1 sm:order-3"
+                        >
+                          {isLocking ? "Locking..." : (
+                            <>
+                              <Lock className="h-4 w-4 mr-2" />
+                              Lock Marks
+                            </>
+                          )}
+                        </Button>
+                      )}
+                    </>
+                  )}
                 </DialogFooter>
               </form>
             </CardContent>

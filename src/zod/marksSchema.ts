@@ -13,6 +13,7 @@ export const marksDBSchema = z.object({
   impactScore: z.number().int().min(-1,"Marks should range between 0-15").max(15).default(-1),
   session: z.number().int().positive(),
   submitted: z.boolean().default(false),
+  locked: z.boolean().default(false),
   createdAt: z.date().default(() => new Date()).optional(),
   updatedAt: z.date().default(() => new Date()).optional(),
 });

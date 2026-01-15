@@ -2,12 +2,15 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { createSession, updateJurySession, updateSession, deleteSession, getJuryIdsBySession, deleteJurysSession } from "@/db/utils"
+import { createSession, updateJurySession, updateSession, deleteSession, getJuryIdsBySession, deleteJurysSession, updateTeamjury, getJuryBySession, getTeamsBySession } from "@/db/utils"
 import { shuffleTeamsInSession } from "@/db/utils"
+import { lockAllMarksForSession } from "./marks"
+import { TeamDataType, juryDBType } from "@/zod"
 
 interface AddSessionData {
   name: string
   juryIds: number[]
+  teamAssignments?: Map<number, number> // teamId -> juryId
 }
 
 export async function addSessionAction(data: AddSessionData) {
@@ -30,8 +33,18 @@ export async function addSessionAction(data: AddSessionData) {
       )
     )
 
+    // Handle team assignments if provided
+    if (data.teamAssignments && data.teamAssignments.size > 0) {
+      await Promise.all(
+        Array.from(data.teamAssignments.entries()).map(([teamId, juryId]) =>
+          updateTeamjury({ teamid: teamId, juryId })
+        )
+      )
+    }
+
     // Revalidate the sessions page
     revalidatePath("/dashboard/sessions")
+    revalidatePath("/dashboard/session")
     revalidatePath("/home")
 
     return { success: true, session: newSession }
@@ -60,17 +73,28 @@ export async function startSessionAction(sessionId: number) {
 
 export async function endSessionAction(sessionId: number) {
   try {
+    // Lock all marks for this session before ending
+    const lockResult = await lockAllMarksForSession(sessionId);
+    if (!lockResult.success) {
+      console.warn("Warning: Failed to lock some marks:", lockResult.message);
+      // Continue with ending session even if locking fails
+    }
+
+    // Update session with end time
     const result = await updateSession({
       sessionId,
       updates: {
         endedAt: new Date()
       }
     })
+    
+    // Remove jury members from session
     const juries = await getJuryIdsBySession({sessionId: sessionId})
     const response = await deleteJurysSession({juries})
     if(!response) throw new Error("Failed to stop session")
     
     revalidatePath("/dashboard/sessions")
+    revalidatePath("/dashboard/marks")
     revalidatePath("/home")
     return { success: true, session: result }
   } catch (error) {
@@ -111,5 +135,38 @@ export async function shuffleStudentsAction(sessionId: number) {
   } catch (error) {
     console.error("Error shuffling students:", error)
     throw new Error("Failed to shuffle students")
+  }
+}
+
+export async function reassignTeamsForSession(
+  sessionId: number,
+  teamAssignments: [number, number][] // Array of [teamId, juryId] tuples
+) {
+  try {
+    if (!sessionId) {
+      throw new Error("Session ID is required")
+    }
+
+    if (!teamAssignments || teamAssignments.length === 0) {
+      throw new Error("Team assignments are required")
+    }
+
+    // Update team assignments in parallel
+    await Promise.all(
+      teamAssignments.map(([teamId, juryId]) =>
+        updateTeamjury({ teamid: teamId, juryId })
+      )
+    )
+
+    // Revalidate relevant paths
+    revalidatePath("/dashboard/sessions")
+    revalidatePath("/dashboard/session")
+    revalidatePath("/dashboard/marks")
+    revalidatePath("/home")
+
+    return { success: true }
+  } catch (error) {
+    console.error("Error reassigning teams:", error)
+    throw new Error("Failed to reassign teams")
   }
 }

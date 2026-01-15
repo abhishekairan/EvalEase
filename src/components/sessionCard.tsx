@@ -22,12 +22,14 @@ import {
   Square,
   Shuffle,
   Users,
+  Users2,
   Trophy,
   Clock,
   Calendar,
   CheckCircle,
   Trash2
 } from "lucide-react"
+import Link from "next/link"
 import { cn } from "@/lib/utils"
 
 interface SessionStats {
@@ -338,6 +340,24 @@ export function SessionCard({
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Reassign Teams Button */}
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex-1"
+          asChild
+          disabled={
+            sessionStatus.status === "ended" || 
+            actionLoading !== null ||
+            isLoading
+          }
+        >
+          <Link href={`/dashboard/session/${session.id}/reassign`} className="flex items-center gap-2">
+            <Users2 className="h-4 w-4" />
+            {"Reassign"}
+          </Link>
+        </Button>
       </CardFooter>
     </Card>
   )

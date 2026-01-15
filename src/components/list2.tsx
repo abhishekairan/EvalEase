@@ -13,7 +13,8 @@ import { Separator } from "@/components/ui/separator";
 import MarksDialog from "./marks-dialog";
 import { logoutAction } from "@/actions/logout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TeamDataType } from "@/zod";
+import { TeamDataType, MarksDBType } from "@/zod";
+import { getExistingMark } from "@/actions/marks";
 
 
 interface List2Props {
@@ -31,7 +32,9 @@ const List2 = ({
 }: List2Props) => {
   const [teamList, setTeamList] = useState<TeamDataType[]>(teams);
   const [selectedTeam, setSelectedTeam] = useState<TeamDataType | null>(null);
+  const [existingMark, setExistingMark] = useState<MarksDBType | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [isLoadingMark, setIsLoadingMark] = useState(false);
 
   useEffect(() => {
     setTeamList(teams);
@@ -47,16 +50,41 @@ const List2 = ({
     );
     setDialogOpen(false);
     setSelectedTeam(null);
+    setExistingMark(null);
   };
 
-  const openMarksDialog = (team: TeamDataType) => {
+  const openMarksDialog = async (team: TeamDataType) => {
     setSelectedTeam(team);
+    setIsLoadingMark(true);
+    
+    // Fetch existing mark if any
+    if (juryId && sessionId && team.id) {
+      try {
+        const result = await getExistingMark({ 
+          teamId: team.id, 
+          juryId: juryId,
+          sessionId: sessionId
+        });
+        
+        if (result.success && result.mark) {
+          setExistingMark(result.mark);
+        } else {
+          setExistingMark(null);
+        }
+      } catch (error) {
+        console.error("Error fetching existing marks:", error);
+        setExistingMark(null);
+      }
+    }
+    
+    setIsLoadingMark(false);
     setDialogOpen(true);
   };
 
   const closeDialog = () => {
     setDialogOpen(false);
     setSelectedTeam(null);
+    setExistingMark(null);
   };
 
   if (teamList.length === 0) {
@@ -161,8 +189,9 @@ const List2 = ({
 
                 <Button
                   onClick={() => openMarksDialog(team)}
+                  disabled={isLoadingMark}
                   className={`w-full bg-blue-600 hover:bg-blue-700`}>
-                  {'Enter Marks'}
+                  {isLoadingMark ? 'Loading...' : 'Enter Marks'}
                 </Button>
               </CardContent>
             </Card>
@@ -177,6 +206,7 @@ const List2 = ({
             juryId={juryId}
             sessionId={sessionId}
             onMarksSubmitted={handleMarksSubmitted}
+            existingMark={existingMark}
           />
         )}
       </div>

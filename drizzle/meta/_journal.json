@@ -15,6 +15,13 @@
       "when": 1763785598004,
       "tag": "0001_grey_tempest",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1768463947616,
+      "tag": "0002_nosy_anthem",
+      "breakpoints": true
     }
   ]
 }

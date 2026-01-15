@@ -1,0 +1,1 @@
+ALTER TABLE `marks` ADD `locked` boolean DEFAULT false NOT NULL;

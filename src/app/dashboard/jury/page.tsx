@@ -17,30 +17,29 @@ function JurryTableSkeleton(){
 
 
 async function JuryContent(){
-  try{
-    const data = await getJuryWithSessions()
-    const sessions = await getSessionsForDropdown()
+  try {
+    const data = await getJuryWithSessions();
+    const sessions = await getSessionsForDropdown();
     
-    return(
+    return (
       <>
         <AddJuryDialog sessions={sessions}>
           <Button variant={"secondary"}>Add Jury</Button>
         </AddJuryDialog>
         <JuryDataTable data={data} sessions={sessions} />
       </>
-    )
-  }catch(error){
-    console.error("Error loading Juries: ",error)
-  }
+    );
+  } catch (error) {
+    const err = error as Error;
+    console.error("Error loading Juries:", err);
+    
     return (
       <div className="text-center py-10">
-        <h2 className="text-xl font-semibold text-red-600">Error Loading Marks</h2>
-        <p className="text-muted-foreground mt-2">
-          There was an error loading the marks data. Please try again later.
-        </p>
+        <h2 className="text-xl font-semibold text-red-600">Error Loading Jury Data</h2>
+        <p className="text-muted-foreground mt-2">Please try again later.</p>
       </div>
     );
-
+  }
 }
 const page = async () => {
   try{

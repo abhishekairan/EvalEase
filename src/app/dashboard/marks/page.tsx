@@ -20,7 +20,7 @@ function MarksTableSkeleton() {
 async function MarksContent() {
   try {
     const data = await getMarksWithData();
-    console.log(data)
+    // console.log(rawData)
     
     return (
       <>

@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getSessionsForJury, getTeamsWithData, getSessionById } from "@/db/utils";
 import { SessionTeamsView } from "@/components/SessionTeamsView";
+import { getTeamsMarksStatus } from "@/actions/marks";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +20,8 @@ export default async function SessionPage({ params }: PageProps) {
   }
 
   const juryId = Number(jury.user.id);
-  const sessionId = Number(params.sessionId);
+  const resolvedParams = await params;
+  const sessionId = Number(resolvedParams.sessionId);
 
   // Get session details
   const session = await getSessionById(sessionId);
@@ -57,6 +59,14 @@ export default async function SessionPage({ params }: PageProps) {
     (team) => team.juryId === juryId
   );
 
+  // Get marks status for all teams
+  const teamIds = juryTeams.map(team => team.id!).filter(id => id !== undefined);
+  const marksStatusResult = await getTeamsMarksStatus({
+    juryId,
+    sessionId: session.id!,
+    teamIds,
+  });
+
   return (
     <SessionTeamsView
       juryName={jury.user.name}
@@ -68,6 +78,7 @@ export default async function SessionPage({ params }: PageProps) {
         endedAt,
       }}
       teams={juryTeams}
+      initialMarksStatus={marksStatusResult.marksStatus}
     />
   );
 }

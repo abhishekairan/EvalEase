@@ -224,6 +224,7 @@ export async function getMarksWithData({ id, teamId, juryId, session }: {
       technicalScore: marks.technicalScore,
       impactScore: marks.impactScore,
       submitted: marks.submitted,
+      locked: marks.locked,
       createdAt: marks.createdAt,
       updatedAt: marks.updatedAt,
       // Team data

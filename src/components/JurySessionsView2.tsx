@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Clock, Play, CheckCircle, Calendar, ArrowRight, LogOut, Lock } from "lucide-react";
-import { logoutAction } from "@/actions/logout";
+import { useLogout } from "@/hooks/use-logout";
 import { useRouter } from "next/navigation";
 
 interface SessionData {
@@ -28,6 +28,7 @@ export function JurySessionsView({
   sessions,
 }: JurySessionsViewProps) {
   const router = useRouter();
+  const { handleLogout } = useLogout();
 
   // Group sessions by status
   const groupedSessions = useMemo(() => {
@@ -89,12 +90,22 @@ export function JurySessionsView({
     return (
       <Card
         key={session.id}
-        className={`relative overflow-hidden transition-all duration-200 ${
+        className={`relative overflow-hidden animate-fade-in ${
           canAccess
-            ? "cursor-pointer hover:shadow-lg hover:scale-[1.02] border-l-4 border-l-green-500"
+            ? "cursor-pointer card-hover border-l-4 border-l-green-500"
             : "opacity-75"
         }`}
         onClick={() => canAccess && handleSessionClick(session)}
+        onKeyDown={(e) => {
+          if (canAccess && (e.key === "Enter" || e.key === " ")) {
+            e.preventDefault();
+            handleSessionClick(session);
+          }
+        }}
+        tabIndex={canAccess ? 0 : undefined}
+        role={canAccess ? "button" : undefined}
+        aria-label={canAccess ? `Open ${session.name} session` : `${session.name} session - ${session.status}`}
+        aria-disabled={!canAccess}
       >
         {/* Status indicator stripe */}
         <div
@@ -183,54 +194,56 @@ export function JurySessionsView({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 animate-fade-in">
       {/* Header */}
-      <div className="bg-white border-b shadow-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold">Welcome, {juryName}</h1>
-              <p className="text-sm text-muted-foreground mt-1">
+      <header className="bg-white border-b shadow-sm sticky top-0 z-10" role="banner">
+        <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-lg sm:text-xl md:text-2xl font-bold truncate">Welcome, {juryName}</h1>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 sm:mt-1">
                 {sessions.length} session{sessions.length !== 1 ? "s" : ""} assigned
               </p>
             </div>
             <Button
               variant="outline"
-              onClick={() => logoutAction()}
-              className="gap-2"
+              onClick={handleLogout}
+              className="gap-2 shrink-0 h-9 sm:h-10"
+              size="sm"
+              aria-label="Logout from application"
             >
-              <LogOut className="h-4 w-4" />
-              Logout
+              <LogOut className="h-4 w-4" aria-hidden="true" />
+              <span className="hidden sm:inline">Logout</span>
             </Button>
           </div>
         </div>
-      </div>
+      </header>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
+      <section className="container mx-auto px-4 sm:px-6 py-6 sm:py-8" role="main" aria-label="Sessions overview">
         {sessions.length === 0 ? (
           <Card>
-            <CardContent className="text-center py-16">
-              <Calendar className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+            <CardContent className="text-center py-12">
+              <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">No Sessions Assigned</h3>
               <p className="text-muted-foreground">
-                You haven't been assigned to any sessions yet. Please contact the administrator.
+                You haven't been assigned to any sessions yet. Please contact the administrator for assistance.
               </p>
             </CardContent>
           </Card>
         ) : (
           <Tabs defaultValue="started" className="space-y-6">
             <TabsList className="grid w-full grid-cols-3 max-w-md">
-              <TabsTrigger value="started" className="gap-2">
-                <Play className="h-4 w-4" />
+              <TabsTrigger value="started" className="gap-2" aria-label={`Ongoing sessions (${groupedSessions.started.length})`}>
+                <Play className="h-4 w-4" aria-hidden="true" />
                 Ongoing ({groupedSessions.started.length})
               </TabsTrigger>
-              <TabsTrigger value="upcoming" className="gap-2">
-                <Clock className="h-4 w-4" />
+              <TabsTrigger value="upcoming" className="gap-2" aria-label={`Upcoming sessions (${groupedSessions.upcoming.length})`}>
+                <Clock className="h-4 w-4" aria-hidden="true" />
                 Upcoming ({groupedSessions.upcoming.length})
               </TabsTrigger>
-              <TabsTrigger value="past" className="gap-2">
-                <CheckCircle className="h-4 w-4" />
+              <TabsTrigger value="past" className="gap-2" aria-label={`Past sessions (${groupedSessions.past.length})`}>
+                <CheckCircle className="h-4 w-4" aria-hidden="true" />
                 Past ({groupedSessions.past.length})
               </TabsTrigger>
             </TabsList>
@@ -239,18 +252,20 @@ export function JurySessionsView({
               {groupedSessions.started.length === 0 ? (
                 <Card>
                   <CardContent className="text-center py-12">
-                    <Play className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p className="font-medium mb-1">No ongoing sessions</p>
-                    <p className="text-sm text-muted-foreground">
-                      You don't have any active sessions at the moment.
+                    <Play className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No Ongoing Sessions</h3>
+                    <p className="text-muted-foreground">
+                      You don't have any active sessions at the moment. Check back later or view upcoming sessions.
                     </p>
                   </CardContent>
                 </Card>
               ) : (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {groupedSessions.started.map((session) =>
-                    renderSessionCard(session)
-                  )}
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {groupedSessions.started.map((session, index) => (
+                    <div key={session.id} style={{ animationDelay: `${index * 50}ms` }}>
+                      {renderSessionCard(session)}
+                    </div>
+                  ))}
                 </div>
               )}
             </TabsContent>
@@ -259,10 +274,10 @@ export function JurySessionsView({
               {groupedSessions.upcoming.length === 0 ? (
                 <Card>
                   <CardContent className="text-center py-12">
-                    <Clock className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p className="font-medium mb-1">No upcoming sessions</p>
-                    <p className="text-sm text-muted-foreground">
-                      You don't have any scheduled sessions.
+                    <Clock className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No Upcoming Sessions</h3>
+                    <p className="text-muted-foreground">
+                      You don't have any scheduled sessions. New sessions will appear here when they are created.
                     </p>
                   </CardContent>
                 </Card>
@@ -279,10 +294,10 @@ export function JurySessionsView({
               {groupedSessions.past.length === 0 ? (
                 <Card>
                   <CardContent className="text-center py-12">
-                    <CheckCircle className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p className="font-medium mb-1">No past sessions</p>
-                    <p className="text-sm text-muted-foreground">
-                      You don't have any completed sessions yet.
+                    <CheckCircle className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No Past Sessions</h3>
+                    <p className="text-muted-foreground">
+                      You don't have any completed sessions yet. Finished sessions will be archived here.
                     </p>
                   </CardContent>
                 </Card>
@@ -296,7 +311,7 @@ export function JurySessionsView({
             </TabsContent>
           </Tabs>
         )}
-      </div>
+      </section>
     </div>
   );
 }

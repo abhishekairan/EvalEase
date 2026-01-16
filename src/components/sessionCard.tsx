@@ -103,9 +103,8 @@ export function SessionCard({
 
   return (
     <Card className={cn(
-      "w-full max-w-md transition-all duration-200 hover:shadow-xl border-0",
-      "shadow-lg hover:shadow-2xl hover:-translate-y-1",
-      stats.isActive && "ring-2 ring-green-500 "
+      "w-full max-w-md card-hover shadow-lg border-0 animate-fade-in",
+      stats.isActive && "ring-2 ring-green-500"
     )}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">

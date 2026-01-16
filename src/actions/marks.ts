@@ -187,3 +187,46 @@ export async function getExistingMark(params: {
   }
 }
 
+/**
+ * Fetch marks status for all teams in a session for a specific jury
+ * Returns a map of teamId to {marked: boolean, locked: boolean}
+ */
+export async function getTeamsMarksStatus(params: {
+  juryId: number;
+  sessionId: number;
+  teamIds: number[];
+}) {
+  try {
+    // Get all marks for this jury in this session
+    const allMarks = await getMarks({
+      juryId: params.juryId,
+      session: params.sessionId,
+    });
+
+    // Create a map of teamId to mark status
+    const marksStatus: Record<number, { marked: boolean; locked: boolean }> = {};
+    
+    for (const teamId of params.teamIds) {
+      const mark = allMarks.find(m => m.teamId === teamId);
+      if (mark) {
+        marksStatus[teamId] = {
+          marked: true,
+          locked: mark.locked || false,
+        };
+      }
+    }
+
+    return {
+      success: true,
+      marksStatus,
+    };
+  } catch (error) {
+    console.error("Error fetching teams marks status:", error);
+    return {
+      success: false,
+      marksStatus: {},
+      message: "Failed to fetch marks status.",
+    };
+  }
+}
+

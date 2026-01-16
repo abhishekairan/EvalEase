@@ -404,7 +404,19 @@ export async function getSessionsForJury({ juryId }: { juryId: number }) {
     
     return result;
   } catch (error) {
-    console.error('Error fetching sessions for jury:', error);
+    const err = error as Error;
+    console.error('Error fetching sessions for jury:', {
+      message: err.message,
+      code: (err as any).code,
+      errno: (err as any).errno,
+      juryId,
+    });
+    
+    // If it's a connection error, throw it so it can be caught by error boundary
+    if ((err as any).code === 'ER_CON_COUNT_ERROR' || err.message.includes('Too many connections')) {
+      throw new Error('Database is currently experiencing high load. Please try again in a moment.');
+    }
+    
     return [];
   }
 }

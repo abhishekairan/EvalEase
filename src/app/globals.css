@@ -158,4 +158,177 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Mobile optimizations */
+  @media (max-width: 640px) {
+    /* Prevent zoom on input focus on iOS */
+    input[type="text"],
+    input[type="email"],
+    input[type="number"],
+    input[type="password"],
+    input[type="search"],
+    input[type="tel"],
+    input[type="url"],
+    textarea,
+    select {
+      font-size: 16px;
+    }
+    
+    /* Better touch targets */
+    button, 
+    a {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+  
+  /* Improve mobile scrolling */
+  @media (hover: none) and (pointer: coarse) {
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* Momentum scrolling */
+    .overflow-auto,
+    .overflow-y-auto,
+    .overflow-x-auto {
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+  
+  /* Accessibility improvements */
+  
+  /* Enhanced focus visible styles */
+  *:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+  
+  /* Skip to main content link */
+  .skip-to-main {
+    position: absolute;
+    left: -9999px;
+    z-index: 999;
+    padding: 1rem 1.5rem;
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    text-decoration: none;
+    border-radius: 0 0 0.5rem 0.5rem;
+  }
+  
+  .skip-to-main:focus {
+    left: 50%;
+    transform: translateX(-50%);
+    top: 0;
+  }
+  
+  /* Screen reader only content */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+  
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+  
+  /* High contrast mode improvements */
+  @media (prefers-contrast: high) {
+    * {
+      border-width: 2px;
+    }
+    
+    button,
+    a {
+      text-decoration: underline;
+    }
+  }
+}
+
+/* Animation utilities */
+@layer utilities {
+  /* Fade in animation for page loads */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Card hover effect */
+  .card-hover {
+    @apply transition-all duration-200 ease-in-out;
+  }
+  
+  .card-hover:hover {
+    @apply -translate-y-0.5 shadow-md;
+  }
+  
+  /* Button hover effect */
+  .button-hover {
+    @apply transition-all duration-150 ease-in-out;
+  }
+  
+  .button-hover:hover:not(:disabled) {
+    @apply scale-[1.02];
+  }
+  
+  .button-hover:active:not(:disabled) {
+    @apply scale-[0.98];
+  }
+  
+  /* Smooth transitions for all interactive elements */
+  .transition-smooth {
+    @apply transition-all duration-200 ease-in-out;
+  }
+  
+  /* Scale on hover */
+  .hover-scale {
+    @apply transition-transform duration-200 ease-in-out;
+  }
+  
+  .hover-scale:hover {
+    @apply scale-[1.02];
+  }
+  
+  /* Fade in with delay for staggered animations */
+  .animate-fade-in-delay-100 {
+    animation: fadeIn 0.3s ease-in-out 0.1s both;
+  }
+  
+  .animate-fade-in-delay-200 {
+    animation: fadeIn 0.3s ease-in-out 0.2s both;
+  }
+  
+  .animate-fade-in-delay-300 {
+    animation: fadeIn 0.3s ease-in-out 0.3s both;
+  }
 }

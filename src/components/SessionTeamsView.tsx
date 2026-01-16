@@ -4,12 +4,13 @@ import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/loading-button";
 import { Input } from "@/components/ui/input";
-import { Search, Users, ArrowLeft, LogOut, Lock } from "lucide-react";
+import { Search, Users, ArrowLeft, LogOut, Lock, CheckCircle2, Clock, AlertCircle, LucideIcon } from "lucide-react";
 import MarksDialog from "./marks-dialog";
 import { TeamDataType, MarksDBType } from "@/zod";
 import { getExistingMark } from "@/actions/marks";
-import { logoutAction } from "@/actions/logout";
+import { useLogout } from "@/hooks/use-logout";
 import { useRouter } from "next/navigation";
 
 interface SessionData {
@@ -24,6 +25,59 @@ interface SessionTeamsViewProps {
   juryId: number;
   session: SessionData;
   teams: TeamDataType[];
+  initialMarksStatus: Record<number, { marked: boolean; locked: boolean }>;
+}
+
+interface StatsCardProps {
+  icon: LucideIcon;
+  label: string;
+  value: number | string;
+  theme: 'gray' | 'green' | 'blue' | 'orange';
+}
+
+function StatsCard({ icon: Icon, label, value, theme }: StatsCardProps) {
+  const themeStyles = {
+    gray: {
+      bg: 'bg-slate-50',
+      border: 'border-gray-200',
+      icon: 'text-gray-400',
+      label: 'text-muted-foreground',
+      value: 'text-gray-900'
+    },
+    green: {
+      bg: 'bg-green-50',
+      border: 'border-green-200',
+      icon: 'text-green-400',
+      label: 'text-green-700',
+      value: 'text-green-700'
+    },
+    blue: {
+      bg: 'bg-blue-50',
+      border: 'border-blue-200',
+      icon: 'text-blue-400',
+      label: 'text-blue-700',
+      value: 'text-blue-700'
+    },
+    orange: {
+      bg: 'bg-orange-50',
+      border: 'border-orange-200',
+      icon: 'text-orange-400',
+      label: 'text-orange-700',
+      value: 'text-orange-700'
+    }
+  };
+
+  const styles = themeStyles[theme];
+
+  return (
+    <div className={`relative flex items-center gap-2 ${styles.bg} rounded-lg border ${styles.border} shadow-sm px-3 py-2 flex-1`}>
+      <Icon className={`absolute inset-0 h-7 w-7 ${styles.icon} opacity-30 m-auto`} />
+      <div className="text-center relative z-10 w-full">
+        <div className={`text-xs ${styles.label} font-medium`}>{label}</div>
+        <div className={`text-lg font-bold ${styles.value}`}>{value}</div>
+      </div>
+    </div>
+  );
 }
 
 export function SessionTeamsView({
@@ -31,14 +85,20 @@ export function SessionTeamsView({
   juryId,
   session,
   teams,
+  initialMarksStatus,
 }: SessionTeamsViewProps) {
   const router = useRouter();
+  const { handleLogout } = useLogout();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTeam, setSelectedTeam] = useState<TeamDataType | null>(null);
   const [existingMark, setExistingMark] = useState<MarksDBType | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isLoadingMark, setIsLoadingMark] = useState(false);
-  const [teamMarks, setTeamMarks] = useState<Record<number, { marked: boolean; locked: boolean }>>({});
+  const [loadingTeamId, setLoadingTeamId] = useState<number | null>(null);
+  const [teamMarks, setTeamMarks] =
+    useState<Record<number, { marked: boolean; locked: boolean }>>(
+      initialMarksStatus
+    );
 
   // Filter teams by search term
   const filteredTeams = useMemo(() => {
@@ -56,7 +116,7 @@ export function SessionTeamsView({
   const handleTeamClick = async (team: TeamDataType) => {
     setSelectedTeam(team);
     setIsLoadingMark(true);
-    setDialogOpen(true);
+    setLoadingTeamId(team.id!);
 
     try {
       const response = await getExistingMark({
@@ -66,19 +126,25 @@ export function SessionTeamsView({
       });
       const mark = response.success ? response.mark : null;
       setExistingMark(mark);
-      
+
       // Update team marks state with marked and locked status
       if (mark) {
-        setTeamMarks((prev) => ({ 
-          ...prev, 
-          [team.id!]: { marked: true, locked: mark.locked || false }
+        setTeamMarks((prev) => ({
+          ...prev,
+          [team.id!]: { marked: true, locked: mark.locked || false },
         }));
       }
+      
+      // Open dialog only after data is fetched
+      setDialogOpen(true);
     } catch (error) {
       console.error("Error fetching existing mark:", error);
       setExistingMark(null);
+      // Still open dialog even if fetch fails
+      setDialogOpen(true);
     } finally {
       setIsLoadingMark(false);
+      setLoadingTeamId(null);
     }
   };
 
@@ -96,143 +162,205 @@ export function SessionTeamsView({
   const lockedCount = teams.filter((t) => teamMarks[t.id!]?.locked).length;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 animate-fade-in">
       {/* Header */}
-      <div className="bg-white border-b shadow-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+      <header
+        className="bg-white border-b shadow-sm sticky top-0 z-10"
+        role="banner"
+      >
+        <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4">
+          <div className="flex flex-col items-start sm:items-center justify-between gap-3 sm:gap-4">
+            {/* Left Section - Back Button & Session Info */}
+            <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1 w-full sm:w-auto">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => router.push("/home")}
-                className="gap-2"
+                className="gap-1.5 shrink-0 h-8 sm:h-9 px-2 sm:px-3"
+                aria-label="Go back to sessions list"
               >
-                <ArrowLeft className="h-4 w-4" />
-                Back to Sessions
+                <ArrowLeft
+                  className="h-3.5 w-3.5 sm:h-4 sm:w-4"
+                  aria-hidden="true"
+                />
+                <span className="hidden sm:inline text-sm">Back</span>
               </Button>
-              <div className="border-l pl-4">
-                <h1 className="text-xl font-bold">{session.name}</h1>
-                <p className="text-sm text-muted-foreground">
-                  Welcome, {juryName}
+
+              <div className="border-l h-8 sm:h-10" />
+
+              <div className="min-w-0 flex-1">
+                <h1
+                  className="text-base sm:text-lg md:text-xl font-bold truncate"
+                  title={session.name}
+                >
+                  {session.name}
+                </h1>
+                <p className="text-xs sm:text-sm text-muted-foreground truncate mt-0.5">
+                  Welcome, <span className="font-medium">{juryName}</span>
                 </p>
               </div>
-            </div>
+
+              {/* Right Section - Logout Button */}
             <Button
               variant="outline"
-              onClick={() => logoutAction()}
-              className="gap-2"
+              onClick={handleLogout}
+              className="gap-2 shrink-0 h-9 sm:h-10"
+              size="sm"
+              aria-label="Logout from application"
             >
-              <LogOut className="h-4 w-4" />
-              Logout
+              <LogOut className="h-4 w-4" aria-hidden="true" />
+              <span className="hidden sm:inline">Logout</span>
             </Button>
+            </div>
           </div>
         </div>
-      </div>
+      </header>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
+      <section
+        className="container mx-auto px-4 py-8"
+        role="main"
+        aria-label="Session teams"
+      >
         {/* Stats and Search */}
-        <div className="mb-6 space-y-4">
-          <div className="flex flex-wrap gap-4">
-            <Card className="flex-1 min-w-[200px]">
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <p className="text-sm text-muted-foreground mb-1">Total Teams</p>
-                  <p className="text-3xl font-bold">{teams.length}</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="flex-1 min-w-[200px]">
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <p className="text-sm text-muted-foreground mb-1">Marked</p>
-                  <p className="text-3xl font-bold text-green-600">{markedCount}</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="flex-1 min-w-[200px]">
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <p className="text-sm text-muted-foreground mb-1">Locked</p>
-                  <p className="text-3xl font-bold text-blue-600">{lockedCount}</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="flex-1 min-w-[200px]">
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <p className="text-sm text-muted-foreground mb-1">Pending</p>
-                  <p className="text-3xl font-bold text-orange-600">
-                    {teams.length - markedCount}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+        <div className="mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start sm:items-center">
+            {/* Stats Overview */}
+            <div className="flex gap-3 sm:gap-4 w-full justify-center sm:w-auto overflow-x-auto">
+              <StatsCard
+                icon={Users}
+                label="Total"
+                value={teams.length}
+                theme="gray"
+              />
+              <StatsCard
+                icon={CheckCircle2}
+                label="Marked"
+                value={markedCount}
+                theme="green"
+              />
+              <StatsCard
+                icon={Lock}
+                label="Locked"
+                value={lockedCount}
+                theme="orange"
+              />
+              <StatsCard
+                icon={Clock}
+                label="Pending"
+                value={teams.length - markedCount}
+                theme="blue"
+              />
+            </div>
 
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search teams by name, leader, or members..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
+            {/* Search Bar */}
+            <div className="flex-1 w-full sm:max-w-md">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                <Input
+                  placeholder="Search teams by name, leader, or members..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 h-9 sm:h-10"
+                  type="search"
+                  aria-label="Search teams"
+                />
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Teams Grid */}
         {filteredTeams.length === 0 ? (
           <Card>
-            <CardContent className="text-center py-16">
-              <Users className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-              <h3 className="text-lg font-semibold mb-2">
-                {searchTerm ? "No teams match your search" : "No teams assigned"}
-              </h3>
-              <p className="text-muted-foreground">
-                {searchTerm
-                  ? "Try adjusting your search terms"
-                  : "You don't have any teams assigned in this session yet"}
-              </p>
+            <CardContent className="text-center py-12">
+              {searchTerm ? (
+                <>
+                  <Search className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">
+                    No Teams Match Your Search
+                  </h3>
+                  <p className="text-muted-foreground mb-4">
+                    Try adjusting your search terms or clear the search to view
+                    all teams.
+                  </p>
+                  <Button variant="outline" onClick={() => setSearchTerm("")}>
+                    Clear Search
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">
+                    No Teams Assigned
+                  </h3>
+                  <p className="text-muted-foreground">
+                    You don't have any teams assigned in this session yet. Teams
+                    will appear here once they are assigned.
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {filteredTeams.map((team) => {
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {filteredTeams.map((team, index) => {
               const markStatus = teamMarks[team.id!];
               const isMarked = markStatus?.marked || false;
               const isLocked = markStatus?.locked || false;
               
+              // Determine border color based on status
+              const borderColor = isLocked 
+                ? "border-l-orange-500" 
+                : isMarked 
+                ? "border-l-green-500" 
+                : "border-l-blue-500";
+              
               return (
                 <Card
                   key={team.id}
-                  className="cursor-pointer hover:shadow-lg transition-all duration-200 border-l-4 border-l-gray-400 hover:scale-[1.02]"
+                  className={`cursor-pointer card-hover border-l-4 gap-2 ${borderColor} animate-fade-in`}
+                  style={{ animationDelay: `${index * 50}ms` }}
                   onClick={() => handleTeamClick(team)}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`${
+                    isLocked
+                      ? "View locked marks"
+                      : isMarked
+                      ? "View or edit marks"
+                      : "Add marks"
+                  } for ${team.teamName}`}
                 >
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between gap-2">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <CardTitle className="text-lg">{team.teamName}</CardTitle>
+                        <CardTitle className="text-lg">
+                          {team.teamName}
+                        </CardTitle>
                         <p className="text-sm text-muted-foreground mt-1">
                           HC_{team.id}
                         </p>
                       </div>
                       <div className="flex flex-col gap-1">
-                        <Badge variant={isMarked ? "default" : "secondary"}>
-                          {isMarked ? "Marked" : "Pending"}
-                        </Badge>
-                        {isLocked && (
-                          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300">
+                        {isLocked ? (
+                          <Badge
+                            variant="outline"
+                            className="bg-blue-50 text-blue-700 border-blue-300"
+                          >
                             <Lock className="h-3 w-3 mr-1" />
                             Locked
+                          </Badge>
+                        ) : (
+                          <Badge variant={isMarked ? "default" : "secondary"}>
+                            {isMarked ? "Marked" : "Pending"}
                           </Badge>
                         )}
                       </div>
                     </div>
                   </CardHeader>
 
-                  <CardContent className="space-y-3">
+                  <CardContent className="space-y-6">
                     <div className="space-y-2 text-sm">
                       <div className="flex items-center gap-2">
                         <Users className="h-4 w-4 text-muted-foreground" />
@@ -254,7 +382,13 @@ export function SessionTeamsView({
                       )}
                     </div>
 
-                    <Button className="w-full" size="sm" variant="outline">
+                    <LoadingButton 
+                      className="w-full" 
+                      size="sm" 
+                      variant="outline"
+                      loading={loadingTeamId === team.id}
+                      loadingText="Loading..."
+                    >
                       {isLocked ? (
                         <>
                           <Lock className="h-4 w-4 mr-2" />
@@ -265,14 +399,14 @@ export function SessionTeamsView({
                       ) : (
                         "Add Marks"
                       )}
-                    </Button>
+                    </LoadingButton>
                   </CardContent>
                 </Card>
               );
             })}
           </div>
         )}
-      </div>
+      </section>
 
       {/* Marks Dialog */}
       {selectedTeam && (
@@ -284,6 +418,7 @@ export function SessionTeamsView({
           sessionId={session.id}
           onMarksSubmitted={handleMarksSubmitted}
           existingMark={existingMark}
+          isLoadingMark={isLoadingMark}
         />
       )}
     </div>

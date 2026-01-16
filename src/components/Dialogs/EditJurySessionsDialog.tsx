@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { updateJurySessionsAction } from "@/actions/juryForm";
 
 interface Session {

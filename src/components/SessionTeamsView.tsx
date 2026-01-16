@@ -96,7 +96,7 @@ export function SessionTeamsView({
   const lockedCount = teams.filter((t) => teamMarks[t.id!]?.locked).length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b shadow-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
@@ -207,7 +207,7 @@ export function SessionTeamsView({
               return (
                 <Card
                   key={team.id}
-                  className="cursor-pointer hover:shadow-lg transition-all duration-200 border-l-4 border-l-purple-500 hover:scale-[1.02]"
+                  className="cursor-pointer hover:shadow-lg transition-all duration-200 border-l-4 border-l-gray-400 hover:scale-[1.02]"
                   onClick={() => handleTeamClick(team)}
                 >
                   <CardHeader className="pb-3">

@@ -22,7 +22,7 @@ export function SessionSummaryCard({
       <CardContent className="space-y-3 text-sm">
         <div className="flex items-center justify-between py-2 border-b">
           <span className="text-gray-600">Session Name</span>
-          <span className="font-medium text-right max-w-[150px] truncate">
+          <span className="font-medium text-right max-w-37.5 truncate">
             {sessionName || <span className="text-gray-400">Not set</span>}
           </span>
         </div>

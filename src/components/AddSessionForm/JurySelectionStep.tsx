@@ -46,12 +46,12 @@ export function JurySelectionStep({
   return (
     <div className="space-y-6">
       <Card className="shadow-sm hover:shadow-md transition-shadow duration-200">
-        <CardHeader className="bg-gradient-to-r from-purple-50 to-white border-b">
+        <CardHeader className="bg-gray-50 border-b">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <CardTitle className="flex items-center gap-2 text-lg">
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <Users className="h-5 w-5 text-purple-600" />
+                <div className="p-2 bg-gray-100 rounded-lg">
+                  <Users className="h-5 w-5 text-gray-700" />
                 </div>
                 Select Jury Members
               </CardTitle>
@@ -67,7 +67,7 @@ export function JurySelectionStep({
                 size="sm"
                 onClick={onSelectAll}
                 disabled={isSubmitting || availableJury.length === 0}
-                className="hover:bg-purple-50"
+                className="hover:bg-gray-50"
               >
                 Select All
               </Button>
@@ -109,7 +109,7 @@ export function JurySelectionStep({
           )}
 
           <div className="border rounded-lg overflow-hidden shadow-sm">
-            <div className="max-h-[500px] overflow-auto">
+            <div className="max-h-125 overflow-auto">
               <Table>
                 <TableHeader className="sticky top-0 z-10">
                   <TableRow className="bg-gray-50 hover:bg-gray-50">

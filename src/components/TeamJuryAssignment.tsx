@@ -31,7 +31,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Shuffle, Users, UserCheck, Search, Filter, X, ChevronLeft, ChevronRight, Plus, AlertTriangle } from "lucide-react";
 import { TeamDataType, juryDBType } from "@/zod";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { useDebounce } from "@/hooks/use-debounce";
 
 interface TeamJuryAssignmentProps {
@@ -168,12 +168,16 @@ export function TeamJuryAssignment({
     setAssignments(newAssignments);
     onAssignmentsChange(newAssignments);
     setShowShuffleDialog(false);
-    toast.success(`${teamsToShuffle.length} teams distributed among ${jury.length} jury members`);
+    toast.success("Teams shuffled", {
+      description: `${teamsToShuffle.length} teams distributed among ${jury.length} jury members`
+    });
   }, [jury, filteredTeams, teams, onAssignmentsChange]);
 
   const handleShuffle = useCallback(() => {
     if (jury.length === 0) {
-      toast.error("No jury members available for shuffling");
+      toast.error("Cannot shuffle teams", {
+        description: "Please select at least one jury member first"
+      });
       return;
     }
 
@@ -192,7 +196,9 @@ export function TeamJuryAssignment({
     const newAssignments = new Map<number, number>();
     setAssignments(newAssignments);
     onAssignmentsChange(newAssignments);
-    toast.info("All assignments cleared");
+    toast.info("Assignments cleared", {
+      description: "All team assignments have been reset"
+    });
   };
 
   // Reset to page 1 when filters change
@@ -334,7 +340,7 @@ export function TeamJuryAssignment({
             </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2 max-h-[240px] overflow-y-auto pr-2">
+            <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
               {jury.map((j) => {
                 const count = stats.juryTeamCount.get(j.id!) || 0;
                 return (
@@ -748,7 +754,7 @@ export function TeamJuryAssignment({
               </p>
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 space-y-2">
                 <p className="text-sm text-amber-900 font-medium flex items-start gap-2">
-                  <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
                   <span>Warning: This action will:</span>
                 </p>
                 <ul className="text-sm text-amber-800 space-y-1 ml-6 list-disc">

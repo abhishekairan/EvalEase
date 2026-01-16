@@ -150,8 +150,8 @@ export function JurySessionsView({
             )}
 
             <div className="flex items-center gap-2 pt-2">
-              <div className="px-3 py-1.5 bg-purple-50 rounded-lg">
-                <span className="text-sm font-semibold text-purple-700">
+              <div className="px-3 py-1.5 bg-gray-100 rounded-lg">
+                <span className="text-sm font-semibold text-gray-700">
                   {session.teamCount} {session.teamCount === 1 ? "Team" : "Teams"} Assigned
                 </span>
               </div>
@@ -183,7 +183,7 @@ export function JurySessionsView({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b shadow-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">

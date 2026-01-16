@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/loading-button";
 import {
   Dialog,
   DialogContent,
@@ -17,9 +18,8 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { submitMarks, lockMarks } from "@/actions/marks";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { MarksFormData, MarksFormSchema, TeamDataType, MarksDBType } from "@/zod";
-import { getMarks } from "@/db/utils";
 
 interface MarksDialogProps {
   open: boolean;
@@ -84,12 +84,16 @@ export default function MarksDialog({
 
   const onSubmit = async (data: MarksFormData) => {
     if (!juryId || !sessionId) {
-      toast.error("Missing jury or session information");
+      toast.error("Cannot submit marks", {
+        description: "Missing required information"
+      });
       return;
     }
 
     if (isLocked) {
-      toast.error("This mark is locked and cannot be edited");
+      toast.error("Mark is locked", {
+        description: "This mark has been locked and cannot be edited"
+      });
       return;
     }
 
@@ -108,15 +112,21 @@ export default function MarksDialog({
 
       const result = await submitMarks(markData);
       if(result.success){
-        toast.success(result.message || "Marks saved successfully!");
+        toast.success("Marks saved", {
+          description: result.message || "Your evaluation has been saved"
+        });
         onMarksSubmitted(team.id!);
         onClose();
       }else{
-        toast.error(result.message || "Marks cannot be submitted!");
+        toast.error("Cannot submit marks", {
+          description: result.message || "Please check your input and try again"
+        });
       }
     } catch (error) {
       console.error("Error submitting marks:", error);
-      toast.error("Failed to submit marks. Please try again.");
+      toast.error("Failed to submit marks", {
+        description: "Please try again or contact support"
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -124,7 +134,9 @@ export default function MarksDialog({
 
   const handleLockMarks = async () => {
     if (!existingMark?.id) {
-      toast.error("No marks to lock. Please save marks first.");
+      toast.error("No marks to lock", {
+        description: "Please save marks before locking"
+      });
       return;
     }
 
@@ -132,15 +144,21 @@ export default function MarksDialog({
     try {
       const result = await lockMarks({ markId: existingMark.id });
       if (result.success) {
-        toast.success(result.message || "Marks locked successfully!");
+        toast.success("Marks locked", {
+          description: result.message || "This evaluation can no longer be edited"
+        });
         setIsLocked(true);
         onMarksSubmitted(team.id!);
       } else {
-        toast.error(result.message || "Failed to lock marks");
+        toast.error("Failed to lock marks", {
+          description: result.message || "Please try again"
+        });
       }
     } catch (error) {
       console.error("Error locking marks:", error);
-      toast.error("Failed to lock marks. Please try again.");
+      toast.error("Failed to lock marks", {
+        description: "Please try again or contact support"
+      });
     } finally {
       setIsLocking(false);
     }
@@ -346,28 +364,26 @@ export default function MarksDialog({
                   </Button>
                   {!isLocked && (
                     <>
-                      <Button
+                      <LoadingButton
                         type="submit"
-                        disabled={isSubmitting}
+                        loading={isSubmitting}
+                        loadingText={isEditing ? "Updating..." : "Submitting..."}
                         className="w-full sm:w-auto order-1 sm:order-2"
                       >
-                        {isSubmitting ? "Saving..." : (isEditing ? "Update Marks" : "Submit Marks")}
-                      </Button>
+                        {isEditing ? "Update Marks" : "Submit Marks"}
+                      </LoadingButton>
                       {isEditing && existingMark && (
-                        <Button
+                        <LoadingButton
                           type="button"
                           variant="secondary"
                           onClick={handleLockMarks}
-                          disabled={isLocking}
+                          loading={isLocking}
+                          loadingText="Locking..."
                           className="w-full sm:w-auto order-1 sm:order-3"
                         >
-                          {isLocking ? "Locking..." : (
-                            <>
-                              <Lock className="h-4 w-4 mr-2" />
-                              Lock Marks
-                            </>
-                          )}
-                        </Button>
+                          <Lock className="h-4 w-4 mr-2" />
+                          Lock Marks
+                        </LoadingButton>
                       )}
                     </>
                   )}

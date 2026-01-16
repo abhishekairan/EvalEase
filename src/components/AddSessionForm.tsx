@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ArrowLeft } from "lucide-react"
 import { addSessionAction } from "@/actions/sessionActions"
 import { juryDBType, TeamDataType } from "@/zod"
-import { toast } from "sonner"
+import { toast } from "@/lib/toast";
 import { ProgressSidebar } from "./AddSessionForm/ProgressSidebar"
 import { SessionSummaryCard } from "./AddSessionForm/SessionSummaryCard"
 import { HeaderStats } from "./AddSessionForm/HeaderStats"
@@ -116,7 +116,9 @@ export function AddSessionForm({ juryMembers, teams }: AddSessionFormProps) {
       })
 
       if (result.success) {
-        toast.success("Session created successfully!")
+        toast.success("Session created", {
+          description: `${data.name} has been added to the system`
+        })
         router.push("/dashboard/session")
         router.refresh()
       }
@@ -126,7 +128,9 @@ export function AddSessionForm({ juryMembers, teams }: AddSessionFormProps) {
         type: "manual",
         message: "Failed to create session. Please try again.",
       })
-      toast.error("Failed to create session")
+      toast.error("Failed to create session", {
+        description: "Please check your input and try again"
+      })
     }
   }
 
@@ -161,7 +165,7 @@ export function AddSessionForm({ juryMembers, teams }: AddSessionFormProps) {
   const assignedJury: typeof juryMembers = []
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50">
+    <div className="min-h-screen bg-gray-50">
       {/* Header Section - Fixed at top with gradient */}
       <div className="bg-white border-b sticky top-0 z-20 shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-5">
@@ -177,7 +181,7 @@ export function AddSessionForm({ juryMembers, teams }: AddSessionFormProps) {
                 <span className="hidden sm:inline">Back</span>
               </Button>
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold tracking-tight bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900">
                   Add New Session
                 </h1>
                 <p className="text-sm text-muted-foreground hidden sm:block">

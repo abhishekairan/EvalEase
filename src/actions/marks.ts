@@ -29,7 +29,7 @@ export async function submitMarks(markData: MarkData) {
     const sessionData = await getSessionById(markData.session);
     if(sessionData?.endedAt) {
       revalidatePath("/home");
-      return { success: false, message: "Session has ended. Cannot submit marks." };
+      return { success: false, message: "Session has ended and marks cannot be modified" };
     }
 
     // Check if mark already exists
@@ -45,7 +45,7 @@ export async function submitMarks(markData: MarkData) {
       
       // Check if mark is locked
       if (existingMark.locked) {
-        return { success: false, message: "Mark is locked and cannot be edited." };
+        return { success: false, message: "This mark has been locked and cannot be edited" };
       }
 
       // Update the mark
@@ -70,10 +70,10 @@ export async function submitMarks(markData: MarkData) {
     revalidatePath("/home");
     revalidatePath("/dashboard/marks");
     revalidatePath("/dashboard/sessions");
-    return { success: true, message: "Marks saved successfully." };
+    return { success: true, message: "Your evaluation has been saved" };
   } catch (error) {
     console.error("Error submitting marks:", error);
-    return { success: false, message: "Failed to submit marks." };
+    return { success: false, message: "Unable to save marks" };
   }
 }
 
@@ -86,7 +86,7 @@ export async function lockMarks(params: { markId: number }) {
     const existingMarks = await getMarks({ id: params.markId });
     
     if (existingMarks.length === 0) {
-      return { success: false, message: "Mark not found." };
+      return { success: false, message: "Mark not found" };
     }
 
     const mark = existingMarks[0];
@@ -100,10 +100,10 @@ export async function lockMarks(params: { markId: number }) {
 
     revalidatePath("/home");
     revalidatePath("/dashboard/marks");
-    return { success: true, message: "Mark locked successfully." };
+    return { success: true, message: "Mark locked - no further edits allowed" };
   } catch (error) {
     console.error("Error locking mark:", error);
-    return { success: false, message: "Failed to lock mark." };
+    return { success: false, message: "Unable to lock mark" };
   }
 }
 
@@ -116,7 +116,7 @@ export async function unlockMarks(params: { markId: number }) {
     const existingMarks = await getMarks({ id: params.markId });
     
     if (existingMarks.length === 0) {
-      return { success: false, message: "Mark not found." };
+      return { success: false, message: "Mark not found" };
     }
 
     const mark = existingMarks[0];
@@ -130,10 +130,10 @@ export async function unlockMarks(params: { markId: number }) {
 
     revalidatePath("/home");
     revalidatePath("/dashboard/marks");
-    return { success: true, message: "Mark unlocked successfully." };
+    return { success: true, message: "Mark unlocked - editing is now allowed" };
   } catch (error) {
     console.error("Error unlocking mark:", error);
-    return { success: false, message: "Failed to unlock mark." };
+    return { success: false, message: "Unable to unlock mark" };
   }
 }
 
@@ -150,10 +150,10 @@ export async function lockAllMarksForSession(sessionId: number) {
 
     revalidatePath("/dashboard/marks");
     revalidatePath("/dashboard/sessions");
-    return { success: true, message: "All marks locked for session." };
+    return { success: true, message: "All session marks have been locked" };
   } catch (error) {
     console.error("Error locking session marks:", error);
-    return { success: false, message: "Failed to lock marks." };
+    return { success: false, message: "Unable to lock marks" };
   }
 }
 

@@ -9,7 +9,7 @@ import { Save, X } from "lucide-react"
 import { TeamJuryAssignment } from "@/components/TeamJuryAssignment"
 import { TeamDataType, juryDBType } from "@/zod"
 import { reassignTeamsForSession } from "@/actions/sessionActions"
-import { toast } from "sonner"
+import { toast } from "@/lib/toast";
 
 interface ReassignTeamsFormProps {
   sessionId: number
@@ -41,12 +41,16 @@ export function ReassignTeamsForm({
       // Convert Map to array of tuples for the server action
       const assignmentArray = Array.from(assignments.entries())
       await reassignTeamsForSession(sessionId, assignmentArray)
-      toast.success("Team assignments updated successfully")
+      toast.success("Team assignments updated", {
+        description: "Changes have been saved successfully"
+      })
       router.push("/dashboard/session")
       router.refresh()
     } catch (error) {
       console.error("Failed to save assignments:", error)
-      toast.error("Failed to update team assignments")
+      toast.error("Failed to update assignments", {
+        description: "Please try again or contact support"
+      })
     } finally {
       setIsSaving(false)
     }

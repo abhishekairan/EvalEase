@@ -27,7 +27,7 @@ export function SessionDetailsStep({
   return (
     <div className="space-y-6">
       <Card className="shadow-sm pt-0 hover:shadow-md transition-shadow duration-200">
-        <CardHeader className="bg-gradient-to-r rounded-2xl from-blue-50 to-white">
+        <CardHeader className="bg-gray-50 rounded-2xl">
           <CardTitle className="flex flex-col py-6">
             <div className="flex flex-row gap-2 items-center text-lg">
               <div className="p-2 bg-blue-100 rounded-lg">

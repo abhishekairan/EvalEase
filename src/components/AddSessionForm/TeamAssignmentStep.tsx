@@ -35,7 +35,7 @@ export function TeamAssignmentStep({
   return (
     <div className="space-y-6">
       <Card className="shadow-sm hover:shadow-md transition-shadow duration-200 pt-0 gap-0">
-        <CardHeader className="bg-gradient-to-r from-green-50 to-white p-6">
+        <CardHeader className="bg-gray-50 p-6">
           <div className="p-2 bg-green-100 rounded-lg text-center gap-2 align-middle mb-2">
         <CardTitle className="flex gap-2 items-center text-center text-lg">
             <CheckCircle className="h-5 w-5 text-green-600" />
@@ -59,8 +59,8 @@ export function TeamAssignmentStep({
             />
           ) : (
             <div className="text-center py-12">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center mx-auto mb-4">
-                <Users className="h-10 w-10 text-purple-400" />
+              <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                <Users className="h-10 w-10 text-gray-400" />
               </div>
               <p className="font-medium text-gray-900 mb-2">No jury members selected</p>
               <p className="text-sm text-gray-500 max-w-md mx-auto mb-6">

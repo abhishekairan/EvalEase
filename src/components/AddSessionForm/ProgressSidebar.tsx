@@ -30,7 +30,7 @@ export function ProgressSidebar({ currentStep, canProceedToJury, canProceedToTea
       label: "Select Jury", 
       icon: Users,
       description: "Choose jury members",
-      color: "purple"
+      color: "gray"
     },
     { 
       key: "teams", 
@@ -74,7 +74,7 @@ export function ProgressSidebar({ currentStep, canProceedToJury, canProceedToTea
 
       {/* Desktop: Vertical progress sidebar with enhanced design */}
       <Card className="hidden lg:block shadow-sm border-l-4 py-0 border-l-blue-500">
-        <CardHeader className="py-3 bg-gradient-to-br from-blue-50 to-white">
+        <CardHeader className="py-3 bg-gray-50">
           <CardTitle className="text-lg flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
             Progress
@@ -91,8 +91,8 @@ export function ProgressSidebar({ currentStep, canProceedToJury, canProceedToTea
             return (
               <div key={step.key} className="relative">
                 {index < 2 && (
-                  <div className={`absolute left-[18px] top-12 w-0.5 h-14 transition-colors duration-300 ${
-                    isCompleted ? 'bg-gradient-to-b from-green-500 to-green-400' : 'bg-gray-200'
+                  <div className={`absolute left-4.5 top-12 w-0.5 h-14 transition-colors duration-300 ${
+                    isCompleted ? 'bg-green-500' : 'bg-gray-200'
                   }`} />
                 )}
                 

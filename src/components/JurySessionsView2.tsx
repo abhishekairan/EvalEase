@@ -107,12 +107,6 @@ export function JurySessionsView({
         aria-label={canAccess ? `Open ${session.name} session` : `${session.name} session - ${session.status}`}
         aria-disabled={!canAccess}
       >
-        {/* Status indicator stripe */}
-        <div
-          className={`absolute top-0 left-0 right-0 h-1 ${getStatusColor(
-            session.status
-          )}`}
-        />
 
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">

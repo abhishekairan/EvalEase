@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1750952932180,
-      "tag": "0000_far_expediter",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1763785598004,
-      "tag": "0001_grey_tempest",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1768463947616,
-      "tag": "0002_nosy_anthem",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1768490940016,
-      "tag": "0003_vengeful_pretty_boy",
+      "when": 1768628000988,
+      "tag": "0000_useful_wiccan",
       "breakpoints": true
     }
   ]

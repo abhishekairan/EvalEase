@@ -29,7 +29,8 @@ export async function addTeamAction(data: AddTeamFormData) {
     const teamData = {
       teamName: validatedData.teamName,
       leaderId: validatedData.leaderId,
-      juryId: null
+      juryId: validatedData.juryId || null,
+      room: validatedData.room || null,
     };
 
     // Insert the team into the database
@@ -57,11 +58,14 @@ export async function addTeamAction(data: AddTeamFormData) {
     }
 
     // Revalidate the path to refresh the data
-    revalidatePath("/teams"); // Adjust the path as needed
+    revalidatePath("/dashboard/teams");
     
     return { success: true, teamId };
   } catch (error) {
     console.error("Error in addTeamAction:", error);
-    throw new Error("Failed to add team");
+    
+    // Return error message for user-friendly display
+    const errorMessage = error instanceof Error ? error.message : "Failed to add team";
+    return { success: false, error: errorMessage };
   }
 }

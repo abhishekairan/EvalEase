@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "generate-dummy-data": "tsx scripts/runDummyData.ts",
-    "generate-test-data": "tsx scripts/dummyDataScript.ts"
+    "generate-test-data": "tsx scripts/dummyDataScript.ts",
+    "seed": "tsx scripts/seed.ts",
+    "seed:custom": "tsx scripts/seed.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -33,6 +35,7 @@
     "@tabler/icons-react": "^3.34.0",
     "@tanstack/react-table": "^8.21.3",
     "@types/mysql": "^2.15.27",
+    "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

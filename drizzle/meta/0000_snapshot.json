@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "cf27eaaa-cd84-4035-b0c6-e41ddd194415",
+  "id": "a0f5173b-0d69-4c5e-9302-7977d4d2657e",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "admin": {
@@ -142,13 +142,6 @@
           "notNull": true,
           "autoincrement": false
         },
-        "session": {
-          "name": "session",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
         "phone_number": {
           "name": "phone_number",
           "type": "varchar(20)",
@@ -183,21 +176,7 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {
-        "jury_session_sessions_id_fk": {
-          "name": "jury_session_sessions_id_fk",
-          "tableFrom": "jury",
-          "tableTo": "sessions",
-          "columnsFrom": [
-            "session"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {
         "jury_id": {
           "name": "jury_id",
@@ -214,6 +193,88 @@
           ]
         }
       },
+      "checkConstraint": {}
+    },
+    "jury_sessions": {
+      "name": "jury_sessions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "jury_id": {
+          "name": "jury_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "session_id": {
+          "name": "session_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "onUpdate": true,
+          "default": "(now())"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "jury_sessions_jury_id_jury_id_fk": {
+          "name": "jury_sessions_jury_id_jury_id_fk",
+          "tableFrom": "jury_sessions",
+          "tableTo": "jury",
+          "columnsFrom": [
+            "jury_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "jury_sessions_session_id_sessions_id_fk": {
+          "name": "jury_sessions_session_id_sessions_id_fk",
+          "tableFrom": "jury_sessions",
+          "tableTo": "sessions",
+          "columnsFrom": [
+            "session_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "jury_sessions_id": {
+          "name": "jury_sessions_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
       "checkConstraint": {}
     },
     "marks": {
@@ -283,6 +344,14 @@
           "autoincrement": false,
           "default": false
         },
+        "locked": {
+          "name": "locked",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -316,10 +385,10 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "marks_jury_id_users_id_fk": {
-          "name": "marks_jury_id_users_id_fk",
+        "marks_jury_id_jury_id_fk": {
+          "name": "marks_jury_id_jury_id_fk",
           "tableFrom": "marks",
-          "tableTo": "users",
+          "tableTo": "jury",
           "columnsFrom": [
             "jury_id"
           ],

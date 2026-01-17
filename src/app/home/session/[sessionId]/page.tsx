@@ -7,9 +7,9 @@ import { getTeamsMarksStatus } from "@/actions/marks";
 export const dynamic = "force-dynamic";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     sessionId: string;
-  };
+  }>;
 }
 
 export default async function SessionPage({ params }: PageProps) {

@@ -60,7 +60,6 @@ const config = {
               email: String(data.email),
               name: String(data.name),
               role: "jury",
-              session: String(data.session)
             };
           }
 
@@ -80,7 +79,6 @@ callbacks: {
       token.email = user.email;
       token.name = user.name;
       token.role = user.role;
-      if('session' in user) token.session = user.session;
     }
     return token;
   },

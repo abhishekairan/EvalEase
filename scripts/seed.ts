@@ -48,7 +48,7 @@ async function seed(options: SeedOptions = {}) {
     const adminIds = [];
     for (let i = 0; i < admins; i++) {
       const name = faker.person.fullName();
-      const email = faker.internet.email().toLowerCase();
+      const email = `admin${i}@evalease.com`;
       
       // Use createAdmin utility which handles password hashing
       const [newAdmin] = await createAdmin({
@@ -87,7 +87,7 @@ async function seed(options: SeedOptions = {}) {
     const juryIds = [];
     for (let i = 0; i < juries; i++) {
       const name = faker.person.fullName();
-      const email = faker.internet.email().toLowerCase();
+      const email = `jury${i}@evalease.com`;
       const phoneNumber = `9${faker.number.int({ min: 100000000, max: 999999999 })}`;
       
       // Use createJury utility which handles password hashing

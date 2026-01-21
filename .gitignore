@@ -48,6 +48,27 @@ web_modules/
 # TypeScript cache
 *.tsbuildinfo
 
+# Docker
+docker-compose.override.yml
+.env.local
+.env.*.local
+
+# Docker volumes and data
+mysql_data/
+nginx/logs/
+nginx/ssl/*.pem
+nginx/ssl/*.key
+
+# Backups
+backups/
+*.sql
+*.sql.gz
+*.tar.gz
+
+# OS
+.DS_Store
+Thumbs.db
+
 # Optional npm cache directory
 .npm
 

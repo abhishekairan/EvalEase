@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { marks, teams, sessions, jury } from "@/db/schema";
 import { MarksDBType } from "@/zod/marksSchema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 
 /**
  * Marks utility functions for database operations
@@ -90,7 +90,7 @@ export async function getMarks({ id, teamId, juryId, session, submitted }: {
  */
 export async function createMark({ mark }: { mark: Omit<MarksDBType, 'id' | 'createdAt' | 'updatedAt'> }) {
   // Validate foreign key relations
-  console.log("Creating mark:", mark);
+  // console.log("Creating mark:", mark);
   const isValid = await validateMarkRelations({ 
     teamId: mark.teamId, 
     juryId: mark.juryId, 
@@ -262,11 +262,11 @@ export async function getMarksWithData({ id, teamId, juryId, session }: {
 
   // Apply conditions after all joins are complete
   if (conditions.length === 1) {
-    return await baseQuery.where(conditions[0]);
+    return await baseQuery.where(conditions[0]).orderBy(desc(marks.createdAt));
   } else if (conditions.length > 1) {
-    return await baseQuery.where(and(...conditions));
+    return await baseQuery.where(and(...conditions)).orderBy(desc(marks.createdAt));
   }
-  const result = await baseQuery
+  const result = await baseQuery.orderBy(desc(marks.createdAt));
   // console.log("result",result)
   return result;
 }

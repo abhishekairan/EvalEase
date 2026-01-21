@@ -131,7 +131,7 @@ export function DataTable<TData>({
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-0">
         <div className="flex items-center space-x-2 w-full sm:w-auto">
           {enableGlobalSearch && (
-            <div className="relative flex-1 sm:flex-initial sm:min-w-[300px]">
+            <div className="relative flex-1 sm:flex-initial sm:min-w-75">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder={searchPlaceholder}
@@ -248,7 +248,7 @@ function DataTableSkeleton<TData>({
     <div className="space-y-4">
       {/* Search skeleton */}
       <div className="flex items-center space-x-2">
-        <Skeleton className="h-10 w-[300px]" />
+        <Skeleton className="h-10 w-75" />
       </div>
 
       {/* Table skeleton */}
@@ -258,7 +258,7 @@ function DataTableSkeleton<TData>({
             <TableRow>
               {columns.map((_, index) => (
                 <TableHead key={index}>
-                  <Skeleton className="h-4 w-[100px]" />
+                  <Skeleton className="h-4 w-25" />
                 </TableHead>
               ))}
             </TableRow>
@@ -268,7 +268,7 @@ function DataTableSkeleton<TData>({
               <TableRow key={rowIndex}>
                 {columns.map((_, colIndex) => (
                   <TableCell key={colIndex}>
-                    <Skeleton className="h-4 w-[80px]" />
+                    <Skeleton className="h-4 w-20" />
                   </TableCell>
                 ))}
               </TableRow>
@@ -279,9 +279,9 @@ function DataTableSkeleton<TData>({
 
       {/* Pagination skeleton */}
       <div className="flex items-center justify-between">
-        <Skeleton className="h-4 w-[100px]" />
+        <Skeleton className="h-4 w-25" />
         <div className="flex items-center space-x-2">
-          <Skeleton className="h-8 w-[70px]" />
+          <Skeleton className="h-8 w-20" />
           <div className="flex items-center space-x-1">
             {Array.from({ length: 4 }).map((_, i) => (
               <Skeleton key={i} className="h-8 w-8" />
@@ -309,7 +309,7 @@ function DataTablePagination<TData>({ table }: { table: Table<TData> }) {
             onChange={(e) => {
               table.setPageSize(Number(e.target.value));
             }}
-            className="h-10 sm:h-8 w-[70px] rounded border border-input bg-background px-2 py-1 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+            className="h-10 sm:h-8 w-17.5 rounded border border-input bg-background px-2 py-1 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
           >
             {[10, 20, 30, 40, 50].map((pageSize) => (
               <option key={pageSize} value={pageSize}>
@@ -318,7 +318,7 @@ function DataTablePagination<TData>({ table }: { table: Table<TData> }) {
             ))}
           </select>
         </div>
-        <div className="flex w-[100px] items-center justify-center text-sm font-medium whitespace-nowrap">
+        <div className="flex w-25 items-center justify-center text-sm font-medium whitespace-nowrap">
           Page {table.getState().pagination.pageIndex + 1} of{" "}
           {table.getPageCount()}
         </div>

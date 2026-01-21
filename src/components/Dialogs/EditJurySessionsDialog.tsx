@@ -83,7 +83,7 @@ export function EditJurySessionsDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-106.25">
         <DialogHeader>
           <DialogTitle>Edit Sessions for {juryName}</DialogTitle>
           <DialogDescription>
@@ -97,7 +97,7 @@ export function EditJurySessionsDialog({
               No sessions available
             </p>
           ) : (
-            <div className="space-y-3 max-h-[300px] overflow-y-auto border rounded-md p-4">
+            <div className="space-y-3 max-h-75 overflow-y-auto border rounded-md p-4">
               {allSessions.map((session) => (
                 <div key={session.id} className="flex items-center space-x-3">
                   <Checkbox

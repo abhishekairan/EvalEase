@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createJury, updateJurySession, removeJuryFromSession, getSessionsForJury } from "@/db/utils";
+import { createJury, updateJurySession, removeJuryFromSession, getSessionsForJury, updateJuryPassword } from "@/db/utils";
 import { juryDBSchema } from "@/zod/userSchema";
 
 interface AddJuryData {
@@ -98,5 +98,37 @@ export async function updateJurySessionsAction({
   } catch (error) {
     console.error("Error updating jury sessions:", error);
     throw new Error("Failed to update jury sessions");
+  }
+}
+
+/**
+ * Reset password for a jury member
+ */
+export async function resetJuryPasswordAction({
+  juryId,
+  email,
+  newPassword,
+}: {
+  juryId: number;
+  email: string;
+  newPassword: string;
+}) {
+  try {
+    // Validate password length
+    if (!newPassword || newPassword.length < 8) {
+      return { success: false, message: "Password must be at least 8 characters long" };
+    }
+
+    const result = await updateJuryPassword({ email, newPassword });
+
+    if (result) {
+      revalidatePath("/dashboard/jury");
+      return { success: true, message: "Password reset successfully" };
+    } else {
+      return { success: false, message: "Failed to reset password" };
+    }
+  } catch (error) {
+    console.error("Error resetting jury password:", error);
+    return { success: false, message: "Failed to reset password" };
   }
 }

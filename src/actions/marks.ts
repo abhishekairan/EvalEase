@@ -158,6 +158,71 @@ export async function lockAllMarksForSession(sessionId: number) {
 }
 
 /**
+ * Lock all marks for a specific jury in a session
+ * Called by jury member to finalize all their evaluations
+ * Creates default marks (0) for teams without marks
+ */
+export async function lockAllMarksForJuryInSession(params: {
+  juryId: number;
+  sessionId: number;
+  teamIds: number[];
+}) {
+  try {
+    // Get existing marks for this jury in this session
+    const existingMarks = await getMarks({
+      juryId: params.juryId,
+      session: params.sessionId,
+    });
+
+    // Find teams that don't have marks yet
+    const markedTeamIds = new Set(existingMarks.map(m => m.teamId));
+    const teamsWithoutMarks = params.teamIds.filter(id => !markedTeamIds.has(id));
+
+    // Create default marks (0) for teams without marks
+    for (const teamId of teamsWithoutMarks) {
+      await createMark({
+        mark: {
+          teamId,
+          juryId: params.juryId,
+          session: params.sessionId,
+          innovationScore: 0,
+          presentationScore: 0,
+          technicalScore: 0,
+          impactScore: 0,
+          submitted: true,
+          locked: true,
+        },
+      });
+    }
+
+    // Lock all marks (existing and new) for this jury in this session
+    await db
+      .update(marks)
+      .set({ locked: true, submitted: true })
+      .where(
+        and(
+          eq(marks.juryId, params.juryId),
+          eq(marks.session, params.sessionId)
+        )
+      );
+
+    const totalLocked = params.teamIds.length;
+    const newlyCreated = teamsWithoutMarks.length;
+
+    revalidatePath("/home");
+    revalidatePath("/dashboard/marks");
+    return { 
+      success: true, 
+      message: `Successfully submitted ${totalLocked} teams (${newlyCreated} with default marks)`,
+      lockedCount: totalLocked,
+    };
+  } catch (error) {
+    console.error("Error locking jury marks:", error);
+    return { success: false, message: "Unable to lock marks", lockedCount: 0 };
+  }
+}
+
+/**
  * Fetch existing mark for a team by a jury in a session
  * Server action for client components to use
  */

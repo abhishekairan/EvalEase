@@ -10,10 +10,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Mail, Phone, Lock, LockOpen } from "lucide-react";
+import { Users, Mail, Phone, Lock, LockOpen, AlertTriangle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -441,18 +452,46 @@ export default function MarksDialog({
                         {isEditing ? "Update Marks" : "Submit Marks"}
                       </LoadingButton>
                       {isEditing && existingMark && (
-                        <LoadingButton
-                          type="button"
-                          variant="secondary"
-                          onClick={handleLockMarks}
-                          loading={isLocking}
-                          loadingText="Locking..."
-                          className="w-full sm:w-auto order-1 sm:order-3"
-                          aria-label="Lock marks permanently"
-                        >
-                          <Lock className="h-4 w-4 mr-2" aria-hidden="true" />
-                          Lock Marks
-                        </LoadingButton>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <LoadingButton
+                              type="button"
+                              variant="secondary"
+                              loading={isLocking}
+                              loadingText="Locking..."
+                              className="w-full sm:w-auto order-1 sm:order-3"
+                              aria-label="Lock marks permanently"
+                            >
+                              <Lock className="h-4 w-4 mr-2" aria-hidden="true" />
+                              Lock Marks
+                            </LoadingButton>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+                                <AlertTriangle className="h-5 w-5" />
+                                Confirm Lock Marks
+                              </AlertDialogTitle>
+                              <AlertDialogDescription className="space-y-2">
+                                <span className="block">
+                                  Are you sure you want to lock the marks for <span className="font-semibold">{team.teamName}</span>?
+                                </span>
+                                <span className="block text-red-600 font-medium">
+                                  ⚠️ Warning: Once locked, these marks cannot be edited or changed. This action is permanent.
+                                </span>
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={handleLockMarks}
+                                className="bg-orange-600 hover:bg-orange-700 text-white"
+                              >
+                                Yes, Lock Marks
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       )}
                     </>
                   )}

@@ -4,9 +4,10 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { juryDBType } from "@/zod/userSchema";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, KeyRound } from "lucide-react";
 import { ConfirmDeleteTJuryAlert } from "./alerts/ConfirmDeleteAlert";
 import { EditJurySessionsDialog } from "./Dialogs/EditJurySessionsDialog";
+import { ResetJuryPasswordDialog } from "./Dialogs/ResetJuryPasswordDialog";
 
 interface Session {
   id: number;
@@ -87,10 +88,25 @@ export function createJuryColumnsWithSessions(allSessions: Session[]): ColumnDef
               currentSessions={row.original.sessions || []}
               allSessions={allSessions}
             >
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Edit Sessions">
                 <Edit className="h-4 w-4" />
               </Button>
             </EditJurySessionsDialog>
+            
+            <ResetJuryPasswordDialog
+              juryId={row.original.id || 0}
+              juryEmail={row.original.email}
+              juryName={row.original.name}
+            >
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 w-8 p-0 text-blue-600 hover:text-blue-600 hover:bg-blue-50"
+                title="Reset Password"
+              >
+                <KeyRound className="h-4 w-4" />
+              </Button>
+            </ResetJuryPasswordDialog>
             
             <ConfirmDeleteTJuryAlert
               id={row.original.id || 0}
@@ -100,6 +116,7 @@ export function createJuryColumnsWithSessions(allSessions: Session[]): ColumnDef
                 variant="ghost"
                 size="sm"
                 className="h-8 w-8 p-0 text-red-600 hover:text-red-600 hover:bg-red-50"
+                title="Delete Jury"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>

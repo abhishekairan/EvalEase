@@ -10,7 +10,8 @@
     "generate-dummy-data": "tsx scripts/runDummyData.ts",
     "generate-test-data": "tsx scripts/dummyDataScript.ts",
     "seed": "tsx scripts/seed.ts",
-    "seed:custom": "tsx scripts/seed.ts"
+    "seed:custom": "tsx scripts/seed.ts",
+    "seed:excel": "tsx scripts/seedFromExcel.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

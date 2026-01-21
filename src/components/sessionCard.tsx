@@ -99,7 +99,8 @@ export function SessionCard({
   }
 
   const sessionStatus = getSessionStatus()
-  const completionRate = stats.totalMarks > 0 ? (stats.submittedMarks / stats.totalMarks) * 100 : 0
+  const expectedMarks = stats.totalTeams
+  const completionRate = expectedMarks > 0 ? (stats.submittedMarks / expectedMarks) * 100 : 0
 
   return (
     <Card className={cn(
@@ -201,7 +202,7 @@ export function SessionCard({
               <span className="text-sm font-medium">Submitted</span>
             </div>
             <p className="text-2xl font-bold text-green-600">
-              {stats.submittedMarks}/{stats.totalMarks}
+              {stats.submittedMarks}/{stats.totalTeams}
             </p>
           </div>
 

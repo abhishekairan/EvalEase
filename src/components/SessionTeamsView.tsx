@@ -6,12 +6,24 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { Input } from "@/components/ui/input";
-import { Search, Users, ArrowLeft, LogOut, Lock, CheckCircle2, Clock, AlertCircle, LucideIcon } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Search, Users, ArrowLeft, LogOut, Lock, CheckCircle2, Clock, AlertCircle, LucideIcon, AlertTriangle, Send } from "lucide-react";
 import MarksDialog from "./marks-dialog";
 import { TeamDataType, MarksDBType } from "@/zod";
-import { getExistingMark } from "@/actions/marks";
+import { getExistingMark, lockAllMarksForJuryInSession } from "@/actions/marks";
 import { useLogout } from "@/hooks/use-logout";
 import { useRouter } from "next/navigation";
+import { toast } from "@/lib/toast";
 
 interface SessionData {
   id: number;
@@ -99,6 +111,8 @@ export function SessionTeamsView({
     useState<Record<number, { marked: boolean; locked: boolean }>>(
       initialMarksStatus
     );
+  const [isLockingAll, setIsLockingAll] = useState(false);
+  const [lockAllDialogOpen, setLockAllDialogOpen] = useState(false);
 
   // Filter teams by search term
   const filteredTeams = useMemo(() => {
@@ -160,6 +174,44 @@ export function SessionTeamsView({
 
   const markedCount = teams.filter((t) => teamMarks[t.id!]?.marked).length;
   const lockedCount = teams.filter((t) => teamMarks[t.id!]?.locked).length;
+  const pendingLockCount = markedCount - lockedCount;
+
+  const handleLockAllMarks = async () => {
+    setIsLockingAll(true);
+    try {
+      const result = await lockAllMarksForJuryInSession({
+        juryId,
+        sessionId: session.id,
+        teamIds: teams.map(t => t.id!),
+      });
+
+      if (result.success) {
+        toast.success("All marks submitted", {
+          description: result.message,
+        });
+        // Update local state to reflect ALL teams as locked
+        setTeamMarks(() => {
+          const updated: Record<number, { marked: boolean; locked: boolean }> = {};
+          for (const team of teams) {
+            updated[team.id!] = { marked: true, locked: true };
+          }
+          return updated;
+        });
+      } else {
+        toast.error("Failed to lock marks", {
+          description: result.message,
+        });
+      }
+    } catch (error) {
+      console.error("Error locking all marks:", error);
+      toast.error("Failed to lock marks", {
+        description: "Please try again or contact support",
+      });
+    } finally {
+      setIsLockingAll(false);
+      setLockAllDialogOpen(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 animate-fade-in">
@@ -216,14 +268,9 @@ export function SessionTeamsView({
         </div>
       </header>
 
-      {/* Main Content */}
-      <section
-        className="container mx-auto px-4 py-8"
-        role="main"
-        aria-label="Session teams"
-      >
-        {/* Stats and Search */}
-        <div className="mb-4 sm:mb-6">
+      {/* Sticky Stats/Search/Submit Bar */}
+      <div className="sticky top-14 z-9 bg-gray-50 border-b border-gray-200 shadow-sm">
+        <div className="container mx-auto px-4 py-3">
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start sm:items-center">
             {/* Stats Overview */}
             <div className="flex gap-3 sm:gap-4 w-full justify-center sm:w-auto overflow-x-auto">
@@ -267,8 +314,81 @@ export function SessionTeamsView({
                 />
               </div>
             </div>
+
+            {/* Submit All Marks Button */}
+            <AlertDialog open={lockAllDialogOpen} onOpenChange={setLockAllDialogOpen}>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="default"
+                  className="gap-2 bg-orange-600 hover:bg-orange-700 w-full sm:w-auto"
+                  disabled={lockedCount === teams.length || isLockingAll}
+                >
+                  <Send className="h-4 w-4" color="white" />
+                  <span className="hidden sm:inline text-white">Submit All Marks</span>
+                  <span className="sm:hidden text-white">Submit All</span>
+                  {teams.length - lockedCount > 0 && (
+                    <Badge variant="secondary" className="ml-1 bg-white text-orange-600">
+                      {teams.length - lockedCount}
+                    </Badge>
+                  )}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="flex items-center gap-2 text-orange-600">
+                    <AlertTriangle className="h-5 w-5" />
+                    Submit All Marks
+                  </AlertDialogTitle>
+                  <AlertDialogDescription asChild>
+                    <div className="space-y-3">
+                      <p>
+                        You are about to submit and lock <span className="font-semibold">all {teams.length}</span> team(s) for this session.
+                      </p>
+                      <div className="bg-orange-50 border border-orange-200 rounded-md p-3 text-orange-800">
+                        <div className="flex items-start gap-2">
+                          <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
+                          <div className="text-sm">
+                            <p className="font-semibold">Warning: This action is permanent!</p>
+                            <p className="mt-1">Once submitted, these marks cannot be edited or changed. Make sure all evaluations are correct before proceeding.</p>
+                            {teams.length - markedCount > 0 && (
+                              <p className="mt-2 font-semibold text-red-600">
+                                ⚠️ {teams.length - markedCount} team(s) have not been evaluated and will receive 0 marks.
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-sm space-y-1">
+                        <p>• <span className="font-medium">{markedCount}</span> team(s) have been marked</p>
+                        <p>• <span className="font-medium">{teams.length - markedCount}</span> team(s) will receive default marks (0)</p>
+                        <p>• <span className="font-medium">{lockedCount}</span> team(s) are already locked</p>
+                      </div>
+                    </div>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={isLockingAll}>Cancel</AlertDialogCancel>
+                  <LoadingButton
+                    onClick={handleLockAllMarks}
+                    loading={isLockingAll}
+                    loadingText="Submitting..."
+                    className="bg-orange-600 hover:bg-orange-700 text-white"
+                  >
+                    Yes, Submit All Marks
+                  </LoadingButton>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
+      </div>
+
+      {/* Main Content */}
+      <section
+        className="container mx-auto px-4 py-8"
+        role="main"
+        aria-label="Session teams"
+      >
 
         {/* Teams Grid */}
         {filteredTeams.length === 0 ? (

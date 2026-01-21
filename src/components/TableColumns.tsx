@@ -199,7 +199,9 @@ export const teamColumns: ColumnDef<TeamDataType>[] = [
     header: "Member 1",
     enableSorting: false,
     accessorFn: (row) => {
-      const member = row.members[1];
+      // Filter out leader from members
+      const nonLeaderMembers = row.members.filter(m => m.id !== row.leaderId?.id);
+      const member = nonLeaderMembers[0];
       return member ? member.name : "-";
     },
     cell: ({ getValue }) => {
@@ -211,7 +213,9 @@ export const teamColumns: ColumnDef<TeamDataType>[] = [
     header: "Member 2",
     enableSorting: false,
     accessorFn: (row) => {
-      const member = row.members[2];
+      // Filter out leader from members
+      const nonLeaderMembers = row.members.filter(m => m.id !== row.leaderId?.id);
+      const member = nonLeaderMembers[1];
       return member ? member.name : "-";
     },
     cell: ({ getValue }) => {
@@ -223,7 +227,9 @@ export const teamColumns: ColumnDef<TeamDataType>[] = [
     header: "Member 3",
     enableSorting: false,
     accessorFn: (row) => {
-      const member = row.members[3];
+      // Filter out leader from members
+      const nonLeaderMembers = row.members.filter(m => m.id !== row.leaderId?.id);
+      const member = nonLeaderMembers[2];
       return member ? member.name : "-";
     },
     cell: ({ getValue }) => {

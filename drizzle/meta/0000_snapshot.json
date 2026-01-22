@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "559cfe19-8432-40f7-9751-4e975979c6e5",
+  "id": "72476b34-49ef-42a8-9c1f-0e21448d4f09",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "admin": {
@@ -308,29 +308,29 @@
           "notNull": true,
           "autoincrement": false
         },
-        "innovation_score": {
-          "name": "innovation_score",
+        "feasibility_score": {
+          "name": "feasibility_score",
           "type": "int",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "presentation_score": {
-          "name": "presentation_score",
+        "tech_implementation_score": {
+          "name": "tech_implementation_score",
           "type": "int",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "technical_score": {
-          "name": "technical_score",
+        "innovation_creativity_score": {
+          "name": "innovation_creativity_score",
           "type": "int",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "impact_score": {
-          "name": "impact_score",
+        "problem_relevance_score": {
+          "name": "problem_relevance_score",
           "type": "int",
           "primaryKey": false,
           "notNull": true,

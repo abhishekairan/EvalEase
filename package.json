@@ -11,7 +11,8 @@
     "generate-test-data": "tsx scripts/dummyDataScript.ts",
     "seed": "tsx scripts/seed.ts",
     "seed:custom": "tsx scripts/seed.ts",
-    "seed:excel": "tsx scripts/seedFromExcel.ts"
+    "seed:excel": "tsx scripts/seedFromExcel.ts",
+    "createsuperuser": "tsx scripts/createSuperuser.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

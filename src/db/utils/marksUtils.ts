@@ -8,7 +8,7 @@ import { eq, and, desc } from "drizzle-orm";
  * 
  * This module provides CRUD operations for marks management using Drizzle ORM.
  * Marks represent scoring data for teams by jury members (participants) in specific sessions.
- * Each mark record contains scores for innovation, presentation, technical aspects, and impact.
+ * Each mark record contains scores for feasibility, tech implementation, innovation & creativity, and problem relevance.
  */
 
 /**
@@ -80,10 +80,10 @@ export async function getMarks({ id, teamId, juryId, session, submitted }: {
  *   teamId: 123,
  *   juryId: 456,
  *   session: 1,
- *   innovationScore: 8,
- *   presentationScore: 7,
- *   technicalScore: 9,
- *   impactScore: 8,
+ *   feasibilityScore: 20,
+ *   techImplementationScore: 18,
+ *   innovationCreativityScore: 22,
+ *   problemRelevanceScore: 20,
  *   submitted: false
  * };
  * const result = await createMark({ mark: newMark });
@@ -154,10 +154,10 @@ export async function deleteMark({ id }: { id: number }) {
  *   teamId: 456,
  *   juryId: 789,
  *   session: 1,
- *   innovationScore: 9,
- *   presentationScore: 8,
- *   technicalScore: 10,
- *   impactScore: 9,
+ *   feasibilityScore: 22,
+ *   techImplementationScore: 20,
+ *   innovationCreativityScore: 24,
+ *   problemRelevanceScore: 22,
  *   submitted: true
  * };
  * const result = await updateMark({ mark: updatedMark });
@@ -219,10 +219,10 @@ export async function getMarksWithData({ id, teamId, juryId, session }: {
     .select({
       // Mark fields
       id: marks.id,
-      innovationScore: marks.innovationScore,
-      presentationScore: marks.presentationScore,
-      technicalScore: marks.technicalScore,
-      impactScore: marks.impactScore,
+      feasibilityScore: marks.feasibilityScore,
+      techImplementationScore: marks.techImplementationScore,
+      innovationCreativityScore: marks.innovationCreativityScore,
+      problemRelevanceScore: marks.problemRelevanceScore,
       submitted: marks.submitted,
       locked: marks.locked,
       createdAt: marks.createdAt,
@@ -333,8 +333,8 @@ export async function submitMark({ id }: { id: number }) {
   const mark = markData[0];
   
   // Validate that all scores are provided (not -1)
-  if (mark.innovationScore === -1 || mark.presentationScore === -1 || 
-      mark.technicalScore === -1 || mark.impactScore === -1) {
+  if (mark.feasibilityScore === -1 || mark.techImplementationScore === -1 || 
+      mark.innovationCreativityScore === -1 || mark.problemRelevanceScore === -1) {
     throw new Error("All scores must be provided before submission");
   }
   
@@ -359,10 +359,10 @@ export async function submitMark({ id }: { id: number }) {
  */
 export function calculateTotalScore({ mark }: { mark: MarksDBType }) {
   const scores = [
-    mark.innovationScore,
-    mark.presentationScore,
-    mark.technicalScore,
-    mark.impactScore
+    mark.feasibilityScore,
+    mark.techImplementationScore,
+    mark.innovationCreativityScore,
+    mark.problemRelevanceScore
   ];
   
   // Only count scores that are not -1 (unscored)
@@ -381,38 +381,38 @@ export function calculateTotalScore({ mark }: { mark: MarksDBType }) {
  * 
  * @example
  * const averages = await getTeamAverageScores({ teamId: 123, session: 1 });
- * console.log(`Average innovation score: ${averages.innovationAvg}`);
+ * console.log(`Average feasibility score: ${averages.feasibilityAvg}`);
  */
 export async function getTeamAverageScores({ teamId, session }: { teamId: number; session?: number }) {
   const teamMarks = await getMarks({ teamId, session, submitted: true });
   
   if (teamMarks.length === 0) {
     return {
-      innovationAvg: 0,
-      presentationAvg: 0,
-      technicalAvg: 0,
-      impactAvg: 0,
+      feasibilityAvg: 0,
+      techImplementationAvg: 0,
+      innovationCreativityAvg: 0,
+      problemRelevanceAvg: 0,
       totalAvg: 0,
       juryCount: 0
     };
   }
   
   const totals = teamMarks.reduce((acc, mark) => {
-    acc.innovation += mark.innovationScore !== -1 ? mark.innovationScore : 0;
-    acc.presentation += mark.presentationScore !== -1 ? mark.presentationScore : 0;
-    acc.technical += mark.technicalScore !== -1 ? mark.technicalScore : 0;
-    acc.impact += mark.impactScore !== -1 ? mark.impactScore : 0;
+    acc.feasibility += mark.feasibilityScore !== -1 ? mark.feasibilityScore : 0;
+    acc.techImplementation += mark.techImplementationScore !== -1 ? mark.techImplementationScore : 0;
+    acc.innovationCreativity += mark.innovationCreativityScore !== -1 ? mark.innovationCreativityScore : 0;
+    acc.problemRelevance += mark.problemRelevanceScore !== -1 ? mark.problemRelevanceScore : 0;
     return acc;
-  }, { innovation: 0, presentation: 0, technical: 0, impact: 0 });
+  }, { feasibility: 0, techImplementation: 0, innovationCreativity: 0, problemRelevance: 0 });
   
   const count = teamMarks.length;
   
   return {
-    innovationAvg: totals.innovation / count,
-    presentationAvg: totals.presentation / count,
-    technicalAvg: totals.technical / count,
-    impactAvg: totals.impact / count,
-    totalAvg: (totals.innovation + totals.presentation + totals.technical + totals.impact) / count,
+    feasibilityAvg: totals.feasibility / count,
+    techImplementationAvg: totals.techImplementation / count,
+    innovationCreativityAvg: totals.innovationCreativity / count,
+    problemRelevanceAvg: totals.problemRelevance / count,
+    totalAvg: (totals.feasibility + totals.techImplementation + totals.innovationCreativity + totals.problemRelevance) / count,
     juryCount: count
   };
 }

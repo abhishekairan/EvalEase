@@ -10,10 +10,10 @@ interface MarkData {
   teamId: number;
   juryId: number;
   session: number;
-  innovationScore: number;
-  presentationScore: number;
-  technicalScore: number;
-  impactScore: number;
+  feasibilityScore: number;
+  techImplementationScore: number;
+  innovationCreativityScore: number;
+  problemRelevanceScore: number;
   submitted: boolean;
   locked?: boolean;
 }
@@ -52,10 +52,10 @@ export async function submitMarks(markData: MarkData) {
       await updateMark({ 
         mark: {
           ...existingMark,
-          innovationScore: markData.innovationScore,
-          presentationScore: markData.presentationScore,
-          technicalScore: markData.technicalScore,
-          impactScore: markData.impactScore,
+          feasibilityScore: markData.feasibilityScore,
+          techImplementationScore: markData.techImplementationScore,
+          innovationCreativityScore: markData.innovationCreativityScore,
+          problemRelevanceScore: markData.problemRelevanceScore,
           submitted: markData.submitted,
         }
       });
@@ -185,10 +185,10 @@ export async function lockAllMarksForJuryInSession(params: {
           teamId,
           juryId: params.juryId,
           session: params.sessionId,
-          innovationScore: 0,
-          presentationScore: 0,
-          technicalScore: 0,
-          impactScore: 0,
+          feasibilityScore: 0,
+          techImplementationScore: 0,
+          innovationCreativityScore: 0,
+          problemRelevanceScore: 0,
           submitted: true,
           locked: true,
         },

@@ -44,7 +44,7 @@ export async function getSessionStats(sessionId: number) {
       .select({
         totalMarks: count(),
         submittedMarks: sql<number>`SUM(CASE WHEN ${marks.submitted} = 1 THEN 1 ELSE 0 END)`,
-        averageScore: avg(sql<number>`${marks.innovationScore} + ${marks.presentationScore} + ${marks.technicalScore} + ${marks.impactScore}`)
+        averageScore: avg(sql<number>`${marks.feasibilityScore} + ${marks.techImplementationScore} + ${marks.innovationCreativityScore} + ${marks.problemRelevanceScore}`)
       })
       .from(marks)
       .where(eq(marks.session, sessionId))

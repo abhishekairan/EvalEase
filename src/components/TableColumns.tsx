@@ -33,54 +33,54 @@ export const marksColumns: ColumnDef<MarksDataType>[] = [
     enableSorting: true, // Enable sorting for session
   },
   {
-    accessorKey: "innovationScore",
-    header: "Innovation Score",
+    accessorKey: "feasibilityScore",
+    header: "Feasibility",
     enableSorting: false, // Enable sorting for scores
     cell: (value) => {
       const score = value.getValue() as number;
       let variant: "default" | "secondary" | "destructive" | "outline" | "red" | "green" | "orange" = "destructive";
-      if (score < 4) variant = "red";
-      if (score > 3 && score < 8) variant = "orange";
-      if (score > 7) variant = "green";
+      if (score < 10) variant = "red";
+      if (score >= 10 && score < 18) variant = "orange";
+      if (score >= 18) variant = "green";
       return <Badge variant={variant}>{score}</Badge>;
     },
   },
   {
-    accessorKey: "presentationScore",
-    header: "Presentation Score",
+    accessorKey: "techImplementationScore",
+    header: "Tech Implementation",
     enableSorting: false,
     cell: (value) => {
       const score = value.getValue() as number;
       let variant: "default" | "secondary" | "destructive" | "outline" | "red" | "green" | "orange" = "destructive";
-      if (score < 4) variant = "red";
-      if (score > 3 && score < 8) variant = "orange";
-      if (score > 7) variant = "green";
+      if (score < 10) variant = "red";
+      if (score >= 10 && score < 18) variant = "orange";
+      if (score >= 18) variant = "green";
       return <Badge variant={variant}>{score}</Badge>;
     },
   },
   {
-    accessorKey: "technicalScore",
-    header: "Code Quality",
+    accessorKey: "innovationCreativityScore",
+    header: "Innovation & Creativity",
     enableSorting: false,
     cell: (value) => {
       const score = value.getValue() as number;
       let variant: "default" | "secondary" | "destructive" | "outline" | "red" | "green" | "orange" = "destructive";
-      if (score < 4) variant = "red";
-      if (score > 3 && score < 8) variant = "orange";
-      if (score > 7) variant = "green";
+      if (score < 10) variant = "red";
+      if (score >= 10 && score < 18) variant = "orange";
+      if (score >= 18) variant = "green";
       return <Badge variant={variant}>{score}</Badge>;
     },
   },
   {
-    accessorKey: "impactScore",
-    header: "Feasibility Score",
+    accessorKey: "problemRelevanceScore",
+    header: "Problem Relevance",
     enableSorting: false,
     cell: (value) => {
       const score = value.getValue() as number;
       let variant: "default" | "secondary" | "destructive" | "outline" | "red" | "green" | "orange" = "destructive";
-      if (score < 4) variant = "red";
-      if (score > 3 && score < 8) variant = "orange";
-      if (score > 7) variant = "green";
+      if (score < 10) variant = "red";
+      if (score >= 10 && score < 18) variant = "orange";
+      if (score >= 18) variant = "green";
       return <Badge variant={variant}>{score}</Badge>;
     },
   },
@@ -88,7 +88,7 @@ export const marksColumns: ColumnDef<MarksDataType>[] = [
     header: "Total Score",
     enableSorting: true, // Enable sorting for total score
     accessorFn: (row) => {
-      return row.innovationScore + row.presentationScore + row.technicalScore + row.impactScore;
+      return row.feasibilityScore + row.techImplementationScore + row.innovationCreativityScore + row.problemRelevanceScore;
     },
     cell: ({ getValue }) => {
       const score = getValue() as number;

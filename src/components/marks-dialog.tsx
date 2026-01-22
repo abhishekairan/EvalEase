@@ -65,10 +65,10 @@ export default function MarksDialog({
   const form = useForm({
     resolver: zodResolver(MarksFormSchema),
     defaultValues: {
-      innovationScore: existingMark?.innovationScore || 0,
-      presentationScore: existingMark?.presentationScore || 0,
-      technicalScore: existingMark?.technicalScore || 0,
-      impactScore: existingMark?.impactScore || 0,
+      feasibilityScore: existingMark?.feasibilityScore || 0,
+      techImplementationScore: existingMark?.techImplementationScore || 0,
+      innovationCreativityScore: existingMark?.innovationCreativityScore || 0,
+      problemRelevanceScore: existingMark?.problemRelevanceScore || 0,
     },
   });
 
@@ -83,18 +83,18 @@ export default function MarksDialog({
   useEffect(() => {
     if (existingMark) {
       reset({
-        innovationScore: existingMark.innovationScore,
-        presentationScore: existingMark.presentationScore,
-        technicalScore: existingMark.technicalScore,
-        impactScore: existingMark.impactScore,
+        feasibilityScore: existingMark.feasibilityScore,
+        techImplementationScore: existingMark.techImplementationScore,
+        innovationCreativityScore: existingMark.innovationCreativityScore,
+        problemRelevanceScore: existingMark.problemRelevanceScore,
       });
       setIsLocked(existingMark.locked || false);
     } else {
       reset({
-        innovationScore: 0,
-        presentationScore: 0,
-        technicalScore: 0,
-        impactScore: 0,
+        feasibilityScore: 0,
+        techImplementationScore: 0,
+        innovationCreativityScore: 0,
+        problemRelevanceScore: 0,
       });
       setIsLocked(false);
     }
@@ -121,10 +121,10 @@ export default function MarksDialog({
         teamId: team.id!,
         juryId: juryId,
         session: sessionId,
-        innovationScore: data.innovationScore,
-        presentationScore: data.presentationScore,
-        technicalScore: data.technicalScore,
-        impactScore: data.impactScore,
+        feasibilityScore: data.feasibilityScore,
+        techImplementationScore: data.techImplementationScore,
+        innovationCreativityScore: data.innovationCreativityScore,
+        problemRelevanceScore: data.problemRelevanceScore,
         submitted: true,
       };
 
@@ -297,134 +297,134 @@ export default function MarksDialog({
                 Evaluation Marks
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Enter scores for each category
+                Enter scores for each category (25 marks each, total 100)
               </p>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Innovation Score */}
+                  {/* Feasibility Score */}
                   <div className="space-y-2">
                     <Label
-                      htmlFor="innovationScore"
+                      htmlFor="feasibilityScore"
                       className="text-sm font-medium"
                     >
-                      Innovation Score (0-10)
+                      Feasibility (0-25)
                     </Label>
                     <Input
-                      id="innovationScore"
+                      id="feasibilityScore"
                       type="number"
                       min="0"
-                      max="10"
+                      max="25"
                       step="1"
                       disabled={isLocked}
                       aria-required="true"
-                      aria-describedby="innovationScore-error"
-                      {...register("innovationScore", { valueAsNumber: true })}
+                      aria-describedby="feasibilityScore-error"
+                      {...register("feasibilityScore", { valueAsNumber: true })}
                       className="w-full"
                     />
-                    {errors.innovationScore && (
+                    {errors.feasibilityScore && (
                       <p
-                        id="innovationScore-error"
+                        id="feasibilityScore-error"
                         className="text-sm text-red-500"
                         role="alert"
                       >
-                        {errors.innovationScore.message}
+                        {errors.feasibilityScore.message}
                       </p>
                     )}
                   </div>
 
-                  {/* Presentation Score */}
+                  {/* Tech Implementation Score */}
                   <div className="space-y-2">
                     <Label
-                      htmlFor="presentationScore"
+                      htmlFor="techImplementationScore"
                       className="text-sm font-medium"
                     >
-                      Presentation Score (0-10)
+                      Tech Implementation (0-25)
                     </Label>
                     <Input
-                      id="presentationScore"
+                      id="techImplementationScore"
                       type="number"
                       min="0"
-                      max="10"
+                      max="25"
                       step="1"
                       disabled={isLocked}
                       aria-required="true"
-                      aria-describedby="presentationScore-error"
-                      {...register("presentationScore", {
+                      aria-describedby="techImplementationScore-error"
+                      {...register("techImplementationScore", {
                         valueAsNumber: true,
                       })}
                       className="w-full"
                     />
-                    {errors.presentationScore && (
+                    {errors.techImplementationScore && (
                       <p
-                        id="presentationScore-error"
+                        id="techImplementationScore-error"
                         className="text-sm text-red-500"
                         role="alert"
                       >
-                        {errors.presentationScore.message}
+                        {errors.techImplementationScore.message}
                       </p>
                     )}
                   </div>
 
-                  {/* Technical Score */}
+                  {/* Innovation & Creativity Score */}
                   <div className="space-y-2">
                     <Label
-                      htmlFor="technicalScore"
+                      htmlFor="innovationCreativityScore"
                       className="text-sm font-medium"
                     >
-                      Code Quality (0-15)
+                      Innovation & Creativity (0-25)
                     </Label>
                     <Input
-                      id="technicalScore"
+                      id="innovationCreativityScore"
                       type="number"
                       min="0"
-                      max="15"
+                      max="25"
                       step="1"
                       disabled={isLocked}
                       aria-required="true"
-                      aria-describedby="technicalScore-error"
-                      {...register("technicalScore", { valueAsNumber: true })}
+                      aria-describedby="innovationCreativityScore-error"
+                      {...register("innovationCreativityScore", { valueAsNumber: true })}
                       className="w-full"
                     />
-                    {errors.technicalScore && (
+                    {errors.innovationCreativityScore && (
                       <p
-                        id="technicalScore-error"
+                        id="innovationCreativityScore-error"
                         className="text-sm text-red-500"
                         role="alert"
                       >
-                        {errors.technicalScore.message}
+                        {errors.innovationCreativityScore.message}
                       </p>
                     )}
                   </div>
 
-                  {/* Impact Score */}
+                  {/* Problem Statement Relevance Score */}
                   <div className="space-y-2">
                     <Label
-                      htmlFor="impactScore"
+                      htmlFor="problemRelevanceScore"
                       className="text-sm font-medium"
                     >
-                      Feasibility (0-15)
+                      Problem Statement Relevance (0-25)
                     </Label>
                     <Input
-                      id="impactScore"
+                      id="problemRelevanceScore"
                       type="number"
                       min="0"
-                      max="15"
+                      max="25"
                       step="1"
                       disabled={isLocked}
                       aria-required="true"
-                      aria-describedby="impactScore-error"
-                      {...register("impactScore", { valueAsNumber: true })}
+                      aria-describedby="problemRelevanceScore-error"
+                      {...register("problemRelevanceScore", { valueAsNumber: true })}
                       className="w-full"
                     />
-                    {errors.impactScore && (
+                    {errors.problemRelevanceScore && (
                       <p
-                        id="impactScore-error"
+                        id="problemRelevanceScore-error"
                         className="text-sm text-red-500"
                         role="alert"
                       >
-                        {errors.impactScore.message}
+                        {errors.problemRelevanceScore.message}
                       </p>
                     )}
                   </div>

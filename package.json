@@ -12,6 +12,7 @@
     "seed": "tsx scripts/seed.ts",
     "seed:custom": "tsx scripts/seed.ts",
     "seed:excel": "tsx scripts/seedFromExcel.ts",
+    "seed:csv": "tsx scripts/seedFromCSV.ts",
     "createsuperuser": "tsx scripts/createSuperuser.ts"
   },
   "dependencies": {

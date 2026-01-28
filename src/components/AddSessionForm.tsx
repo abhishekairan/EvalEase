@@ -147,6 +147,30 @@ export function AddSessionForm({
     }
   }, [selectedJury, currentStep, sessionName, saveDraftSnapshot, saveDraftToDatabase])
 
+  // Setup autosave with debounce (5 seconds) during team assignment step
+  useEffect(() => {
+    if (currentStep !== "teams" || !sessionName || sessionName.trim().length === 0) return
+
+    // Save snapshot to array immediately
+    saveDraftSnapshot()
+
+    // Clear existing timeout
+    if (draftSaveTimeoutRef.current) {
+      clearTimeout(draftSaveTimeoutRef.current)
+    }
+
+    // Set new timeout for debounced DB save (5 seconds)
+    draftSaveTimeoutRef.current = setTimeout(() => {
+      saveDraftToDatabase()
+    }, 5000)
+
+    return () => {
+      if (draftSaveTimeoutRef.current) {
+        clearTimeout(draftSaveTimeoutRef.current)
+      }
+    }
+  }, [teamAssignments, currentStep, sessionName, saveDraftSnapshot, saveDraftToDatabase])
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {

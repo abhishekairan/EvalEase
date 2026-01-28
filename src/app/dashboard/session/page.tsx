@@ -1,10 +1,11 @@
 // app/dashboard/sessions/page.tsx
 import { SessionsList } from '@/components/SessionsList'
+import { DraftsSection } from '@/components/DraftsSection'
 import { SiteHeader } from '@/components/site-header'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import Link from 'next/link'
-import { getSessions, getSessionStats } from '@/db/utils'
+import { getSessions, getSessionStats, getDrafts } from '@/db/utils'
 import { Suspense } from 'react'
 
 function SessionsPageSkeleton() {
@@ -19,13 +20,25 @@ function SessionsPageSkeleton() {
   )
 }
 
+async function DraftsContent() {
+  try {
+    const drafts = await getDrafts()
+    return <DraftsSection drafts={drafts} />
+  } catch (error) {
+    console.error("Error loading drafts:", error)
+    return null
+  }
+}
+
 async function SessionsContent() {
   try {
     const sessions = await getSessions()
-    // console.log("Session Recived for session page:", sessions)
+    // Filter only published sessions (non-drafts)
+    const publishedSessions = sessions.filter(s => !s.isDraft)
+    
     // Get stats for each session
     const sessionsWithStats = await Promise.all(
-      sessions.map(async (session) => {
+      publishedSessions.map(async (session) => {
         const stats = await getSessionStats(session.id)
         return { session, stats }
       })
@@ -57,6 +70,15 @@ const page = () => {
           </Link>
         </Button>
       </div>
+      
+      {/* Drafts Section */}
+      <div className="container mx-auto px-6 pt-6">
+        <Suspense fallback={<div className="h-32 bg-gray-100 rounded-lg animate-pulse" />}>
+          <DraftsContent />
+        </Suspense>
+      </div>
+      
+      {/* Published Sessions */}
       <Suspense fallback={<SessionsPageSkeleton />}>
         <SessionsContent />
       </Suspense>

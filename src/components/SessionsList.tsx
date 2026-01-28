@@ -21,6 +21,7 @@ interface SessionsListProps {
       endedAt: Date | null
       createdAt: Date
       updatedAt: Date
+      isDraft?: boolean | null
     }
     stats: {
       totalTeams: number
@@ -34,6 +35,8 @@ interface SessionsListProps {
 }
 
 export function SessionsList({ sessionsWithStats }: SessionsListProps) {
+  // Filter only published sessions (not drafts)
+  const publishedSessions = sessionsWithStats.filter(item => !item.session.isDraft)
   const handleStartSession = async (sessionId: number) => {
     try {
       await startSessionAction(sessionId)
@@ -74,7 +77,7 @@ export function SessionsList({ sessionsWithStats }: SessionsListProps) {
             <Calendar className="h-12 w-12 text-gray-400" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">No sessions found</h3>
+            <h3 className="text-lg font-semibold text-gray-900">No published sessions</h3>
             <p className="text-gray-500 mt-1">Create your first session to get started</p>
           </div>
           <Button asChild className="mt-4">
@@ -90,6 +93,7 @@ export function SessionsList({ sessionsWithStats }: SessionsListProps) {
 
   return (
     <div className="m-6">
+      <h2 className="text-lg font-semibold text-gray-900 mb-4">Published Sessions</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {sessionsWithStats.map(({ session, stats }) => (
           <SessionCard

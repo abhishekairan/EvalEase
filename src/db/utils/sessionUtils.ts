@@ -75,10 +75,12 @@ export async function getSessionStats(sessionId: number) {
 }
 
 
-export async function createSession({ session }: { session: { name: string } }) {
+export async function createSession({ session, isDraft = false }: { session: { name: string }, isDraft?: boolean }) {
   try {
     const result = await db.insert(sessions).values({
       name: session.name,
+      isDraft: isDraft,
+      publishedAt: isDraft ? null : new Date(),
     }).$returningId()
 
     if (result.length > 0) {
@@ -353,5 +355,149 @@ export async function getTeamsBySession(sessionId: number) {
   } catch (error) {
     console.error("Error getting teams by session:", error)
     return []
+  }
+}
+
+// ==================== DRAFT FUNCTIONS ====================
+
+/**
+ * Get all draft sessions (unpublished)
+ * @returns Promise<Array> - Array of draft sessions
+ */
+export async function getDrafts() {
+  try {
+    const result = await db
+      .select()
+      .from(sessions)
+      .where(eq(sessions.isDraft, true))
+      .orderBy(sessions.updatedAt)
+    return result
+  } catch (error) {
+    console.error("Error fetching drafts:", error)
+    return []
+  }
+}
+
+/**
+ * Get all published sessions (non-draft)
+ * @returns Promise<Array> - Array of published sessions
+ */
+export async function getPublishedSessions() {
+  try {
+    const result = await db
+      .select()
+      .from(sessions)
+      .where(eq(sessions.isDraft, false))
+      .orderBy(sessions.createdAt)
+    return result
+  } catch (error) {
+    console.error("Error fetching published sessions:", error)
+    return []
+  }
+}
+
+/**
+ * Get a specific draft by ID
+ * @param draftId - Draft session ID
+ * @returns Promise<Draft | null>
+ */
+export async function getDraftById(draftId: number) {
+  try {
+    const result = await db
+      .select()
+      .from(sessions)
+      .where(sql`${sessions.id} = ${draftId} AND ${sessions.isDraft} = true`)
+      .limit(1)
+    return result[0] || null
+  } catch (error) {
+    console.error("Error fetching draft:", error)
+    return null
+  }
+}
+
+/**
+ * Save or update a draft session
+ * @param params - Parameters object
+ * @param params.sessionId - Session ID (null for new draft)
+ * @param params.name - Session name
+ * @returns Promise<{id: number} | null>
+ */
+export async function saveDraft({
+  sessionId,
+  name,
+}: {
+  sessionId: number | null
+  name: string
+}) {
+  try {
+    if (!sessionId) {
+      // Create new draft
+      const result = await db.insert(sessions).values({
+        name,
+        isDraft: true,
+      }).$returningId()
+      return result[0] || null
+    } else {
+      // Update existing draft
+      await db
+        .update(sessions)
+        .set({
+          name,
+          isDraft: true,
+          updatedAt: new Date()
+        })
+        .where(eq(sessions.id, sessionId))
+      return { id: sessionId }
+    }
+  } catch (error) {
+    console.error("Error saving draft:", error)
+    return null
+  }
+}
+
+/**
+ * Publish a draft session (convert to published)
+ * @param draftId - Draft session ID
+ * @returns Promise<SessionType | null>
+ */
+export async function publishDraft(draftId: number) {
+  try {
+    await db
+      .update(sessions)
+      .set({
+        isDraft: false,
+        publishedAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(sessions.id, draftId))
+
+    return await getSessionById(draftId)
+  } catch (error) {
+    console.error("Error publishing draft:", error)
+    return null
+  }
+}
+
+/**
+ * Delete a draft session
+ * @param draftId - Draft session ID
+ * @returns Promise<boolean>
+ */
+export async function deleteDraft(draftId: number) {
+  try {
+    // Delete jury-session relationships
+    await db
+      .delete(jurySessions)
+      .where(eq(jurySessions.sessionId, draftId))
+
+    // Delete the draft
+    await db
+      .delete(sessions)
+      .where(eq(sessions.id, draftId))
+
+    return true
+  } catch (error) {
+    console.error("Error deleting draft:", error)
+    return false
   }
 }

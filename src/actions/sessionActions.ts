@@ -2,7 +2,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { createSession, updateJurySession, updateSession, deleteSession, getJuryIdsBySession, deleteJurysSession, updateTeamjury, getJuryBySession, getTeamsBySession } from "@/db/utils"
+import { createSession, updateJurySession, updateSession, deleteSession, getJuryIdsBySession, deleteJurysSession, updateTeamjury, getJuryBySession, getTeamsBySession, saveDraft, publishDraft, deleteDraft, getDraftById, getDrafts } from "@/db/utils"
 import { shuffleTeamsInSession } from "@/db/utils"
 import { lockAllMarksForSession } from "./marks"
 import { TeamDataType, juryDBType } from "@/zod"
@@ -168,5 +168,171 @@ export async function reassignTeamsForSession(
   } catch (error) {
     console.error("Error reassigning teams:", error)
     throw new Error("Failed to reassign teams")
+  }
+}
+
+// ==================== DRAFT ACTIONS ====================
+
+/**
+ * Save a draft session with jury assignments
+ * @param sessionId - Existing session ID or null for new draft
+ * @param name - Session name
+ * @param juryIds - Array of jury member IDs
+ * @param teamAssignments - Map of team to jury assignments
+ */
+export async function saveDraftAction(
+  sessionId: number | null,
+  name: string,
+  juryIds: number[] = [],
+  teamAssignments: Map<number, number> = new Map()
+) {
+  try {
+    if (!name || name.trim().length === 0) {
+      throw new Error("Session name is required")
+    }
+
+    const result = await saveDraft({ sessionId, name })
+
+    if (!result) {
+      throw new Error("Failed to save draft")
+    }
+
+    const draftId = result.id
+
+    // Save jury assignments if provided
+    if (juryIds.length > 0) {
+      await Promise.all(
+        juryIds.map(juryId =>
+          updateJurySession({ juryId, sessionId: draftId })
+        )
+      )
+    }
+
+    // Save team assignments if provided
+    if (teamAssignments && teamAssignments.size > 0) {
+      await Promise.all(
+        Array.from(teamAssignments.entries()).map(([teamId, juryId]) =>
+          updateTeamjury({ teamid: teamId, juryId })
+        )
+      )
+    }
+
+    revalidatePath("/dashboard/session")
+
+    return { success: true, draftId }
+  } catch (error) {
+    console.error("Error saving draft:", error)
+    throw new Error("Failed to save draft")
+  }
+}
+
+/**
+ * Publish a draft session (convert to live session)
+ * @param draftId - Draft session ID to publish
+ * @param juryIds - Array of jury member IDs
+ * @param teamAssignments - Map of team to jury assignments
+ */
+export async function publishDraftAction(
+  draftId: number,
+  juryIds: number[] = [],
+  teamAssignments: Map<number, number> = new Map()
+) {
+  try {
+    if (!draftId) {
+      throw new Error("Draft ID is required")
+    }
+
+    // Ensure jury and teams are assigned before publishing
+    if (juryIds.length > 0) {
+      await Promise.all(
+        juryIds.map(juryId =>
+          updateJurySession({ juryId, sessionId: draftId })
+        )
+      )
+    }
+
+    if (teamAssignments && teamAssignments.size > 0) {
+      await Promise.all(
+        Array.from(teamAssignments.entries()).map(([teamId, juryId]) =>
+          updateTeamjury({ teamid: teamId, juryId })
+        )
+      )
+    }
+
+    const result = await publishDraft(draftId)
+
+    if (!result) {
+      throw new Error("Failed to publish draft")
+    }
+
+    revalidatePath("/dashboard/session")
+    revalidatePath("/dashboard/sessions")
+
+    return { success: true, session: result }
+  } catch (error) {
+    console.error("Error publishing draft:", error)
+    throw new Error("Failed to publish draft")
+  }
+}
+
+/**
+ * Delete a draft session
+ * @param draftId - Draft session ID to delete
+ */
+export async function deleteDraftAction(draftId: number) {
+  try {
+    if (!draftId) {
+      throw new Error("Draft ID is required")
+    }
+
+    const result = await deleteDraft(draftId)
+
+    if (!result) {
+      throw new Error("Failed to delete draft")
+    }
+
+    revalidatePath("/dashboard/session")
+    revalidatePath("/dashboard/sessions")
+
+    return { success: true }
+  } catch (error) {
+    console.error("Error deleting draft:", error)
+    throw new Error("Failed to delete draft")
+  }
+}
+
+/**
+ * Get all drafts for the dashboard
+ */
+export async function getDraftsAction() {
+  try {
+    const drafts = await getDrafts()
+    return { success: true, drafts }
+  } catch (error) {
+    console.error("Error fetching drafts:", error)
+    return { success: false, drafts: [], error: "Failed to fetch drafts" }
+  }
+}
+
+/**
+ * Resume a draft session - get draft data
+ * @param draftId - Draft session ID to resume
+ */
+export async function resumeDraftAction(draftId: number) {
+  try {
+    if (!draftId) {
+      throw new Error("Draft ID is required")
+    }
+
+    const draft = await getDraftById(draftId)
+
+    if (!draft) {
+      throw new Error("Draft not found")
+    }
+
+    return { success: true, draft }
+  } catch (error) {
+    console.error("Error resuming draft:", error)
+    throw new Error("Failed to resume draft")
   }
 }

@@ -17,6 +17,8 @@ export const sessions = mysqlTable('sessions',{
   name: varchar('name',{length:255}).notNull(),
   startedAt: timestamp('startedAt'),
   endedAt: timestamp('endedAt'),
+  isDraft: boolean('is_draft').default(true).notNull(),
+  publishedAt: timestamp('published_at'),
   ...timestamps,
 })
 

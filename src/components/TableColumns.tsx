@@ -179,7 +179,7 @@ export const teamColumns: ColumnDef<TeamDataType>[] = [
     header: "ID",
     enableSorting: false,
     cell: ({row})=>{
-      return <>PU_{row.original.id}</>
+      return <>TE_{row.original.id}</>
     }
   },
   {

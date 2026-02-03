@@ -1,4 +1,5 @@
 // Seed teams and participants from CSV file (Stall Allotment Tech Expo 2026.csv)
+import "dotenv/config"
 import * as XLSX from "xlsx"
 import path from "path"
 import { db } from "../src/db/index"
@@ -47,7 +48,7 @@ const PROJECT_ID_PREFIX = "TE-"
 const CSV_FILE_PATH = path.join(
   process.cwd(),
   "data",
-  "Stall Allotment Tech Expo 2026.csv"
+  "TechExpo_Teams_unformatted.csv"
 )
 
 function readTeamsFromCSV(): Team[] {

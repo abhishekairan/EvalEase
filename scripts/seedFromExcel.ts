@@ -99,7 +99,7 @@ async function seedFromExcel(options: SeedOptions = {}) {
     createAdmin: shouldCreateAdmin = true,
     createSession: shouldCreateSession = true,
     sessionName = 'Hackathon Evaluation Session',
-    teamIdPrefix = 'HC_',
+    teamIdPrefix = 'TE_',
     defaultRoom = 'Room',
     teamsPerRoom = 20,
   } = options;
@@ -108,7 +108,7 @@ async function seedFromExcel(options: SeedOptions = {}) {
 
   try {
     const dataDir = path.join(process.cwd(), 'data');
-    const teamsFilePath = path.join(dataDir, 'All Teams.xlsx');
+    const teamsFilePath = path.join(dataDir, 'Stall Allotment Tech Expo 2026.xlsx');
     const juryFilePath = path.join(dataDir, 'ALL JURY MEMBERS.xlsx');
 
     // Read Excel files

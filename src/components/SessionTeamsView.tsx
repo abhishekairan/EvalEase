@@ -459,7 +459,7 @@ export function SessionTeamsView({
                           {team.teamName}
                         </CardTitle>
                         <p className="text-sm text-muted-foreground mt-1">
-                          PU_{team.id}
+                          TE_{team.id}
                         </p>
                       </div>
                       <div className="flex flex-col gap-1">

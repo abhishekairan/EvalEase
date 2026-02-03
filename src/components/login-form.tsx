@@ -105,7 +105,7 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid gap-2 text-center">
             <CircleUser className="mx-auto h-12 w-12" />
-            <h1 className="text-3xl font-bold">PU Code 3.0</h1>
+            <h1 className="text-3xl font-bold">TECH EXPO 2026</h1>
             <p className="text-balance text-muted-foreground">
               Login to your account
             </p>

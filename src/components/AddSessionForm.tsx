@@ -336,7 +336,7 @@ export function AddSessionForm({
   const assignedJury: typeof juryMembers = []
 
   return (
-    <div className="min-h-screen bg-gray-50 animate-fade-in">
+    <div className="min-h-screen bg-gray-50 animate-fade-in w-full">
       {/* Header Section - Fixed at top with gradient */}
       <div className="bg-white border-b sticky top-0 z-20 shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-5">

@@ -26,7 +26,10 @@ const config = {
         try {
           const { email, password, role } = credentials as Record<string, string> || {};
 
+          console.log("[Auth] Attempting login for:", { email, role });
+
           if (!email || !password || !role) {
+            console.log("[Auth] Missing credentials:", { hasEmail: !!email, hasPassword: !!password, hasRole: !!role });
             return null;
           }
 
@@ -34,10 +37,12 @@ const config = {
 
           if (role === "admin") {
             const data = await getAdminForAuth({ email: email });
+            console.log("[Auth] Admin lookup result:", data ? "found" : "not found");
             if (!data) return null;
 
             passwordHash = data.password;
             const isValidPassword = await verifyPassword(password, passwordHash);
+            console.log("[Auth] Admin password verification:", isValidPassword ? "success" : "failed");
             if (!isValidPassword) return null;
 
             return {
@@ -49,10 +54,12 @@ const config = {
 
           } else if (role === "jury") {
             const data = await getJuryForAuth({ email: email });
+            console.log("[Auth] Jury lookup result:", data ? "found" : "not found");
             if (!data) return null;
 
             passwordHash = data.password;
             const isValidPassword = await verifyPassword(password, passwordHash);
+            console.log("[Auth] Jury password verification:", isValidPassword ? "success" : "failed");
             if (!isValidPassword) return null;
 
             return {
@@ -63,9 +70,10 @@ const config = {
             };
           }
 
+          console.log("[Auth] Unknown role:", role);
           return null;
         } catch (error) {
-          console.error("Authentication error:", error);
+          console.error("[Auth] Authentication error:", error);
           return null;
         }
       }, // FIXED: Added missing closing brace
